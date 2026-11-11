@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173f35">
+  <meta name="description" content="Velovi - إدارة مالية الأسرة">
+  <link rel="manifest" href="manifest.webmanifest">\n  <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">\n  <link rel="apple-touch-icon" href="assets/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>Velovi | إدارة مالية الأسرة</title>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-mark">V</span><div><strong>Velovi</strong><small>إدارة مالية الأسرة</small></div></div>
+    <div class="top-actions"><span class="sync"><i></i> وضع تجريبي · غير متصل بالخادم</span><button class="avatar" title="الملف الشخصي">م</button></div>
+  </header>
+
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="family-card"><span class="family-icon">⌂</span><div><b>الأسرة</b><small>المساحة العائلية</small></div><span class="chevron">⌄</span></div>
+      <nav>
+        <button class="nav-item active" data-view="home"><span>▦</span> الرئيسية</button>
+        <button class="nav-item" data-view="transactions"><span>↕</span> الحركات المالية</button>
+        <button class="nav-item" data-view="accounts"><span>▤</span> الحسابات</button>
+        <button class="nav-item" data-view="members"><span>♧</span> أفراد الأسرة والصلاحيات</button>
+        <button class="nav-item" data-view="reports"><span>◷</span> التقارير والتوقعات</button>
+        <button class="nav-item" data-view="ing"><span>⇄</span> ربط ING-DiBa</button>
+      </nav>
+      <div class="sidebar-bottom"><div class="security">▣ <span><b>الخصوصية مفعّلة بالتصميم</b><small>كل عضو يرى بياناته فقط</small></span></div><small class="version">نسخة واجهات أولية · 0.1</small></div>
+    </aside>
+
+    <main class="main">
+      <section class="view active" id="home">
+        <div class="page-heading"><div><p class="eyebrow">نظرة عامة</p><h1>لوحة التحكم</h1><p class="muted">ملخص الوضع المالي للفترة المحددة</p></div><button class="primary" data-open-add>＋ إضافة حركة</button></div>
+        <div class="notice"><span>ⓘ</span><div><b>بيانات تجريبية للعرض فقط</b><p>هذه الواجهة لا تتصل بقاعدة بيانات ولا تحفظ بيانات مالية حقيقية بعد.</p></div></div>
+        <div class="stats">
+          <article class="stat"><span>إجمالي الإيرادات · هذا الشهر</span><strong>3.850,00 €</strong><small class="positive">↑ 4.2% عن الشهر السابق</small></article>
+          <article class="stat"><span>إجمالي المصروفات · هذا الشهر</span><strong>2.140,00 €</strong><small class="negative">↑ 1.8% عن الشهر السابق</small></article>
+          <article class="stat"><span>الفائض الشهري</span><strong>1.710,00 €</strong><small class="positive">متبقي بعد المصروفات</small></article>
+          <article class="stat"><span>صافي الأصول</span><strong>28.450,00 €</strong><small>الأصول مطروحاً منها الديون</small></article>
+        </div>
+        <div class="content-grid">
+          <article class="panel"><div class="panel-head"><div><h2>آخر الحركات</h2><p class="muted">الحركات الخاصة بحسابك</p></div><button class="text-btn" data-goto="transactions">عرض الكل ←</button></div>
+            <div class="transaction-list">
+              <div class="tx"><span class="tx-icon income">↙</span><div class="tx-info"><b>الراتب الشهري</b><small>دخل · 01 نوفمبر 2026</small></div><strong class="positive">+ 3.200,00 €</strong></div>
+              <div class="tx"><span class="tx-icon expense">⌂</span><div class="tx-info"><b>الإيجار</b><small>السكن · 03 نوفمبر 2026</small></div><strong>− 850,00 €</strong></div>
+              <div class="tx"><span class="tx-icon expense">▧</span><div class="tx-info"><b>مشتريات السوبرماركت</b><small>طعام · 05 نوفمبر 2026</small></div><strong>− 126,40 €</strong></div>
+              <div class="tx"><span class="tx-icon expense">↗</span><div class="tx-info"><b>فاتورة الكهرباء</b><small>منزل · 07 نوفمبر 2026</small></div><strong>− 78,50 €</strong></div>
+            </div>
+          </article>
+          <article class="panel"><div class="panel-head"><div><h2>توزيع المصروفات</h2><p class="muted">نموذج توضيحي للشهر الحالي</p></div></div>
+            <div class="donut-wrap"><div class="donut"><div><b>2.140 €</b><small>الإجمالي</small></div></div></div>
+            <div class="legend"><span><i class="l1"></i> السكن <b>40%</b></span><span><i class="l2"></i> الطعام <b>25%</b></span><span><i class="l3"></i> النقل <b>15%</b></span><span><i class="l4"></i> أخرى <b>20%</b></span></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="transactions">
+        <div class="page-heading"><div><p class="eyebrow">السجل المالي</p><h1>الحركات المالية</h1><p class="muted">إيراداتك ومصروفاتك والتحويلات</p></div><button class="primary" data-open-add>＋ إضافة حركة</button></div>
+        <article class="panel"><div class="filters"><input id="searchTx" placeholder="ابحث في الحركات..." aria-label="بحث"><select><option>كل الأنواع</option><option>إيرادات</option><option>مصروفات</option></select><select><option>هذا الشهر</option><option>الشهر السابق</option></select></div>
+          <div class="table-wrap"><table><thead><tr><th>الوصف</th><th>التصنيف</th><th>التاريخ</th><th>النوع</th><th>المبلغ</th></tr></thead><tbody id="txRows">
+          <tr><td>الراتب الشهري</td><td>راتب</td><td>01.11.2026</td><td><span class="pill green">إيراد</span></td><td class="positive">+3.200,00 €</td></tr>
+          <tr><td>الإيجار</td><td>السكن</td><td>03.11.2026</td><td><span class="pill red">مصروف</span></td><td>−850,00 €</td></tr>
+          <tr><td>مشتريات السوبرماركت</td><td>طعام</td><td>05.11.2026</td><td><span class="pill red">مصروف</span></td><td>−126,40 €</td></tr>
+          <tr><td>فاتورة الكهرباء</td><td>منزل</td><td>07.11.2026</td><td><span class="pill red">مصروف</span></td><td>−78,50 €</td></tr>
+          </tbody></table></div>
+        </article>
+      </section>
+
+      <section class="view" id="accounts">
+        <div class="page-heading"><div><p class="eyebrow">الأرصدة</p><h1>الحسابات</h1><p class="muted">حساباتك البنكية والنقدية والمدخرات</p></div><button class="primary" id="addAccount">＋ إضافة حساب</button></div>
+        <div class="stats"><article class="stat"><span>الحساب الجاري</span><strong>4.850,00 €</strong><small>ING · EUR</small></article><article class="stat"><span>المدخرات</span><strong>12.000,00 €</strong><small>حساب توفير</small></article><article class="stat"><span>النقد</span><strong>350,00 €</strong><small>محفظة نقدية</small></article></div>
+        <article class="panel"><h2>حساباتك</h2><p class="muted">ستُعرض الحسابات الحقيقية بعد تفعيل قاعدة البيانات وربط الحسابات.</p></article>
+      </section>
+
+      <section class="view" id="members">
+        <div class="page-heading"><div><p class="eyebrow">إدارة الأسرة</p><h1>أفراد الأسرة والصلاحيات</h1><p class="muted">إدارة من يمكنه الإضافة والتعديل والحذف</p></div><button class="primary" id="inviteMember">＋ دعوة عضو</button></div>
+        <div class="notice"><span>▣</span><div><b>سياسة الخصوصية المعتمدة</b><p>كل عضو يرى بياناته المالية فقط. المدير يستطيع رؤية بيانات جميع الأعضاء وإدارة صلاحياتهم.</p></div></div>
+        <article class="panel"><div class="member-row"><div class="person"><span class="person-avatar">م</span><div><b>المدير</b><small>أنت · مدير الأسرة</small></div></div><span class="pill green">مدير</span></div>
+          <div class="member-row"><div class="person"><span class="person-avatar alt">ع</span><div><b>عضو الأسرة 1</b><small>عضو · يرى بياناته فقط</small></div></div><div class="permission-summary"><span>إضافة ✓</span><span>تعديل ✓</span><span>حذف ✕</span></div><button class="secondary" data-permission>تعديل الصلاحيات</button></div>
+          <div class="member-row"><div class="person"><span class="person-avatar alt2">س</span><div><b>عضو الأسرة 2</b><small>عضو · يرى بياناته فقط</small></div></div><div class="permission-summary"><span>إضافة ✓</span><span>تعديل ✓</span><span>حذف ✕</span></div><button class="secondary" data-permission>تعديل الصلاحيات</button></div>
+        </article>
+      </section>
+
+      <section class="view" id="reports">
+        <div class="page-heading"><div><p class="eyebrow">التخطيط المالي</p><h1>التقارير والتوقعات</h1><p class="muted">استكشف المسار المالي على المدى الذي تختاره</p></div></div>
+        <article class="panel"><div class="panel-head"><div><h2>توقع الرصيد المستقبلي</h2><p class="muted">مثال افتراضي مبسط دون بيانات حقيقية</p></div></div>
+          <div class="form-grid"><label>الرصيد الحالي (€)<input type="number" value="20000"></label><label>الفائض الشهري (€)<input type="number" value="1000"></label><label>عدد السنوات<input id="years" type="number" min="1" max="100" value="10"></label><label>العائد السنوي (%)<input type="number" value="0" step=".1"></label></div>
+          <button class="primary" id="calcForecast">حساب التوقع</button><div class="forecast-result" id="forecastResult">الرصيد المتوقع بعد 10 سنوات: <b>140.000 €</b></div>
+          <p class="muted small">التوقعات تقديرية وتتأثر بالتضخم والعوائد وتغير الدخل والمصروفات.</p>
+        </article>
+      </section>
+
+      <section class="view" id="ing">
+        <div class="page-heading"><div><p class="eyebrow">استيراد بنكي</p><h1>ربط ING-DiBa</h1><p class="muted">الاستيراد اليدوي والمزامنة التلقائية</p></div></div>
+        <div class="content-grid">
+          <article class="panel"><span class="big-icon">⇧</span><h2>استيراد ملف الحركات</h2><p class="muted">رفع ملف CSV أو صيغة بنكية مدعومة بعد تجهيز محلل الملفات.</p><button class="secondary" id="chooseFile">اختيار ملف</button><input id="fileInput" type="file" accept=".csv,.txt,.xml" hidden><p class="small muted" id="fileName">لم يتم اختيار ملف</p></article>
+          <article class="panel"><span class="big-icon">⟳</span><h2>المزامنة التلقائية</h2><p class="muted">سيتم اختبار ربط آمن متوافق مع ING عبر مزود مصرفي أو FinTS/HBCI قبل تفعيله.</p><span class="pill amber">لم يتم ربط الحساب بعد</span><p class="small muted">لن نطلب منك إدخال كلمة مرور ING في هذه الواجهة التجريبية.</p></article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="transactionDialog">
+    <form method="dialog" id="transactionForm">
+      <div class="dialog-head"><h2>إضافة حركة مالية</h2><button class="close" value="cancel" aria-label="إغلاق">×</button></div>
+      <label>نوع الحركة<select id="txType"><option value="income">إيراد</option><option value="expense">مصروف</option></select></label>
+      <label>الوصف<input id="txDesc" required placeholder="مثلاً: راتب أو مشتريات"></label>
+      <div class="form-grid"><label>المبلغ (€)<input id="txAmount" type="number" min=".01" step=".01" required></label><label>التاريخ<input id="txDate" type="date" required></label></div>
+      <label>التصنيف<input id="txCategory" placeholder="مثلاً: السكن، الطعام، الراتب"></label>
+      <button class="primary full" id="saveTx" value="default">إضافة تجريبية</button>
+      <p class="small muted">تُضاف الحركة إلى العرض الحالي فقط؛ لا يتم حفظها أو مزامنتها.</p>
+    </form>
+  </dialog>
+  <dialog id="permissionDialog">
+    <form method="dialog"><div class="dialog-head"><h2>تعديل صلاحيات العضو</h2><button class="close" value="cancel">×</button></div>
+      <label class="check"><input type="checkbox" checked> السماح بإضافة الحركات</label>
+      <label class="check"><input type="checkbox" checked> السماح بتعديل الحركات</label>
+      <label class="check"><input type="checkbox"> السماح بحذف الحركات</label>
+      <p class="small muted">هذه عناصر واجهة تجريبية؛ لا تغيّر صلاحيات حساب حقيقي بعد.</p><button class="primary full" value="cancel">إغلاق</button>
+    </form>
+  </dialog>
+  <script src="app.js"></script>
+  <script src="install.js"></script>\n</body>
+</html>
