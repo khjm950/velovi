@@ -169,25 +169,32 @@ addListener(transactionForm, 'submit', event => {
 
 const balanceInput = getElement('forecastBalance');
 const signToggle = getElement('toggleBalanceSign');
+function refreshSignToggle() {
+  if (!signToggle || !balanceInput) return;
+  const value = Number(balanceInput.value.trim().replace(/\s/g, '').replace(',', '.'));
+  const isNegative = Number.isFinite(value) && value < 0;
+  signToggle.textContent = isNegative ? '+' : '−';
+  signToggle.setAttribute('aria-label', isNegative ? 'اجعل الرصيد موجباً' : 'اجعل الرصيد سالباً');
+  signToggle.title = isNegative ? 'اجعل الرصيد موجباً' : 'اجعل الرصيد سالباً';
+}
 if (signToggle) {
   signToggle.onclick = () => {
     if (!balanceInput) return;
-    const raw = balanceInput.value.trim().replace(/\\s/g, '').replace(',', '.');
-    if (!raw || raw === '-' || raw === '+') {
-      balanceInput.value = raw.startsWith('-') ? '' : '-';
-    } else {
-      const value = Number(raw);
-      if (!Number.isFinite(value)) {
-        alert('أدخل مبلغاً صحيحاً أولاً، ثم بدّل إشارته.');
-        balanceInput.focus();
-        return;
-      }
-      balanceInput.value = value > 0 ? String(-value) : String(Math.abs(value));
+    const raw = balanceInput.value.trim().replace(/\s/g, '').replace(',', '.');
+    const value = Number(raw);
+    if (!raw || !Number.isFinite(value)) {
+      alert('أدخل مبلغاً صحيحاً أولاً.');
+      balanceInput.focus();
+      return;
     }
+    balanceInput.value = value < 0 ? String(Math.abs(value)) : String(-Math.abs(value));
+    refreshSignToggle();
     balanceInput.focus();
     balanceInput.setSelectionRange(balanceInput.value.length, balanceInput.value.length);
     balanceInput.dispatchEvent(new Event('input', { bubbles: true }));
   };
+  balanceInput?.addEventListener('input', refreshSignToggle);
+  refreshSignToggle();
 }
 const forecastButton = getElement('calcForecast');
 addListener(forecastButton, 'click', () => {
