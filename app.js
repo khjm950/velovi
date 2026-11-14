@@ -34,8 +34,8 @@ let sortDirection = 'desc';
 function normalizeDate(value) {
   if (!value) return '';
   if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
-  const match = value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-  return match ? `${match[3]}-${match[2]}-${match[1]}` : '';
+  const match = value.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  return match ? `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}` : '';
 }
 function parseAmount(value) {
   let cleaned = String(value).replace(/[^\d,.-]/g, '');
