@@ -1,7 +1,8 @@
-// Adds a native-style install action when Chrome exposes the PWA install prompt.
+// يعرض زر التثبيت فقط عندما يتيح المتصفح تثبيت PWA.
 let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', (event) => {
+window.addEventListener('beforeinstallprompt', event => {
   event.preventDefault();
+  if (window.matchMedia('(display-mode: standalone)').matches) return;
   deferredPrompt = event;
   let button = document.getElementById('veloviInstallButton');
   if (!button) {
@@ -13,13 +14,21 @@ window.addEventListener('beforeinstallprompt', (event) => {
     document.body.appendChild(button);
     button.addEventListener('click', async () => {
       if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
+      const promptEvent = deferredPrompt;
       deferredPrompt = null;
-      button.remove();
+      button.disabled = true;
+      try {
+        await promptEvent.prompt();
+        await promptEvent.userChoice;
+      } catch (error) {
+        console.error('تعذر إكمال تثبيت Velovi:', error);
+      } finally {
+        button.remove();
+      }
     });
   }
 });
 window.addEventListener('appinstalled', () => {
+  deferredPrompt = null;
   document.getElementById('veloviInstallButton')?.remove();
 });
