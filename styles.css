@@ -215,3 +215,20 @@ dialog form{gap:17px}
   .balance-input-row{grid-template-columns:minmax(0,1fr) 54px}
   .balance-input-row .sign-toggle{width:54px;min-width:54px}
 }
+
+/* Forecast: switch to a single column on typical phone widths, including 720px browsers. */
+@media (max-width: 800px) {
+  #reports .forecast-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100%;
+  }
+  #reports .forecast-grid > label,
+  #reports .forecast-grid input {
+    width: 100%;
+    min-width: 0;
+  }
+  #reports .panel {
+    min-width: 0;
+    overflow: hidden;
+  }
+}
