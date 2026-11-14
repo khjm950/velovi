@@ -168,34 +168,43 @@ addListener(transactionForm, 'submit', event => {
 });
 
 const balanceInput = getElement('forecastBalance');
-addListener(getElement('toggleBalanceSign'), 'click', () => {
-  if (!balanceInput) return;
-  const raw = balanceInput.value.trim().replace(/\s/g, '').replace(',', '.');
-  if (!raw) {
-    balanceInput.value = '-';
+const signToggle = getElement('toggleBalanceSign');
+if (signToggle) {
+  signToggle.onclick = () => {
+    if (!balanceInput) return;
+    const raw = balanceInput.value.trim().replace(/\\s/g, '').replace(',', '.');
+    if (!raw || raw === '-' || raw === '+') {
+      balanceInput.value = raw.startsWith('-') ? '' : '-';
+    } else {
+      const value = Number(raw);
+      if (!Number.isFinite(value)) {
+        alert('أدخل مبلغاً صحيحاً أولاً، ثم بدّل إشارته.');
+        balanceInput.focus();
+        return;
+      }
+      balanceInput.value = value > 0 ? String(-value) : String(Math.abs(value));
+    }
     balanceInput.focus();
-    return;
-  }
-  const value = Number(raw);
-  if (!Number.isFinite(value)) return alert('أدخل مبلغاً صحيحاً أولاً، ثم بدّل إشارته.');
-  balanceInput.value = String(value === 0 ? 0 : -value);
-  balanceInput.focus();
-});
+    balanceInput.setSelectionRange(balanceInput.value.length, balanceInput.value.length);
+    balanceInput.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+}
 const forecastButton = getElement('calcForecast');
 addListener(forecastButton, 'click', () => {
-  const inputs = document.querySelectorAll('#reports .form-grid input');
   const result = getElement('forecastResult');
-  if (inputs.length < 4 || !result) return alert('تعذر قراءة بيانات الحاسبة.');
-  const balanceRaw = getElement('forecastBalance')?.value.trim() || '';
-  const balance = Number(balanceRaw.replace(/\s/g, '').replace(',', '.'));
-  const monthly = Number(inputs[1].value);
-  const years = Number(getElement('years')?.value), annual = Number(inputs[3].value);
-  if (![balance, monthly, years, annual].every(Number.isFinite) || years < 1 || years > 100) return alert('أدخل قيماً صحيحة وعدد سنوات بين 1 و100.');
+  const balanceRaw = balanceInput?.value.trim() || '';
+  const balance = Number(balanceRaw.replace(/\\s/g, '').replace(',', '.'));
+  const monthly = Number(getElement('monthlySurplus')?.value);
+  const months = Number(getElement('forecastMonths')?.value);
+  const annual = Number(getElement('annualReturn')?.value);
+  if (![balance, monthly, months, annual].every(Number.isFinite) || !Number.isInteger(months) || months < 1 || months > 1200) {
+    return alert('أدخل قيماً صحيحة، واجعل مدة التوقع بين شهر واحد و1200 شهر.');
+  }
   if (annual <= -100 || annual > 100) return alert('العائد السنوي يجب أن يكون أكبر من -100% ولا يتجاوز 100%.');
   const rate = Math.pow(1 + annual / 100, 1 / 12) - 1;
   let future = balance;
-  for (let month = 0; month < Math.round(years * 12); month++) future = future * (1 + rate) + monthly;
-  result.replaceChildren(document.createTextNode(`الرصيد الحسابي الافتراضي بعد ${years} سنوات: `));
+  for (let month = 0; month < months; month++) future = future * (1 + rate) + monthly;
+  result.replaceChildren(document.createTextNode(`الرصيد الحسابي الافتراضي بعد ${months} شهراً: `));
   const value = document.createElement('b');
   value.textContent = `${future.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
   result.appendChild(value);
