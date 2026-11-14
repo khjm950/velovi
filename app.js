@@ -167,12 +167,28 @@ addListener(transactionForm, 'submit', event => {
   alert('أضيفت الحركة إلى العرض التجريبي فقط، ولن تُحفظ بعد إغلاق الصفحة.');
 });
 
+const balanceInput = getElement('forecastBalance');
+addListener(getElement('toggleBalanceSign'), 'click', () => {
+  if (!balanceInput) return;
+  const raw = balanceInput.value.trim().replace(/\s/g, '').replace(',', '.');
+  if (!raw) {
+    balanceInput.value = '-';
+    balanceInput.focus();
+    return;
+  }
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return alert('أدخل مبلغاً صحيحاً أولاً، ثم بدّل إشارته.');
+  balanceInput.value = String(value === 0 ? 0 : -value);
+  balanceInput.focus();
+});
 const forecastButton = getElement('calcForecast');
 addListener(forecastButton, 'click', () => {
   const inputs = document.querySelectorAll('#reports .form-grid input');
   const result = getElement('forecastResult');
   if (inputs.length < 4 || !result) return alert('تعذر قراءة بيانات الحاسبة.');
-  const balance = Number(getElement('forecastBalance')?.value), monthly = Number(inputs[1].value);
+  const balanceRaw = getElement('forecastBalance')?.value.trim() || '';
+  const balance = Number(balanceRaw.replace(/\s/g, '').replace(',', '.'));
+  const monthly = Number(inputs[1].value);
   const years = Number(getElement('years')?.value), annual = Number(inputs[3].value);
   if (![balance, monthly, years, annual].every(Number.isFinite) || years < 1 || years > 100) return alert('أدخل قيماً صحيحة وعدد سنوات بين 1 و100.');
   if (annual <= -100 || annual > 100) return alert('العائد السنوي يجب أن يكون أكبر من -100% ولا يتجاوز 100%.');
