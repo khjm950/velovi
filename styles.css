@@ -201,3 +201,17 @@ dialog form{gap:17px}
 .balance-input-row{display:flex;align-items:stretch;gap:8px}
 .balance-input-row input{flex:1;min-width:0}
 .balance-input-row .sign-toggle{flex:0 0 54px;min-width:54px;font-size:20px;font-weight:700;padding-inline:8px}
+
+/* Forecast form: compact, aligned controls with a reliable touch target. */
+.forecast-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
+.forecast-grid label{min-width:0}
+.balance-input-row{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:8px;direction:ltr}
+.balance-input-row input{width:100%;min-width:0;text-align:left;font-variant-numeric:tabular-nums}
+.balance-input-row .sign-toggle{width:52px;min-width:52px;min-height:44px;padding:0;font-size:19px;line-height:1;cursor:pointer;touch-action:manipulation;pointer-events:auto}
+.field-hint{min-height:18px}
+@media(max-width:700px){
+  .forecast-grid{grid-template-columns:1fr;gap:13px}
+  .forecast-grid label{width:100%}
+  .balance-input-row{grid-template-columns:minmax(0,1fr) 54px}
+  .balance-input-row .sign-toggle{width:54px;min-width:54px}
+}
