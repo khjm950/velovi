@@ -226,6 +226,20 @@
             </select>
             <label class="date-filter">من <input id="dateFrom" type="date" aria-label="من تاريخ"></label>
             <label class="date-filter">إلى <input id="dateTo" type="date" aria-label="إلى تاريخ"></label>
+            <label class="sort-filter">ترتيب الحركات
+              <select id="sortTransactions" aria-label="ترتيب الحركات">
+                <option value="date-desc">الأحدث أولاً</option>
+                <option value="date-asc">الأقدم أولاً</option>
+                <option value="amount-desc">المبلغ: الأعلى أولاً</option>
+                <option value="amount-asc">المبلغ: الأقل أولاً</option>
+                <option value="type-asc">النوع: تصاعدي</option>
+                <option value="type-desc">النوع: تنازلي</option>
+                <option value="category-asc">التصنيف: أ–ي</option>
+                <option value="category-desc">التصنيف: ي–أ</option>
+                <option value="description-asc">الوصف: أ–ي</option>
+                <option value="description-desc">الوصف: ي–أ</option>
+              </select>
+            </label>
             <button class="text-btn" id="clearFilters" type="button">مسح الفلاتر</button>
           </div>
           <div class="transaction-summary" aria-live="polite">
@@ -375,7 +389,8 @@
           <div class="form-grid">
             <label>
               الرصيد الحالي (€)
-              <input type="number" value="20000">
+              <input id="forecastBalance" type="number" step="0.01" value="20000" aria-describedby="balanceHint">
+              <small id="balanceHint" class="field-hint">يمكن إدخال رصيد سالب إذا كان الحساب مكشوفاً أو عليه عجز.</small>
             </label>
             <label>
               الفائض الشهري (€)
@@ -393,7 +408,7 @@
 
           <button class="primary" id="calcForecast">حساب التوقع</button>
 
-          <div class="forecast-result" id="forecastResult">
+          <div class="forecast-result" id="forecastResult" aria-live="polite">
             الرصيد المتوقع بعد 10 سنوات: <b>140.000 €</b>
           </div>
 
