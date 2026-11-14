@@ -29,6 +29,7 @@ const dateFrom = getElement('dateFrom');
 const dateTo = getElement('dateTo');
 const netElement = getElement('txNet');
 const countElement = getElement('txCount');
+const sortSelect = getElement('sortTransactions');
 let sortKey = 'date';
 let sortDirection = 'desc';
 
@@ -114,6 +115,12 @@ document.querySelectorAll('.sort-header').forEach(button => addListener(button, 
   }
   applyTransactionView();
 }));
+addListener(sortSelect, 'change', () => {
+  const [key, direction] = (sortSelect?.value || 'date-desc').split('-');
+  sortKey = key;
+  sortDirection = direction;
+  applyTransactionView();
+});
 [searchInput, typeFilter, dateFrom, dateTo].forEach(element => addListener(element, 'input', applyTransactionView));
 addListener(typeFilter, 'change', applyTransactionView);
 addListener(getElement('clearFilters'), 'click', () => {
@@ -165,7 +172,7 @@ addListener(forecastButton, 'click', () => {
   const inputs = document.querySelectorAll('#reports .form-grid input');
   const result = getElement('forecastResult');
   if (inputs.length < 4 || !result) return alert('تعذر قراءة بيانات الحاسبة.');
-  const balance = Number(inputs[0].value), monthly = Number(inputs[1].value);
+  const balance = Number(getElement('forecastBalance')?.value), monthly = Number(inputs[1].value);
   const years = Number(getElement('years')?.value), annual = Number(inputs[3].value);
   if (![balance, monthly, years, annual].every(Number.isFinite) || years < 1 || years > 100) return alert('أدخل قيماً صحيحة وعدد سنوات بين 1 و100.');
   if (annual <= -100 || annual > 100) return alert('العائد السنوي يجب أن يكون أكبر من -100% ولا يتجاوز 100%.');
@@ -176,6 +183,8 @@ addListener(forecastButton, 'click', () => {
   const value = document.createElement('b');
   value.textContent = `${future.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
   result.appendChild(value);
+  result.classList.toggle('negative', future < 0);
+  result.classList.toggle('positive', future > 0);
 });
 
 const chooseFileButton = getElement('chooseFile'), fileInput = getElement('fileInput'), fileName = getElement('fileName');
