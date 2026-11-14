@@ -1,438 +1,191 @@
-
 'use strict';
 
-/* =========================================
-   Velovi - واجهة التطبيق التجريبية
-   لا يتم حفظ البيانات المالية أو مزامنتها حالياً
-========================================= */
-
-/* أدوات مساعدة */
-const getElement = (id) => document.getElementById(id);
-
-const addListener = (element, event, callback) => {
-  if (element) {
-    element.addEventListener(event, callback);
-  }
-};
-
-/* =========================================
-   التنقل بين صفحات التطبيق
-========================================= */
+/* Velovi: واجهة تجريبية فقط، دون حفظ أو مزامنة. */
+const getElement = id => document.getElementById(id);
+const addListener = (element, event, callback) => element?.addEventListener(event, callback);
 
 const views = [...document.querySelectorAll('.view')];
 const navItems = [...document.querySelectorAll('.nav-item')];
-
 function showView(id) {
   const target = getElement(id);
-
   if (!target || !target.classList.contains('view')) return;
-
-  views.forEach(view => {
-    view.classList.toggle('active', view.id === id);
-  });
-
-  navItems.forEach(button => {
-    button.classList.toggle('active', button.dataset.view === id);
-  });
-
+  views.forEach(view => view.classList.toggle('active', view.id === id));
+  navItems.forEach(button => button.classList.toggle('active', button.dataset.view === id));
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
-navItems.forEach(button => {
-  addListener(button, 'click', () => showView(button.dataset.view));
-});
-
-document.querySelectorAll('[data-goto]').forEach(button => {
-  addListener(button, 'click', () => showView(button.dataset.goto));
-});
-
-/* =========================================
-   نوافذ الحوار
-========================================= */
+navItems.forEach(button => addListener(button, 'click', () => showView(button.dataset.view)));
+document.querySelectorAll('[data-goto]').forEach(button => addListener(button, 'click', () => showView(button.dataset.goto)));
 
 const txDialog = getElement('transactionDialog');
 const permissionDialog = getElement('permissionDialog');
-
-document.querySelectorAll('[data-open-add]').forEach(button => {
-  addListener(button, 'click', () => {
-    if (txDialog && typeof txDialog.showModal === 'function') {
-      txDialog.showModal();
-    }
-  });
-});
-
-document.querySelectorAll('[data-permission]').forEach(button => {
-  addListener(button, 'click', () => {
-    if (
-      permissionDialog &&
-      typeof permissionDialog.showModal === 'function'
-    ) {
-      permissionDialog.showModal();
-    }
-  });
-});
-
-/* =========================================
-   أدوات فرز الحركات المالية
-========================================= */
+document.querySelectorAll('[data-open-add]').forEach(button => addListener(button, 'click', () => txDialog?.showModal?.()));
+document.querySelectorAll('[data-permission]').forEach(button => addListener(button, 'click', () => permissionDialog?.showModal?.()));
 
 const rowsContainer = getElement('txRows');
 const searchInput = getElement('searchTx');
-const sortSelect = getElement('sortTx');
+const typeFilter = getElement('typeFilter');
+const dateFrom = getElement('dateFrom');
+const dateTo = getElement('dateTo');
+const netElement = getElement('txNet');
+const countElement = getElement('txCount');
+let sortKey = 'date';
+let sortDirection = 'desc';
 
 function normalizeDate(value) {
   if (!value) return '';
-
-  // التاريخ بصيغة YYYY-MM-DD
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return value;
-  }
-
-  // التاريخ بصيغة DD.MM.YYYY
-  const match = value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-
-  if (match) {
-    return `${match[3]}-${match[2]}-${match[1]}`;
-  }
-
-  return '';
+  if (/^\\d{4}-\\d{2}-\\d{2}$/.test(value)) return value;
+  const match = value.match(/^(\\d{2})\\.(\\d{2})\\.(\\d{4})$/);
+  return match ? `${match[3]}-${match[2]}-${match[1]}` : '';
 }
-
 function parseAmount(value) {
-  const cleaned = String(value)
-    .replace(/[^\d,.-]/g, '')
-    .replace(/\./g, '')
-    .replace(',', '.');
-
+  let cleaned = String(value).replace(/[^\\d,.-]/g, '');
+  if (cleaned.includes(',')) cleaned = cleaned.replace(/\\./g, '').replace(',', '.');
+  else if ((cleaned.match(/\\./g) || []).length > 1) cleaned = cleaned.replace(/\\./g, '');
   const amount = Number(cleaned);
-
   return Number.isFinite(amount) ? Math.abs(amount) : 0;
 }
-
-function prepareExistingRows() {
-  if (!rowsContainer) return;
-
-  [...rowsContainer.querySelectorAll('tr')].forEach(row => {
-    const cells = row.querySelectorAll('td');
-
-    if (cells.length < 5) return;
-
-    row.dataset.sortDescription = cells[0].textContent.trim();
-    row.dataset.sortDate = normalizeDate(cells[2].textContent.trim());
-    row.dataset.sortAmount = String(parseAmount(cells[4].textContent));
-  });
+function getRowData(row) {
+  const cells = row.querySelectorAll('td');
+  const badge = cells[0]?.querySelector('.pill');
+  const typeText = badge?.textContent.trim() || cells[0]?.textContent.trim() || '';
+  const type = typeText.includes('إيراد') ? 'income' : typeText.includes('مصروف') ? 'expense' : 'other';
+  const date = normalizeDate(cells[3]?.textContent.trim() || '');
+  const amount = parseAmount(cells[4]?.textContent || '');
+  row.dataset.type = type;
+  row.dataset.category = cells[1]?.textContent.trim() || '';
+  row.dataset.description = cells[2]?.textContent.trim() || '';
+  row.dataset.date = date;
+  row.dataset.amount = String(amount);
+  return { type, category: row.dataset.category, description: row.dataset.description, date, amount };
 }
-
-function applyTransactionSearch() {
-  if (!rowsContainer) return;
-
-  const query = searchInput
-    ? searchInput.value.trim().toLocaleLowerCase()
-    : '';
-
-  rowsContainer.querySelectorAll('tr').forEach(row => {
-    const content = row.textContent.toLocaleLowerCase();
-    row.hidden = !content.includes(query);
-  });
+function compareRows(a, b) {
+  const x = getRowData(a), y = getRowData(b);
+  let result = 0;
+  if (sortKey === 'amount') result = x.amount - y.amount;
+  else if (sortKey === 'date') result = x.date.localeCompare(y.date);
+  else if (sortKey === 'type') result = x.type.localeCompare(y.type);
+  else result = x[sortKey].localeCompare(y[sortKey], 'ar', { sensitivity: 'base' });
+  return result * (sortDirection === 'asc' ? 1 : -1);
 }
-
-function sortTransactions() {
+function applyTransactionView() {
   if (!rowsContainer) return;
-
-  const sortMode = sortSelect ? sortSelect.value : 'newest';
-
+  const query = searchInput?.value.trim().toLocaleLowerCase() || '';
+  const selectedType = typeFilter?.value || 'all';
+  const from = dateFrom?.value || '';
+  const to = dateTo?.value || '';
   const rows = [...rowsContainer.querySelectorAll('tr')];
-
-  rows.sort((a, b) => {
-    const dateA = a.dataset.sortDate || '';
-    const dateB = b.dataset.sortDate || '';
-
-    const amountA = Number(a.dataset.sortAmount || 0);
-    const amountB = Number(b.dataset.sortAmount || 0);
-
-    const descriptionA = a.dataset.sortDescription || '';
-    const descriptionB = b.dataset.sortDescription || '';
-
-    switch (sortMode) {
-      case 'oldest':
-        return dateA.localeCompare(dateB);
-
-      case 'highest':
-        return amountB - amountA;
-
-      case 'lowest':
-        return amountA - amountB;
-
-      case 'description':
-        return descriptionA.localeCompare(
-          descriptionB,
-          'ar',
-          { sensitivity: 'base' }
-        );
-
-      case 'newest':
-      default:
-        return dateB.localeCompare(dateA);
+  let net = 0, count = 0;
+  rows.forEach(row => {
+    const d = getRowData(row);
+    const matches = (!query || row.textContent.toLocaleLowerCase().includes(query)) &&
+      (selectedType === 'all' || d.type === selectedType) &&
+      (!from || (d.date && d.date >= from)) &&
+      (!to || (d.date && d.date <= to));
+    row.hidden = !matches;
+    if (matches) {
+      count++;
+      if (d.type === 'income') net += d.amount;
+      else if (d.type === 'expense') net -= d.amount;
+      // أي نوع آخر، بما فيه التحويلات مستقبلاً، لا يدخل في الصافي.
     }
   });
-
-  // إعادة ترتيب الصفوف دون فقدان بياناتها أو حالة البحث
-  rows.forEach(row => rowsContainer.appendChild(row));
-
-  applyTransactionSearch();
+  rows.sort(compareRows).forEach(row => rowsContainer.appendChild(row));
+  if (netElement) {
+    netElement.textContent = `${net.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+    netElement.classList.toggle('positive', net > 0);
+    netElement.classList.toggle('negative', net < 0);
+    netElement.classList.toggle('neutral', net === 0);
+  }
+  if (countElement) countElement.textContent = String(count);
+  document.querySelectorAll('.sort-header').forEach(button => {
+    const active = button.dataset.sort === sortKey;
+    const th = button.closest('th');
+    if (th) th.setAttribute('aria-sort', active ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none');
+    const arrow = button.querySelector('span');
+    if (arrow) arrow.textContent = active ? (sortDirection === 'asc' ? '↑' : '↓') : '↕';
+  });
 }
-
-// تجهيز الحركات الموجودة عند فتح الصفحة
-prepareExistingRows();
-sortTransactions();
-
-addListener(sortSelect, 'change', sortTransactions);
-
-addListener(searchInput, 'input', applyTransactionSearch);
-
-/* =========================================
-   إضافة حركة مالية تجريبية
-========================================= */
+document.querySelectorAll('.sort-header').forEach(button => addListener(button, 'click', () => {
+  if (sortKey === button.dataset.sort) sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+  else {
+    sortKey = button.dataset.sort;
+    sortDirection = sortKey === 'date' || sortKey === 'amount' ? 'desc' : 'asc';
+  }
+  applyTransactionView();
+}));
+[searchInput, typeFilter, dateFrom, dateTo].forEach(element => addListener(element, 'input', applyTransactionView));
+addListener(typeFilter, 'change', applyTransactionView);
+addListener(getElement('clearFilters'), 'click', () => {
+  if (searchInput) searchInput.value = '';
+  if (typeFilter) typeFilter.value = 'all';
+  if (dateFrom) dateFrom.value = '';
+  if (dateTo) dateTo.value = '';
+  applyTransactionView();
+});
+applyTransactionView();
 
 const transactionForm = getElement('transactionForm');
-
 addListener(transactionForm, 'submit', event => {
   if (event.submitter?.value === 'cancel') return;
-
   event.preventDefault();
-
   const description = getElement('txDesc')?.value.trim() || '';
   const amount = Number(getElement('txAmount')?.value);
   const date = getElement('txDate')?.value || '';
   const type = getElement('txType')?.value || 'expense';
   const category = getElement('txCategory')?.value.trim() || 'غير مصنف';
-
-  if (!rowsContainer) {
-    alert('تعذر العثور على جدول الحركات.');
-    return;
-  }
-
-  if (!description || !date || !Number.isFinite(amount) || amount <= 0) {
-    alert('يرجى إدخال وصف صحيح ومبلغ أكبر من صفر وتاريخ الحركة.');
-    return;
-  }
-
-  if (!['income', 'expense'].includes(type)) {
-    alert('نوع الحركة غير صحيح.');
-    return;
-  }
+  if (!rowsContainer) return alert('تعذر العثور على جدول الحركات.');
+  if (!description || !date || !Number.isFinite(amount) || amount <= 0) return alert('أدخل وصفاً صحيحاً ومبلغاً أكبر من صفر وتاريخ الحركة.');
+  if (!['income', 'expense'].includes(type)) return alert('نوع الحركة غير صحيح.');
 
   const row = document.createElement('tr');
-
-  const descriptionCell = document.createElement('td');
-  descriptionCell.textContent = description;
-
-  const categoryCell = document.createElement('td');
-  categoryCell.textContent = category;
-
+  const typeCell = document.createElement('td');
+  const badge = document.createElement('span');
+  badge.className = type === 'income' ? 'pill green' : 'pill red';
+  badge.textContent = type === 'income' ? 'إيراد' : 'مصروف';
+  typeCell.appendChild(badge);
+  const categoryCell = document.createElement('td'); categoryCell.textContent = category;
+  const descriptionCell = document.createElement('td'); descriptionCell.textContent = description;
   const dateCell = document.createElement('td');
   const parsedDate = new Date(`${date}T12:00:00`);
-
-  dateCell.textContent = Number.isNaN(parsedDate.getTime())
-    ? date
-    : parsedDate.toLocaleDateString('de-DE');
-
-  const typeCell = document.createElement('td');
-  const typeBadge = document.createElement('span');
-
-  typeBadge.classList.add('pill');
-
-  if (type === 'income') {
-    typeBadge.classList.add('green');
-    typeBadge.textContent = 'إيراد';
-  } else {
-    typeBadge.classList.add('red');
-    typeBadge.textContent = 'مصروف';
-  }
-
-  typeCell.appendChild(typeBadge);
-
+  dateCell.textContent = Number.isNaN(parsedDate.getTime()) ? date : parsedDate.toLocaleDateString('de-DE');
   const amountCell = document.createElement('td');
-  const sign = type === 'income' ? '+' : '−';
-
-  if (type === 'income') {
-    amountCell.classList.add('positive');
-  }
-
-  amountCell.textContent =
-    `${sign}${amount.toLocaleString('de-DE', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })} €`;
-
-  // بيانات الفرز الخاصة بالحركة الجديدة
-  row.dataset.sortDescription = description;
-  row.dataset.sortDate = date;
-  row.dataset.sortAmount = String(amount);
-
-  row.append(
-    descriptionCell,
-    categoryCell,
-    dateCell,
-    typeCell,
-    amountCell
-  );
-
+  amountCell.classList.toggle('positive', type === 'income');
+  amountCell.textContent = `${type === 'income' ? '+' : '−'}${amount.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+  row.append(typeCell, categoryCell, descriptionCell, dateCell, amountCell);
   rowsContainer.appendChild(row);
-
-  // تطبيق الفرز المختار مباشرة بعد الإضافة
-  sortTransactions();
-
-  if (txDialog) txDialog.close();
-
+  applyTransactionView();
+  txDialog?.close();
   transactionForm.reset();
-
-  alert(
-    'أضيفت الحركة إلى العرض التجريبي فقط. ' +
-    'لن تُحفظ بعد إغلاق الصفحة.'
-  );
+  alert('أضيفت الحركة إلى العرض التجريبي فقط، ولن تُحفظ بعد إغلاق الصفحة.');
 });
-
-/* =========================================
-   حاسبة التوقعات المالية الحالية
-========================================= */
 
 const forecastButton = getElement('calcForecast');
-
 addListener(forecastButton, 'click', () => {
-  const forecastInputs = document.querySelectorAll(
-    '#reports .form-grid input'
-  );
-
-  const resultElement = getElement('forecastResult');
-
-  if (forecastInputs.length < 4 || !resultElement) {
-    alert('تعذر قراءة بيانات التوقعات.');
-    return;
-  }
-
-  const balance = Number(forecastInputs[0].value);
-  const monthlySurplus = Number(forecastInputs[1].value);
-  const years = Number(getElement('years')?.value);
-  const annualRate = Number(forecastInputs[3].value);
-
-  if (
-    !Number.isFinite(balance) ||
-    !Number.isFinite(monthlySurplus) ||
-    !Number.isFinite(years) ||
-    !Number.isFinite(annualRate) ||
-    years < 1 ||
-    years > 100
-  ) {
-    alert('يرجى إدخال قيم صحيحة، وعدد سنوات بين 1 و100.');
-    return;
-  }
-
-  if (annualRate <= -100 || annualRate > 100) {
-    alert('يرجى إدخال عائد سنوي أكبر من -100% ولا يتجاوز 100%.');
-    return;
-  }
-
-  const months = Math.round(years * 12);
-
-  const monthlyRate = Math.pow(
-    1 + annualRate / 100,
-    1 / 12
-  ) - 1;
-
-  let futureBalance = balance;
-
-  for (let month = 0; month < months; month++) {
-    futureBalance = futureBalance * (1 + monthlyRate);
-    futureBalance += monthlySurplus;
-  }
-
-  const formattedBalance = futureBalance.toLocaleString('de-DE', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-
-  resultElement.replaceChildren();
-
-  const label = document.createTextNode(
-    `الرصيد المتوقع بعد ${years} سنوات: `
-  );
-
+  const inputs = document.querySelectorAll('#reports .form-grid input');
+  const result = getElement('forecastResult');
+  if (inputs.length < 4 || !result) return alert('تعذر قراءة بيانات الحاسبة.');
+  const balance = Number(inputs[0].value), monthly = Number(inputs[1].value);
+  const years = Number(getElement('years')?.value), annual = Number(inputs[3].value);
+  if (![balance, monthly, years, annual].every(Number.isFinite) || years < 1 || years > 100) return alert('أدخل قيماً صحيحة وعدد سنوات بين 1 و100.');
+  if (annual <= -100 || annual > 100) return alert('العائد السنوي يجب أن يكون أكبر من -100% ولا يتجاوز 100%.');
+  const rate = Math.pow(1 + annual / 100, 1 / 12) - 1;
+  let future = balance;
+  for (let month = 0; month < Math.round(years * 12); month++) future = future * (1 + rate) + monthly;
+  result.replaceChildren(document.createTextNode(`الرصيد الحسابي الافتراضي بعد ${years} سنوات: `));
   const value = document.createElement('b');
-  value.textContent = `${formattedBalance} €`;
-
-  resultElement.append(label, value);
+  value.textContent = `${future.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+  result.appendChild(value);
 });
 
-/* =========================================
-   اختيار ملف كشف الحساب البنكي
-========================================= */
-
-const chooseFileButton = getElement('chooseFile');
-const fileInput = getElement('fileInput');
-const fileName = getElement('fileName');
-
-addListener(chooseFileButton, 'click', () => {
-  if (fileInput) fileInput.click();
-});
-
+const chooseFileButton = getElement('chooseFile'), fileInput = getElement('fileInput'), fileName = getElement('fileName');
+addListener(chooseFileButton, 'click', () => fileInput?.click());
 addListener(fileInput, 'change', event => {
   const file = event.target.files?.[0];
-
-  if (fileName) {
-    fileName.textContent = file
-      ? file.name
-      : 'لم يتم اختيار ملف';
-  }
-
-  if (file) {
-    alert(
-      'تم اختيار الملف بنجاح.\n' +
-      'ملاحظة: قراءة محتوى كشف الحساب واستيراد الحركات ' +
-      'ليسا مفعّلين بعد.'
-    );
-  }
+  if (fileName) fileName.textContent = file ? `${file.name} — اختيار فقط، لم تتم قراءة الملف أو رفعه` : 'لم يتم اختيار ملف';
 });
+addListener(getElement('inviteMember'), 'click', () => alert('دعوات الأعضاء ستُفعّل بعد بناء نظام الحسابات وقاعدة البيانات.'));
+addListener(getElement('addAccount'), 'click', () => alert('إضافة الحسابات ستُفعّل بعد ربط قاعدة البيانات.'));
 
-/* =========================================
-   دعوة أعضاء الأسرة
-========================================= */
-
-const inviteMemberButton = getElement('inviteMember');
-
-addListener(inviteMemberButton, 'click', () => {
-  alert(
-    'سيتم تفعيل دعوات أفراد الأسرة عبر البريد الإلكتروني ' +
-    'بعد ربط نظام الحسابات وقاعدة البيانات.'
-  );
-});
-
-/* =========================================
-   إضافة حساب مالي
-========================================= */
-
-const addAccountButton = getElement('addAccount');
-
-addListener(addAccountButton, 'click', () => {
-  alert(
-    'سيتم تفعيل إضافة الحسابات وإدارتها ' +
-    'بعد ربط قاعدة البيانات.'
-  );
-});
-
-/* =========================================
-   تسجيل Service Worker
-========================================= */
-
-if (
-  'serviceWorker' in navigator &&
-  window.location.protocol.startsWith('http')
-) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('./sw.js')
-      .catch(error => {
-        console.error('تعذر تسجيل Service Worker:', error);
-      });
-  });
+if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(error => console.error('تعذر تسجيل Service Worker:', error)));
 }
