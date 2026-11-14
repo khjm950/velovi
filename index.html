@@ -66,8 +66,8 @@
         <div class="security">
           ▣
           <span>
-            <b>الخصوصية مفعّلة بالتصميم</b>
-            <small>كل عضو يرى بياناته فقط</small>
+            <b>نموذج تجريبي</b>
+            <small>لا توجد حماية حسابات أو مزامنة فعلية بعد</small>
           </span>
         </div>
         <small class="version">نسخة واجهات أولية · 0.1</small>
@@ -126,7 +126,7 @@
             <div class="panel-head">
               <div>
                 <h2>آخر الحركات</h2>
-                <p class="muted">الحركات الخاصة بحسابك</p>
+                <p class="muted">بيانات العرض التجريبي · يمكن فرز الأعمدة وتصفية السجل</p>
               </div>
               <button class="text-btn" data-goto="transactions">عرض الكل ←</button>
             </div>
@@ -210,71 +210,36 @@
 
         <article class="panel">
           <div class="filters">
-  <input
-    id="searchTx"
-    placeholder="ابحث في الحركات..."
-    aria-label="بحث"
-  >
-
-  <select aria-label="فرز الحركات" id="sortTx">
-    <option value="newest">الأحدث أولاً</option>
-    <option value="oldest">الأقدم أولاً</option>
-    <option value="highest">المبلغ الأعلى أولاً</option>
-    <option value="lowest">المبلغ الأقل أولاً</option>
-    <option value="description">الوصف أبجدياً</option>
-  </select>
-
-  <select aria-label="نوع الحركة">
-    <option>كل الأنواع</option>
-    <option>إيرادات</option>
-    <option>مصروفات</option>
-  </select>
-
-  <select aria-label="الفترة الزمنية">
-    <option>هذا الشهر</option>
-    <option>الشهر السابق</option>
-  </select>
+            <input id="searchTx" type="search" placeholder="ابحث في الحركات..." aria-label="بحث في الحركات">
+            <select id="typeFilter" aria-label="تصفية حسب نوع الحركة">
+              <option value="all">كل الأنواع</option>
+              <option value="income">الإيرادات</option>
+              <option value="expense">المصروفات</option>
+            </select>
+            <label class="date-filter">من <input id="dateFrom" type="date" aria-label="من تاريخ"></label>
+            <label class="date-filter">إلى <input id="dateTo" type="date" aria-label="إلى تاريخ"></label>
+            <button class="text-btn" id="clearFilters" type="button">مسح الفلاتر</button>
+          </div>
+          <div class="transaction-summary" aria-live="polite">
+            <div><span>الصافي للفترة</span><strong id="txNet">0,00 €</strong></div>
+            <div><span>عدد الحركات</span><strong id="txCount">0</strong></div>
           </div>
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
-                  <th>الوصف</th>
-                  <th>التصنيف</th>
-                  <th>التاريخ</th>
-                  <th>النوع</th>
-                  <th>المبلغ</th>
+                  <th scope="col" aria-sort="none"><button class="sort-header" type="button" data-sort="type">النوع <span aria-hidden="true">↕</span></button></th>
+                  <th scope="col" aria-sort="none"><button class="sort-header" type="button" data-sort="category">التصنيف <span aria-hidden="true">↕</span></button></th>
+                  <th scope="col" aria-sort="none"><button class="sort-header" type="button" data-sort="description">الوصف <span aria-hidden="true">↕</span></button></th>
+                  <th scope="col" aria-sort="descending"><button class="sort-header" type="button" data-sort="date">التاريخ <span aria-hidden="true">↓</span></button></th>
+                  <th scope="col" aria-sort="none"><button class="sort-header" type="button" data-sort="amount">المبلغ <span aria-hidden="true">↕</span></button></th>
                 </tr>
               </thead>
               <tbody id="txRows">
-                <tr>
-                  <td>الراتب الشهري</td>
-                  <td>راتب</td>
-                  <td>01.11.2026</td>
-                  <td><span class="pill green">إيراد</span></td>
-                  <td class="positive">+3.200,00 €</td>
-                </tr>
-                <tr>
-                  <td>الإيجار</td>
-                  <td>السكن</td>
-                  <td>03.11.2026</td>
-                  <td><span class="pill red">مصروف</span></td>
-                  <td>−850,00 €</td>
-                </tr>
-                <tr>
-                  <td>مشتريات السوبرماركت</td>
-                  <td>طعام</td>
-                  <td>05.11.2026</td>
-                  <td><span class="pill red">مصروف</span></td>
-                  <td>−126,40 €</td>
-                </tr>
-                <tr>
-                  <td>فاتورة الكهرباء</td>
-                  <td>منزل</td>
-                  <td>07.11.2026</td>
-                  <td><span class="pill red">مصروف</span></td>
-                  <td>−78,50 €</td>
-                </tr>
+                <tr><td><span class="pill green">إيراد</span></td><td>راتب</td><td>الراتب الشهري</td><td>01.11.2026</td><td class="positive">+3.200,00 €</td></tr>
+                <tr><td><span class="pill red">مصروف</span></td><td>السكن</td><td>الإيجار</td><td>03.11.2026</td><td>−850,00 €</td></tr>
+                <tr><td><span class="pill red">مصروف</span></td><td>طعام</td><td>مشتريات السوبرماركت</td><td>05.11.2026</td><td>−126,40 €</td></tr>
+                <tr><td><span class="pill red">مصروف</span></td><td>منزل</td><td>فاتورة الكهرباء</td><td>07.11.2026</td><td>−78,50 €</td></tr>
               </tbody>
             </table>
           </div>
@@ -352,7 +317,7 @@
               <span class="person-avatar alt">ع</span>
               <div>
                 <b>عضو الأسرة 1</b>
-                <small>عضو · يرى بياناته فقط</small>
+                <small>عضو · بيانات تجريبية غير مرتبطة بحسابات فعلية</small>
               </div>
             </div>
             <div class="permission-summary">
@@ -368,7 +333,7 @@
               <span class="person-avatar alt2">س</span>
               <div>
                 <b>عضو الأسرة 2</b>
-                <small>عضو · يرى بياناته فقط</small>
+                <small>عضو تجريبي · لا توجد صلاحيات فعلية</small>
               </div>
             </div>
             <div class="permission-summary">
@@ -387,15 +352,15 @@
           <div>
             <p class="eyebrow">التخطيط المالي</p>
             <h1>التقارير والتوقعات</h1>
-            <p class="muted">استكشف المسار المالي على المدى الذي تختاره</p>
+            <p class="muted">حاسبة افتراضية مستقلة وليست توقعاً ذكياً مبنياً على سجل الحركات</p>
           </div>
         </div>
 
         <article class="panel">
           <div class="panel-head">
             <div>
-              <h2>توقع الرصيد المستقبلي</h2>
-              <p class="muted">مثال افتراضي مبسط دون بيانات حقيقية</p>
+              <h2>حاسبة نمو الرصيد الافتراضية</h2>
+              <p class="muted">محاكاة حسابية فقط؛ لا تستخدم بيانات الحسابات أو الحركات الفعلية</p>
             </div>
           </div>
 
@@ -445,11 +410,11 @@
             <span class="big-icon">⇧</span>
             <h2>استيراد ملف الحركات</h2>
             <p class="muted">
-              دعم استيراد ملفات CSV وExcel والصيغ البنكية مثل CAMT.053 وMT940 بعد تجهيز محلل الملفات.
+              يمكن اختيار ملف للمعاينة فقط. قراءة CSV وExcel والصيغ البنكية واستيرادها غير مفعّلة بعد.
             </p>
             <button class="secondary" id="chooseFile">اختيار ملف</button>
             <input id="fileInput" type="file" accept=".csv,.txt,.xml,.xlsx,.xls" hidden>
-            <p class="small muted" id="fileName">لم يتم اختيار ملف</p>
+            <p class="small muted" id="fileName">لم يتم اختيار ملف. لا تُرفع الملفات ولا تُقرأ محتوياتها.</p>
           </article>
 
           <article class="panel">
