@@ -41,26 +41,34 @@
         <span class="chevron">⌄</span>
       </div>
 
-      <nav>
+      <nav aria-label="التنقل الرئيسي">
         <button class="nav-item active" data-view="home">
-          <span>▦</span> الرئيسية
+          <span aria-hidden="true">⌂</span> الرئيسية
         </button>
         <button class="nav-item" data-view="transactions">
-          <span>↕</span> الحركات المالية
+          <span aria-hidden="true">↕</span> الحركات
         </button>
         <button class="nav-item" data-view="accounts">
-          <span>▤</span> الحسابات
+          <span aria-hidden="true">▤</span> الحسابات
         </button>
-        <button class="nav-item" data-view="members">
-          <span>♧</span> أفراد الأسرة والصلاحيات
+        <button class="nav-item nav-secondary" data-view="members">
+          <span aria-hidden="true">♧</span> أفراد الأسرة والصلاحيات
         </button>
-        <button class="nav-item" data-view="reports">
-          <span>◷</span> التقارير والتوقعات
+        <button class="nav-item nav-secondary" data-view="reports">
+          <span aria-hidden="true">◷</span> التقارير والتوقعات
         </button>
-        <button class="nav-item" data-view="ing">
-          <span>⇄</span> الاستيراد البنكي
+        <button class="nav-item nav-secondary" data-view="ing">
+          <span aria-hidden="true">⇄</span> الاستيراد البنكي
         </button>
       </nav>
+      <details class="mobile-more">
+        <summary><span aria-hidden="true">•••</span><span>المزيد</span></summary>
+        <div class="mobile-more-menu">
+          <button class="nav-item" data-view="members"><span aria-hidden="true">♧</span> أفراد الأسرة والصلاحيات</button>
+          <button class="nav-item" data-view="reports"><span aria-hidden="true">◷</span> التقارير والتوقعات</button>
+          <button class="nav-item" data-view="ing"><span aria-hidden="true">⇄</span> الاستيراد البنكي</button>
+        </div>
+      </details>
 
       <div class="sidebar-bottom">
         <div class="security">
