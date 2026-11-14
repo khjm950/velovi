@@ -25,9 +25,7 @@ const navItems = [...document.querySelectorAll('.nav-item')];
 function showView(id) {
   const target = getElement(id);
 
-  if (!target || !target.classList.contains('view')) {
-    return;
-  }
+  if (!target || !target.classList.contains('view')) return;
 
   views.forEach(view => {
     view.classList.toggle('active', view.id === id);
@@ -37,22 +35,15 @@ function showView(id) {
     button.classList.toggle('active', button.dataset.view === id);
   });
 
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 navItems.forEach(button => {
-  addListener(button, 'click', () => {
-    showView(button.dataset.view);
-  });
+  addListener(button, 'click', () => showView(button.dataset.view));
 });
 
 document.querySelectorAll('[data-goto]').forEach(button => {
-  addListener(button, 'click', () => {
-    showView(button.dataset.goto);
-  });
+  addListener(button, 'click', () => showView(button.dataset.goto));
 });
 
 /* =========================================
@@ -82,17 +73,131 @@ document.querySelectorAll('[data-permission]').forEach(button => {
 });
 
 /* =========================================
+   أدوات فرز الحركات المالية
+========================================= */
+
+const rowsContainer = getElement('txRows');
+const searchInput = getElement('searchTx');
+const sortSelect = getElement('sortTx');
+
+function normalizeDate(value) {
+  if (!value) return '';
+
+  // التاريخ بصيغة YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+
+  // التاريخ بصيغة DD.MM.YYYY
+  const match = value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+
+  if (match) {
+    return `${match[3]}-${match[2]}-${match[1]}`;
+  }
+
+  return '';
+}
+
+function parseAmount(value) {
+  const cleaned = String(value)
+    .replace(/[^\d,.-]/g, '')
+    .replace(/\./g, '')
+    .replace(',', '.');
+
+  const amount = Number(cleaned);
+
+  return Number.isFinite(amount) ? Math.abs(amount) : 0;
+}
+
+function prepareExistingRows() {
+  if (!rowsContainer) return;
+
+  [...rowsContainer.querySelectorAll('tr')].forEach(row => {
+    const cells = row.querySelectorAll('td');
+
+    if (cells.length < 5) return;
+
+    row.dataset.sortDescription = cells[0].textContent.trim();
+    row.dataset.sortDate = normalizeDate(cells[2].textContent.trim());
+    row.dataset.sortAmount = String(parseAmount(cells[4].textContent));
+  });
+}
+
+function applyTransactionSearch() {
+  if (!rowsContainer) return;
+
+  const query = searchInput
+    ? searchInput.value.trim().toLocaleLowerCase()
+    : '';
+
+  rowsContainer.querySelectorAll('tr').forEach(row => {
+    const content = row.textContent.toLocaleLowerCase();
+    row.hidden = !content.includes(query);
+  });
+}
+
+function sortTransactions() {
+  if (!rowsContainer) return;
+
+  const sortMode = sortSelect ? sortSelect.value : 'newest';
+
+  const rows = [...rowsContainer.querySelectorAll('tr')];
+
+  rows.sort((a, b) => {
+    const dateA = a.dataset.sortDate || '';
+    const dateB = b.dataset.sortDate || '';
+
+    const amountA = Number(a.dataset.sortAmount || 0);
+    const amountB = Number(b.dataset.sortAmount || 0);
+
+    const descriptionA = a.dataset.sortDescription || '';
+    const descriptionB = b.dataset.sortDescription || '';
+
+    switch (sortMode) {
+      case 'oldest':
+        return dateA.localeCompare(dateB);
+
+      case 'highest':
+        return amountB - amountA;
+
+      case 'lowest':
+        return amountA - amountB;
+
+      case 'description':
+        return descriptionA.localeCompare(
+          descriptionB,
+          'ar',
+          { sensitivity: 'base' }
+        );
+
+      case 'newest':
+      default:
+        return dateB.localeCompare(dateA);
+    }
+  });
+
+  // إعادة ترتيب الصفوف دون فقدان بياناتها أو حالة البحث
+  rows.forEach(row => rowsContainer.appendChild(row));
+
+  applyTransactionSearch();
+}
+
+// تجهيز الحركات الموجودة عند فتح الصفحة
+prepareExistingRows();
+sortTransactions();
+
+addListener(sortSelect, 'change', sortTransactions);
+
+addListener(searchInput, 'input', applyTransactionSearch);
+
+/* =========================================
    إضافة حركة مالية تجريبية
 ========================================= */
 
 const transactionForm = getElement('transactionForm');
 
 addListener(transactionForm, 'submit', event => {
-
-  // السماح بزر الإلغاء بإغلاق النافذة بشكل طبيعي
-  if (event.submitter?.value === 'cancel') {
-    return;
-  }
+  if (event.submitter?.value === 'cancel') return;
 
   event.preventDefault();
 
@@ -102,9 +207,7 @@ addListener(transactionForm, 'submit', event => {
   const type = getElement('txType')?.value || 'expense';
   const category = getElement('txCategory')?.value.trim() || 'غير مصنف';
 
-  const rows = getElement('txRows');
-
-  if (!rows) {
+  if (!rowsContainer) {
     alert('تعذر العثور على جدول الحركات.');
     return;
   }
@@ -119,7 +222,6 @@ addListener(transactionForm, 'submit', event => {
     return;
   }
 
-  // إنشاء صف جديد بطريقة آمنة
   const row = document.createElement('tr');
 
   const descriptionCell = document.createElement('td');
@@ -129,7 +231,6 @@ addListener(transactionForm, 'submit', event => {
   categoryCell.textContent = category;
 
   const dateCell = document.createElement('td');
-
   const parsedDate = new Date(`${date}T12:00:00`);
 
   dateCell.textContent = Number.isNaN(parsedDate.getTime())
@@ -164,6 +265,11 @@ addListener(transactionForm, 'submit', event => {
       maximumFractionDigits: 2
     })} €`;
 
+  // بيانات الفرز الخاصة بالحركة الجديدة
+  row.dataset.sortDescription = description;
+  row.dataset.sortDate = date;
+  row.dataset.sortAmount = String(amount);
+
   row.append(
     descriptionCell,
     categoryCell,
@@ -172,11 +278,12 @@ addListener(transactionForm, 'submit', event => {
     amountCell
   );
 
-  rows.prepend(row);
+  rowsContainer.appendChild(row);
 
-  if (txDialog) {
-    txDialog.close();
-  }
+  // تطبيق الفرز المختار مباشرة بعد الإضافة
+  sortTransactions();
+
+  if (txDialog) txDialog.close();
 
   transactionForm.reset();
 
@@ -187,29 +294,12 @@ addListener(transactionForm, 'submit', event => {
 });
 
 /* =========================================
-   البحث في الحركات المالية
-========================================= */
-
-const searchInput = getElement('searchTx');
-
-addListener(searchInput, 'input', event => {
-  const query = event.target.value.trim().toLocaleLowerCase();
-
-  document.querySelectorAll('#txRows tr').forEach(row => {
-    const content = row.textContent.toLocaleLowerCase();
-
-    row.hidden = !content.includes(query);
-  });
-});
-
-/* =========================================
-   حاسبة التوقعات المالية
+   حاسبة التوقعات المالية الحالية
 ========================================= */
 
 const forecastButton = getElement('calcForecast');
 
 addListener(forecastButton, 'click', () => {
-
   const forecastInputs = document.querySelectorAll(
     '#reports .form-grid input'
   );
@@ -244,6 +334,7 @@ addListener(forecastButton, 'click', () => {
   }
 
   const months = Math.round(years * 12);
+
   const monthlyRate = Math.pow(
     1 + annualRate / 100,
     1 / 12
@@ -261,7 +352,6 @@ addListener(forecastButton, 'click', () => {
     maximumFractionDigits: 2
   });
 
-  // تحديث النتيجة دون إدخال HTML من المستخدم
   resultElement.replaceChildren();
 
   const label = document.createTextNode(
@@ -283,9 +373,7 @@ const fileInput = getElement('fileInput');
 const fileName = getElement('fileName');
 
 addListener(chooseFileButton, 'click', () => {
-  if (fileInput) {
-    fileInput.click();
-  }
+  if (fileInput) fileInput.click();
 });
 
 addListener(fileInput, 'change', event => {
@@ -344,10 +432,7 @@ if (
     navigator.serviceWorker
       .register('./sw.js')
       .catch(error => {
-        console.error(
-          'تعذر تسجيل Service Worker:',
-          error
-        );
+        console.error('تعذر تسجيل Service Worker:', error);
       });
   });
 }
