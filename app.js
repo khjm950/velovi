@@ -14,6 +14,7 @@ function showView(id) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 navItems.forEach(button => addListener(button, 'click', () => showView(button.dataset.view)));
+document.querySelectorAll('.mobile-more-menu .nav-item').forEach(button => addListener(button, 'click', () => { const menu = button.closest('details'); if (menu) menu.open = false; }));
 document.querySelectorAll('[data-goto]').forEach(button => addListener(button, 'click', () => showView(button.dataset.goto)));
 
 const txDialog = getElement('transactionDialog');
