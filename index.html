@@ -210,18 +210,31 @@
 
         <article class="panel">
           <div class="filters">
-            <input id="searchTx" placeholder="ابحث في الحركات..." aria-label="بحث">
-            <select>
-              <option>كل الأنواع</option>
-              <option>إيرادات</option>
-              <option>مصروفات</option>
-            </select>
-            <select>
-              <option>هذا الشهر</option>
-              <option>الشهر السابق</option>
-            </select>
-          </div>
+  <input
+    id="searchTx"
+    placeholder="ابحث في الحركات..."
+    aria-label="بحث"
+  >
 
+  <select aria-label="فرز الحركات" id="sortTx">
+    <option value="newest">الأحدث أولاً</option>
+    <option value="oldest">الأقدم أولاً</option>
+    <option value="highest">المبلغ الأعلى أولاً</option>
+    <option value="lowest">المبلغ الأقل أولاً</option>
+    <option value="description">الوصف أبجدياً</option>
+  </select>
+
+  <select aria-label="نوع الحركة">
+    <option>كل الأنواع</option>
+    <option>إيرادات</option>
+    <option>مصروفات</option>
+  </select>
+
+  <select aria-label="الفترة الزمنية">
+    <option>هذا الشهر</option>
+    <option>الشهر السابق</option>
+  </select>
+          </div>
           <div class="table-wrap">
             <table>
               <thead>
