@@ -74,8 +74,8 @@ function formatCurrencyOptionLabels() {
       symbol = new Intl.NumberFormat('en', { style: 'currency', currency: code, currencyDisplay: 'narrowSymbol' })
         .formatToParts(0).find(part => part.type === 'currency')?.value || code;
     } catch {}
-    // Isolate Latin codes and currency marks from Arabic text to prevent bidi reordering.
-    option.textContent = `⁦${code}⁩ · ${name} (⁦${symbol}⁩)`;
+    // Keep option labels plain: native Android select controls may expose bidi escape marks as text.
+    option.textContent = `${code} · ${name} (${symbol})`;
     option.dir = 'ltr';
   });
 }
