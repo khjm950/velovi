@@ -53,6 +53,25 @@ if (savedCurrency !== storedCurrency) localStorage.setItem('velovi-currency', sa
 const savedTheme = localStorage.getItem('velovi-theme') || 'green';
 if (languageSetting) languageSetting.value = savedLanguage;
 if (currencySetting) currencySetting.value = savedCurrency;
+function getCurrencySymbol() {
+  try {
+    const locale = root.lang || navigator.language || 'de-DE';
+    return new Intl.NumberFormat(locale, { style: 'currency', currency: localStorage.getItem('velovi-currency') || 'EUR' }).formatToParts(0).find(part => part.type === 'currency')?.value || (localStorage.getItem('velovi-currency') || 'EUR');
+  } catch { return localStorage.getItem('velovi-currency') || 'EUR'; }
+}
+function formatPreferredCurrency(value) {
+  try { return new Intl.NumberFormat(root.lang || navigator.language || 'de-DE', { style: 'currency', currency: localStorage.getItem('velovi-currency') || 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value); }
+  catch { return value.toFixed(2) + ' ' + getCurrencySymbol(); }
+}
+function refreshReportCurrency() {
+  const symbol = getCurrencySymbol();
+  const label = getElement('forecastCurrencySymbol');
+  if (label) label.textContent = symbol;
+  const initial = getElement('forecastResult')?.querySelector('b');
+  if (initial) initial.textContent = formatPreferredCurrency(140000);
+}
+refreshReportCurrency();
+
 root.lang = savedLanguage; root.dir = savedLanguage === 'ar' ? 'rtl' : 'ltr'; root.dataset.theme = savedTheme;
 addListener(languageSetting, 'change', () => {
   root.lang = languageSetting.value; root.dir = languageSetting.value === 'ar' ? 'rtl' : 'ltr';
@@ -61,7 +80,8 @@ addListener(languageSetting, 'change', () => {
 });
 addListener(currencySetting, 'change', () => {
   localStorage.setItem('velovi-currency', currencySetting.value);
-  getElement('settingsStatus').textContent = 'حُفظت العملة المفضلة. المبالغ الحالية لا تتحول تلقائياً؛ دعم العملات المتعددة وأسعار الصرف سيُضاف ضمن تطوير الحسابات المالية.';
+  refreshReportCurrency();
+  getElement('settingsStatus').textContent = 'حُفظت العملة المفضلة، وتم تحديث رمز العملة في التقارير. لا يجري تحويل المبالغ الحالية تلقائياً.';
 });
 document.querySelectorAll('[data-theme-choice]').forEach(button => {
   button.classList.toggle('active', button.dataset.themeChoice === savedTheme);
@@ -281,7 +301,7 @@ addListener(forecastButton, 'click', () => {
   for (let month = 0; month < months; month++) future = future * (1 + rate) + monthly;
   result.replaceChildren(document.createTextNode(`الرصيد الحسابي الافتراضي بعد ${months} شهراً: `));
   const value = document.createElement('b');
-  value.textContent = `${future.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+  value.textContent = formatPreferredCurrency(future);
   result.appendChild(value);
   result.classList.toggle('negative', future < 0);
   result.classList.toggle('positive', future > 0);
