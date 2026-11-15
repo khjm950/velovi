@@ -253,3 +253,22 @@ dialog form{gap:17px}
 .balance-input-row{display:block;position:relative}
 .balance-input-row #forecastBalance{width:100%;min-width:0;touch-action:pan-y}
 #balanceHint{display:block;margin-top:7px}
+
+/* Compact +/- action integrated inside the balance input. */
+.balance-input-row{position:relative;display:block}
+.balance-input-row #forecastBalance{
+  display:block;width:100%;min-width:0;
+  padding-right:62px;
+  text-align:left;
+}
+.balance-input-row .balance-sign-button{
+  position:absolute;right:9px;top:50%;transform:translateY(-50%);
+  display:grid;place-items:center;
+  width:36px;height:34px;min-width:36px;min-height:34px;
+  margin:0;padding:0;border:1px solid #dce7e0;border-radius:9px;
+  background:#f4f8f5;color:#315c4c;
+  font:700 18px/1 Arial,sans-serif;
+  box-shadow:none;cursor:pointer;touch-action:manipulation;
+}
+.balance-input-row .balance-sign-button:active{background:#e6f0e9}
+.balance-input-row .balance-sign-button:focus-visible{outline:2px solid #397a62;outline-offset:2px}
