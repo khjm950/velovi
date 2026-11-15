@@ -57,11 +57,11 @@ if (currencySetting) currencySetting.value = savedCurrency;
 function getCurrencySymbol() {
   try {
     const locale = root.lang || navigator.language || 'de-DE';
-    return new Intl.NumberFormat(locale, { style: 'currency', currency: localStorage.getItem('velovi-currency') || 'EUR' }).formatToParts(0).find(part => part.type === 'currency')?.value || (localStorage.getItem('velovi-currency') || 'EUR');
+    return new Intl.NumberFormat(locale, { style: 'currency', currency: localStorage.getItem('velovi-currency') || 'EUR', currencyDisplay: 'narrowSymbol' }).formatToParts(0).find(part => part.type === 'currency')?.value || (localStorage.getItem('velovi-currency') || 'EUR');
   } catch { return localStorage.getItem('velovi-currency') || 'EUR'; }
 }
 function formatPreferredCurrency(value) {
-  try { return new Intl.NumberFormat(root.lang || navigator.language || 'de-DE', { style: 'currency', currency: localStorage.getItem('velovi-currency') || 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value); }
+  try { return new Intl.NumberFormat(root.lang || navigator.language || 'de-DE', { style: 'currency', currency: localStorage.getItem('velovi-currency') || 'EUR', currencyDisplay: 'narrowSymbol', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value); }
   catch { return value.toFixed(2) + ' ' + getCurrencySymbol(); }
 }
 const originalCurrencyText = new WeakMap();
