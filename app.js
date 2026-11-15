@@ -29,8 +29,14 @@ const savedTheme = localStorage.getItem('velovi-theme') || 'green';
 if (languageSetting) languageSetting.value = savedLanguage;
 if (currencySetting) currencySetting.value = savedCurrency;
 root.lang = savedLanguage; root.dir = savedLanguage === 'ar' ? 'rtl' : 'ltr'; root.dataset.theme = savedTheme;
+let currentCurrencySymbol = '€';
 function updateCurrencySymbol(symbol) {
-  document.querySelectorAll('body *').forEach(node => { if (!node.children.length && node.textContent.includes('€')) node.textContent = node.textContent.replace(/€/g, symbol); });
+  document.querySelectorAll('body *').forEach(node => {
+    if (!node.children.length && node.textContent.includes(currentCurrencySymbol)) {
+      node.textContent = node.textContent.split(currentCurrencySymbol).join(symbol);
+    }
+  });
+  currentCurrencySymbol = symbol;
 }
 updateCurrencySymbol(savedCurrency);
 addListener(languageSetting, 'change', () => {
