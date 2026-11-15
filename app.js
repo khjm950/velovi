@@ -75,7 +75,7 @@ function formatCurrencyOptionLabels() {
         .formatToParts(0).find(part => part.type === 'currency')?.value || code;
     } catch {}
     // Isolate Latin codes and currency marks from Arabic text to prevent bidi reordering.
-    option.textContent = `\\u2066${code}\\u2069 · ${name} (\\u2066${symbol}\\u2069)`;
+    option.textContent = `⁦${code}⁩ · ${name} (⁦${symbol}⁩)`;
     option.dir = 'ltr';
   });
 }
