@@ -287,3 +287,14 @@ dialog form{gap:17px}
   background:#edf4ef!important;color:#173f35!important;font-size:20px!important;font-weight:700!important;
   line-height:1!important;box-shadow:none!important;cursor:pointer!important;
 }
+
+/* Reuse the same compact in-field sign control for monthly surplus. */
+.surplus-input-row{position:relative;display:block}
+.surplus-input-row #monthlySurplus{box-sizing:border-box;width:100%;padding-inline-end:64px;text-align:left}
+.surplus-input-row #toggleSurplusSign{
+  position:absolute;z-index:5;inset-inline-end:10px;top:50%;transform:translateY(-50%);
+  display:flex;align-items:center;justify-content:center;visibility:visible;opacity:1;pointer-events:auto;
+  width:40px;min-width:40px;height:36px;min-height:36px;margin:0;padding:0;
+  border:1px solid #d5e2da;border-radius:10px;background:#edf4ef;color:#173f35;
+  font-size:20px;font-weight:700;line-height:1;box-shadow:none;cursor:pointer;touch-action:manipulation;
+}
