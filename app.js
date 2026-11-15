@@ -69,7 +69,13 @@ const chartType = getElement('chartType'), chartPeriod = getElement('chartPeriod
 function renderDemoChart() {
   const chart = getElement('expenseChart'); if (!chart) return;
   const isBars = chartType?.value === 'bars'; chart.classList.toggle('bars', isBars);
-  if (isBars && !chart.querySelector('.chart-bar')) chart.insertAdjacentHTML('beforeend','<span class="chart-bar" style="height:80%"></span><span class="chart-bar" style="height:12%"></span><span class="chart-bar" style="height:7%"></span><span class="chart-bar" style="height:1%"></span>');
+  if (isBars) {
+    // Inline important background prevents the base donut gradient from showing behind bars.
+    chart.style.setProperty('background', 'repeating-linear-gradient(to top, var(--chart-grid) 0 1px, transparent 1px 42px), var(--surface)', 'important');
+    if (!chart.querySelector('.chart-bar')) chart.insertAdjacentHTML('beforeend','<span class="chart-bar" style="height:80%"></span><span class="chart-bar" style="height:12%"></span><span class="chart-bar" style="height:7%"></span><span class="chart-bar" style="height:1%"></span>');
+  } else {
+    chart.style.removeProperty('background');
+  }
   const labels={month:'نموذج توضيحي للشهر الحالي',quarter:'عرض تجريبي لآخر 3 أشهر',year:'عرض تجريبي لهذا العام'};
   const label=getElement('chartPeriodLabel'); if(label) label.textContent=labels[chartPeriod?.value||'month'];
 }
