@@ -60,6 +60,26 @@ function getCurrencySymbol() {
     return new Intl.NumberFormat(locale, { style: 'currency', currency: localStorage.getItem('velovi-currency') || 'EUR', currencyDisplay: 'narrowSymbol' }).formatToParts(0).find(part => part.type === 'currency')?.value || (localStorage.getItem('velovi-currency') || 'EUR');
   } catch { return localStorage.getItem('velovi-currency') || 'EUR'; }
 }
+function formatCurrencyOptionLabels() {
+  if (!currencySetting) return;
+  currencySetting.dir = 'ltr';
+  currencySetting.style.textAlign = 'left';
+  [...currencySetting.options].forEach(option => {
+    const code = option.value;
+    const separator = option.textContent.indexOf(' · ');
+    if (!code || separator < 0) return;
+    const name = option.textContent.slice(separator + 3).replace(/\\s*\\([^)]*\\)\\s*$/, '').trim();
+    let symbol = code;
+    try {
+      symbol = new Intl.NumberFormat('en', { style: 'currency', currency: code, currencyDisplay: 'narrowSymbol' })
+        .formatToParts(0).find(part => part.type === 'currency')?.value || code;
+    } catch {}
+    // Isolate Latin codes and currency marks from Arabic text to prevent bidi reordering.
+    option.textContent = `\\u2066${code}\\u2069 · ${name} (\\u2066${symbol}\\u2069)`;
+    option.dir = 'ltr';
+  });
+}
+formatCurrencyOptionLabels();
 function formatPreferredCurrency(value) {
   try { return new Intl.NumberFormat(root.lang || navigator.language || 'de-DE', { style: 'currency', currency: localStorage.getItem('velovi-currency') || 'EUR', currencyDisplay: 'narrowSymbol', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value); }
   catch { return value.toFixed(2) + ' ' + getCurrencySymbol(); }
