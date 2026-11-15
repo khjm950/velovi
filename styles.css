@@ -436,3 +436,8 @@ dialog::backdrop{background:rgba(0,0,0,.52)!important}
 :root[data-theme] .donut.bars .chart-bar:nth-of-type(2){background:var(--chart-2)!important}
 :root[data-theme] .donut.bars .chart-bar:nth-of-type(3){background:var(--chart-3)!important}
 :root[data-theme] .donut.bars .chart-bar:nth-of-type(4){background:var(--chart-4)!important}
+
+
+/* v18: keep ISO codes and currency symbols stable beside Arabic currency names. */
+#currencySetting{direction:ltr!important;text-align:left!important;unicode-bidi:plaintext}
+#currencySetting option{direction:ltr;unicode-bidi:plaintext;text-align:left}
