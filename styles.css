@@ -398,3 +398,41 @@ dialog::backdrop{background:rgba(0,0,0,.52)!important}
 :root[data-theme="dark"] .pill.green{background:#203b2e!important;color:#8dd0aa!important}
 :root[data-theme="dark"] .pill.red{background:#432c2a!important;color:#e39a91!important}
 @media(max-width:700px){.sidebar{background:var(--surface)!important}.mobile-more-menu{background:var(--surface)!important}}
+
+
+/* v16: keep chart category colors independent from the selected app theme. */
+:root{
+  --chart-1:#0f766e;
+  --chart-2:#3b82f6;
+  --chart-3:#d97706;
+  --chart-4:#8b5cf6;
+  --chart-grid:#e7edf0;
+}
+:root[data-theme="dark"]{
+  --chart-1:#2dd4bf;
+  --chart-2:#60a5fa;
+  --chart-3:#fbbf24;
+  --chart-4:#c4b5fd;
+  --chart-grid:#3a4a50;
+}
+.donut:not(.bars){
+  background:conic-gradient(
+    var(--chart-1) 0 80.6%,
+    var(--chart-2) 80.6% 92.6%,
+    var(--chart-3) 92.6% 100%
+  )!important;
+}
+.legend .l1{background:var(--chart-1)!important}
+.legend .l2{background:var(--chart-2)!important}
+.legend .l3{background:var(--chart-3)!important}
+.legend .l4{background:var(--chart-4)!important}
+.donut.bars{
+  background:repeating-linear-gradient(
+    to top,var(--chart-grid) 0 1px,transparent 1px 42px
+  )!important;
+}
+.donut.bars .chart-bar{background:var(--chart-1)!important}
+.donut.bars .chart-bar:nth-of-type(1){background:var(--chart-1)!important}
+.donut.bars .chart-bar:nth-of-type(2){background:var(--chart-2)!important}
+.donut.bars .chart-bar:nth-of-type(3){background:var(--chart-3)!important}
+.donut.bars .chart-bar:nth-of-type(4){background:var(--chart-4)!important}
