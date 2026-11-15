@@ -168,34 +168,34 @@ addListener(transactionForm, 'submit', event => {
 });
 
 const balanceInput = getElement('forecastBalance');
-const signToggle = getElement('toggleBalanceSign');
-function refreshSignToggle() {
-  if (!signToggle || !balanceInput) return;
-  const value = Number(balanceInput.value.trim().replace(/\s/g, '').replace(',', '.'));
-  const isNegative = Number.isFinite(value) && value < 0;
-  signToggle.textContent = isNegative ? '+' : '−';
-  signToggle.setAttribute('aria-label', isNegative ? 'اجعل الرصيد موجباً' : 'اجعل الرصيد سالباً');
-  signToggle.title = isNegative ? 'اجعل الرصيد موجباً' : 'اجعل الرصيد سالباً';
+function setBalanceSign(negative) {
+  if (!balanceInput) return;
+  const raw = balanceInput.value.trim().replace(/\s/g, '').replace(',', '.');
+  const value = Number(raw);
+  if (!raw || !Number.isFinite(value)) return;
+  balanceInput.value = negative ? String(-Math.abs(value)) : String(Math.abs(value));
+  balanceInput.dispatchEvent(new Event('input', { bubbles: true }));
 }
-if (signToggle) {
-  signToggle.onclick = () => {
-    if (!balanceInput) return;
-    const raw = balanceInput.value.trim().replace(/\s/g, '').replace(',', '.');
-    const value = Number(raw);
-    if (!raw || !Number.isFinite(value)) {
-      alert('أدخل مبلغاً صحيحاً أولاً.');
-      balanceInput.focus();
-      return;
-    }
-    balanceInput.value = value < 0 ? String(Math.abs(value)) : String(-Math.abs(value));
-    refreshSignToggle();
-    balanceInput.focus();
-    balanceInput.setSelectionRange(balanceInput.value.length, balanceInput.value.length);
-    balanceInput.dispatchEvent(new Event('input', { bubbles: true }));
-  };
-  balanceInput?.addEventListener('input', refreshSignToggle);
-  refreshSignToggle();
-}
+let balanceTouchStart = null;
+balanceInput?.addEventListener('touchstart', event => {
+  if (event.touches.length !== 1) return;
+  balanceTouchStart = { x: event.touches[0].clientX, y: event.touches[0].clientY };
+}, { passive: true });
+balanceInput?.addEventListener('touchend', event => {
+  if (!balanceTouchStart || !event.changedTouches.length) return;
+  const touch = event.changedTouches[0];
+  const dx = touch.clientX - balanceTouchStart.x;
+  const dy = touch.clientY - balanceTouchStart.y;
+  balanceTouchStart = null;
+  if (Math.abs(dy) < 35 || Math.abs(dy) < Math.abs(dx) * 1.25) return;
+  setBalanceSign(dy < 0);
+}, { passive: true });
+balanceInput?.addEventListener('touchcancel', () => { balanceTouchStart = null; }, { passive: true });
+balanceInput?.addEventListener('wheel', event => {
+  if (Math.abs(event.deltaY) < 1) return;
+  event.preventDefault();
+  setBalanceSign(event.deltaY < 0);
+}, { passive: false });
 const forecastButton = getElement('calcForecast');
 addListener(forecastButton, 'click', () => {
   const result = getElement('forecastResult');
