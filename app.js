@@ -16,8 +16,18 @@ function showView(id) {
 navItems.forEach(button => addListener(button, 'click', () => showView(button.dataset.view)));
 document.querySelectorAll('.mobile-more-menu .nav-item').forEach(button => addListener(button, 'click', () => { const menu = button.closest('details'); if (menu) menu.open = false; }));
 document.querySelectorAll('[data-goto]').forEach(button => {
-  addListener(button, 'click', () => showView(button.dataset.goto));
-  addListener(button, 'keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); showView(button.dataset.goto); } });
+  const navigate = () => {
+    showView(button.dataset.goto);
+    if (button.dataset.transactionFilter) {
+      const filter = getElement('typeFilter');
+      if (filter) {
+        filter.value = button.dataset.transactionFilter;
+        filter.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+  };
+  addListener(button, 'click', navigate);
+  addListener(button, 'keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigate(); } });
 });
 
 // Local display preferences only; no financial records are stored.
