@@ -9,7 +9,7 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
   <link rel="apple-touch-icon" href="./icon-192.png">
-  <link rel="stylesheet" href="./styles.css?v=12">
+  <link rel="stylesheet" href="./styles.css?v=14">
 
   <title>Velovi | إدارة مالية الأسرة</title>
 </head>
@@ -60,6 +60,7 @@
         <button class="nav-item nav-secondary" data-view="ing">
           <span aria-hidden="true">⇄</span> الاستيراد البنكي
         </button>
+        <button class="nav-item nav-secondary" data-view="settings"><span aria-hidden="true">⚙</span> الإعدادات</button>
       </nav>
       <details class="mobile-more">
         <summary><span aria-hidden="true">•••</span><span>المزيد</span></summary>
@@ -67,6 +68,7 @@
           <button class="nav-item" data-view="members"><span aria-hidden="true">♧</span> أفراد الأسرة والصلاحيات</button>
           <button class="nav-item" data-view="reports"><span aria-hidden="true">◷</span> التقارير والتوقعات</button>
           <button class="nav-item" data-view="ing"><span aria-hidden="true">⇄</span> الاستيراد البنكي</button>
+          <button class="nav-item" data-view="settings"><span aria-hidden="true">⚙</span> الإعدادات</button>
         </div>
       </details>
 
@@ -104,25 +106,25 @@
         </div>
 
         <div class="stats">
-          <article class="stat">
+          <article class="stat dashboard-card" role="button" tabindex="0" data-goto="transactions">
             <span>إجمالي الإيرادات · هذا الشهر</span>
             <strong>3.200,00 €</strong>
             <small>مجموع الحركات التجريبية الظاهرة</small>
           </article>
 
-          <article class="stat">
+          <article class="stat dashboard-card" role="button" tabindex="0" data-goto="transactions">
             <span>إجمالي المصروفات · هذا الشهر</span>
             <strong>1.054,90 €</strong>
             <small>مجموع المصروفات التجريبية الظاهرة</small>
           </article>
 
-          <article class="stat">
+          <article class="stat dashboard-card" role="button" tabindex="0" data-goto="reports">
             <span>الفائض الشهري</span>
             <strong>2.145,10 €</strong>
             <small>الإيرادات مطروحاً منها المصروفات</small>
           </article>
 
-          <article class="stat">
+          <article class="stat dashboard-card" role="button" tabindex="0" data-goto="accounts">
             <span>إجمالي الأرصدة المعروضة</span>
             <strong>17.200,00 €</strong>
             <small>مجموع الحساب الجاري والمدخرات والنقد</small>
@@ -182,12 +184,16 @@
             <div class="panel-head">
               <div>
                 <h2>توزيع المصروفات</h2>
-                <p class="muted">نموذج توضيحي للشهر الحالي</p>
+                <p class="muted" id="chartPeriodLabel">نموذج توضيحي للشهر الحالي</p>
+              </div>
+              <div class="chart-controls">
+                <label>الفترة<select id="chartPeriod"><option value="month">هذا الشهر</option><option value="quarter">آخر 3 أشهر</option><option value="year">هذا العام</option></select></label>
+                <label>طريقة العرض<select id="chartType"><option value="donut">دائري</option><option value="bars">أعمدة</option></select></label>
               </div>
             </div>
 
             <div class="donut-wrap">
-              <div class="donut">
+              <div class="donut" id="expenseChart">
                 <div>
                   <b>1.054,90 €</b>
                   <small>الإجمالي</small>
@@ -424,6 +430,26 @@
         </article>
       </section>
 
+      <section class="view" id="settings">
+        <div class="page-heading"><div><p class="eyebrow">تفضيلات التطبيق</p><h1>الإعدادات</h1><p class="muted">تخصيص اللغة والعملة والمظهر</p></div></div>
+        <article class="panel settings-panel">
+          <h2>اللغة والمنطقة</h2>
+          <div class="form-grid">
+            <label>لغة الواجهة<select id="languageSetting">
+              <option value="ar">العربية</option><option value="de">Deutsch</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="it">Italiano</option><option value="nl">Nederlands</option><option value="tr">Türkçe</option><option value="pt">Português</option><option value="pl">Polski</option>
+            </select><small class="field-hint">يُحفظ اختيار اللغة؛ ترجمة جميع النصوص ستُستكمل لاحقاً.</small></label>
+            <label>العملة المعروضة<select id="currencySetting"><option value="€">EUR · يورو (€)</option><option value="$">USD · دولار ($)</option><option value="£">GBP · جنيه (£)</option><option value="CHF">CHF · فرنك سويسري</option><option value="د.إ">AED · درهم إماراتي</option></select><small class="field-hint">تغيير رمز العرض فقط، دون تحويل الأرصدة أو تطبيق أسعار صرف.</small></label>
+          </div>
+          <div class="divider-line"></div><h2>المظهر والألوان</h2>
+          <div class="theme-choices">
+            <button type="button" class="theme-choice" data-theme-choice="green"><i></i> أخضر Velovi</button>
+            <button type="button" class="theme-choice" data-theme-choice="blue"><i></i> أزرق</button>
+            <button type="button" class="theme-choice" data-theme-choice="violet"><i></i> بنفسجي</button>
+            <button type="button" class="theme-choice" data-theme-choice="dark"><i></i> داكن</button>
+          </div><p class="small muted" id="settingsStatus" aria-live="polite">تُحفظ التفضيلات على هذا الجهاز في النسخة التجريبية.</p>
+        </article>
+      </section>
+
       <!-- الاستيراد البنكي -->
       <section class="view" id="ing">
         <div class="page-heading">
@@ -541,7 +567,7 @@
     </form>
   </dialog>
 
-  <script src="./app.js?v=12"></script>
+  <script src="./app.js?v=14"></script>
   <script src="./install.js"></script>
 </body>
 </html>
