@@ -79,7 +79,15 @@ function applyTransactionView() {
   let net = 0, count = 0;
   rows.forEach(row => {
     const d = getRowData(row);
-    const matches = (!query || row.textContent.toLocaleLowerCase().includes(query)) &&
+    const amountText = d.amount.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const amountDigits = String(d.amount);
+    const normalizedQuery = query.replace(/\s/g, '').replace(',', '.');
+    const numericQuery = normalizedQuery && /^-?\d+(\.\d*)?$/.test(normalizedQuery);
+    const matchesSearch = !query ||
+      row.textContent.toLocaleLowerCase().includes(query) ||
+      (numericQuery && (amountDigits.includes(normalizedQuery.replace(/^-/, '')) ||
+        amountText.replace(/\./g, '').replace(',', '.').includes(normalizedQuery.replace(/^-/, ''))));
+    const matches = matchesSearch &&
       (selectedType === 'all' || d.type === selectedType) &&
       (!from || (d.date && d.date >= from)) &&
       (!to || (d.date && d.date <= to));
@@ -168,19 +176,21 @@ addListener(transactionForm, 'submit', event => {
 });
 
 const balanceInput = getElement('forecastBalance');
-const signToggle = getElement('toggleBalanceSign');
-signToggle?.addEventListener('click', () => {
-  if (!balanceInput) return;
-  const raw = balanceInput.value.trim().replace(/\s/g, '').replace(',', '.');
-  const value = Number(raw);
-  if (!raw || !Number.isFinite(value)) {
-    balanceInput.focus();
-    return;
-  }
-  balanceInput.value = value < 0 ? String(Math.abs(value)) : String(-Math.abs(value));
-  balanceInput.dispatchEvent(new Event('input', { bubbles: true }));
-  balanceInput.focus();
-});
+function bindSignToggle(inputId, buttonId) {
+  const input = getElement(inputId);
+  const button = getElement(buttonId);
+  button?.addEventListener('click', () => {
+    if (!input) return;
+    const raw = input.value.trim().replace(/\s/g, '').replace(',', '.');
+    const value = Number(raw);
+    if (!raw || !Number.isFinite(value)) { input.focus(); return; }
+    input.value = value < 0 ? String(Math.abs(value)) : String(-Math.abs(value));
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.focus();
+  });
+}
+bindSignToggle('forecastBalance', 'toggleBalanceSign');
+bindSignToggle('monthlySurplus', 'toggleSurplusSign');
 const forecastButton = getElement('calcForecast');
 addListener(forecastButton, 'click', () => {
   const result = getElement('forecastResult');
