@@ -397,7 +397,10 @@
             </label>
             <label>
               الفائض الشهري (€)
-              <input id="monthlySurplus" type="number" step="0.01" value="1000">
+              <div class="balance-input-row surplus-input-row">
+                <input id="monthlySurplus" type="text" inputmode="decimal" value="1000" autocomplete="off" dir="ltr" aria-label="الفائض الشهري">
+                <button class="balance-sign-button" id="toggleSurplusSign" type="button" aria-label="تغيير إشارة الفائض الشهري" title="تغيير إشارة الفائض الشهري">±</button>
+              </div>
             </label>
             <label>
               مدة التوقع (بالأشهر)
