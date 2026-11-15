@@ -426,13 +426,13 @@ dialog::backdrop{background:rgba(0,0,0,.52)!important}
 .legend .l2{background:var(--chart-2)!important}
 .legend .l3{background:var(--chart-3)!important}
 .legend .l4{background:var(--chart-4)!important}
-.donut.bars{
+:root[data-theme] .donut.bars{
   background:repeating-linear-gradient(
     to top,var(--chart-grid) 0 1px,transparent 1px 42px
   )!important;
 }
-.donut.bars .chart-bar{background:var(--chart-1)!important}
-.donut.bars .chart-bar:nth-of-type(1){background:var(--chart-1)!important}
-.donut.bars .chart-bar:nth-of-type(2){background:var(--chart-2)!important}
-.donut.bars .chart-bar:nth-of-type(3){background:var(--chart-3)!important}
-.donut.bars .chart-bar:nth-of-type(4){background:var(--chart-4)!important}
+:root[data-theme] .donut.bars .chart-bar{background:var(--chart-1)!important}
+:root[data-theme] .donut.bars .chart-bar:nth-of-type(1){background:var(--chart-1)!important}
+:root[data-theme] .donut.bars .chart-bar:nth-of-type(2){background:var(--chart-2)!important}
+:root[data-theme] .donut.bars .chart-bar:nth-of-type(3){background:var(--chart-3)!important}
+:root[data-theme] .donut.bars .chart-bar:nth-of-type(4){background:var(--chart-4)!important}
