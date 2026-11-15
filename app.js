@@ -11,6 +11,7 @@ function showView(id) {
   if (!target || !target.classList.contains('view')) return;
   views.forEach(view => view.classList.toggle('active', view.id === id));
   navItems.forEach(button => button.classList.toggle('active', button.dataset.view === id));
+  document.querySelectorAll('.mobile-more[open]').forEach(menu => { menu.open = false; });
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 navItems.forEach(button => addListener(button, 'click', () => showView(button.dataset.view)));
@@ -63,13 +64,17 @@ function formatPreferredCurrency(value) {
   try { return new Intl.NumberFormat(root.lang || navigator.language || 'de-DE', { style: 'currency', currency: localStorage.getItem('velovi-currency') || 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value); }
   catch { return value.toFixed(2) + ' ' + getCurrencySymbol(); }
 }
-function refreshReportCurrency() {
+function refreshCurrencyDisplay() {
   const symbol = getCurrencySymbol();
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  nodes.forEach(node => { if (node.nodeValue.includes('€')) node.nodeValue = node.nodeValue.replace(/€/g, symbol); });
   document.querySelectorAll('.forecastCurrencySymbol').forEach(label => { label.textContent = symbol; });
   const initial = getElement('forecastResult')?.querySelector('b');
   if (initial) initial.textContent = formatPreferredCurrency(140000);
 }
-refreshReportCurrency();
+refreshCurrencyDisplay();
 
 root.lang = savedLanguage; root.dir = savedLanguage === 'ar' ? 'rtl' : 'ltr'; root.dataset.theme = savedTheme;
 addListener(languageSetting, 'change', () => {
@@ -80,7 +85,7 @@ addListener(languageSetting, 'change', () => {
 addListener(currencySetting, 'change', () => {
   localStorage.setItem('velovi-currency', currencySetting.value);
   refreshReportCurrency();
-  getElement('settingsStatus').textContent = 'حُفظت العملة المفضلة، وتم تحديث رمز العملة في التقارير. لا يجري تحويل المبالغ الحالية تلقائياً.';
+  getElement('settingsStatus').textContent = 'حُفظت العملة المفضلة، وتم تحديث رمز العملة في جميع الأبواب. لا يجري تحويل المبالغ الحالية تلقائياً.';
 });
 document.querySelectorAll('[data-theme-choice]').forEach(button => {
   button.classList.toggle('active', button.dataset.themeChoice === savedTheme);
@@ -193,7 +198,7 @@ function applyTransactionView() {
   });
   rows.sort(compareRows).forEach(row => rowsContainer.appendChild(row));
   if (netElement) {
-    netElement.textContent = `${net.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+    netElement.textContent = `${net.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${getCurrencySymbol()}`;
     netElement.classList.toggle('positive', net > 0);
     netElement.classList.toggle('negative', net < 0);
     netElement.classList.toggle('neutral', net === 0);
@@ -258,7 +263,7 @@ addListener(transactionForm, 'submit', event => {
   dateCell.textContent = Number.isNaN(parsedDate.getTime()) ? date : parsedDate.toLocaleDateString('de-DE');
   const amountCell = document.createElement('td');
   amountCell.classList.toggle('positive', type === 'income');
-  amountCell.textContent = `${type === 'income' ? '+' : '−'}${amount.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
+  amountCell.textContent = `${type === 'income' ? '+' : '−'}${amount.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${getCurrencySymbol()}`;
   row.append(typeCell, categoryCell, descriptionCell, dateCell, amountCell);
   rowsContainer.appendChild(row);
   applyTransactionView();
