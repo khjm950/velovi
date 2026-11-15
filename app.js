@@ -46,7 +46,10 @@ function detectDefaultCurrency() {
     return currencyByRegion[region] || 'EUR';
   } catch { return 'EUR'; }
 }
-const legacyCurrencyCodes = {'€':'EUR','
+const legacyCurrencyCodes = {'€':'EUR','$':'USD','£':'GBP','CHF':'CHF','د.إ':'AED'};
+const storedCurrency = localStorage.getItem('velovi-currency');
+const savedCurrency = legacyCurrencyCodes[storedCurrency] || storedCurrency || detectDefaultCurrency();
+if (savedCurrency !== storedCurrency) localStorage.setItem('velovi-currency', savedCurrency);
 const savedTheme = localStorage.getItem('velovi-theme') || 'green';
 if (languageSetting) languageSetting.value = savedLanguage;
 if (currencySetting) currencySetting.value = savedCurrency;
@@ -296,23 +299,6 @@ addListener(getElement('addAccount'), 'click', () => alert('إضافة الحس�
 if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(error => console.error('تعذر تسجيل Service Worker:', error)));
 }
-:'USD','£':'GBP','د.إ':'AED'};
-const storedCurrency = localStorage.getItem('velovi-currency');
-const savedCurrency = legacyCurrencyCodes[storedCurrency] || storedCurrency || detectDefaultCurrency();
-if (savedCurrency !== storedCurrency) localStorage.setItem('velovi-currency', savedCurrency);
-const savedTheme = localStorage.getItem('velovi-theme') || 'green';
-if (languageSetting) languageSetting.value = savedLanguage;
-if (currencySetting) currencySetting.value = savedCurrency;
-root.lang = savedLanguage; root.dir = savedLanguage === 'ar' ? 'rtl' : 'ltr'; root.dataset.theme = savedTheme;
-addListener(languageSetting, 'change', () => {
-  root.lang = languageSetting.value; root.dir = languageSetting.value === 'ar' ? 'rtl' : 'ltr';
-  localStorage.setItem('velovi-language', languageSetting.value);
-  getElement('settingsStatus').textContent = 'حُفظ اختيار اللغة. بعض نصوص الواجهة لا تزال بالعربية في هذه النسخة.';
-});
-addListener(currencySetting, 'change', () => {
-  localStorage.setItem('velovi-currency', currencySetting.value);
-  getElement('settingsStatus').textContent = 'حُفظت العملة الافتراضية للحركات الجديدة. المبالغ الحالية لا تتحول تلقائياً؛ يلزم دعم العملات وأسعار الصرف للحسابات متعددة العملات.';
-});
 document.querySelectorAll('[data-theme-choice]').forEach(button => {
   button.classList.toggle('active', button.dataset.themeChoice === savedTheme);
   addListener(button, 'click', () => {
