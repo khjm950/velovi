@@ -65,8 +65,7 @@ function formatPreferredCurrency(value) {
 }
 function refreshReportCurrency() {
   const symbol = getCurrencySymbol();
-  const label = getElement('forecastCurrencySymbol');
-  if (label) label.textContent = symbol;
+  document.querySelectorAll('.forecastCurrencySymbol').forEach(label => { label.textContent = symbol; });
   const initial = getElement('forecastResult')?.querySelector('b');
   if (initial) initial.textContent = formatPreferredCurrency(140000);
 }
