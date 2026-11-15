@@ -53,17 +53,20 @@ function getRowData(row) {
   const type = typeText.includes('إيراد') ? 'income' : typeText.includes('مصروف') ? 'expense' : 'other';
   const date = normalizeDate(cells[3]?.textContent.trim() || '');
   const amount = parseAmount(cells[4]?.textContent || '');
+  const amountText = cells[4]?.textContent || '';
+  const signedAmount = /[−-]/.test(amountText) || type === 'expense' ? -amount : amount;
   row.dataset.type = type;
   row.dataset.category = cells[1]?.textContent.trim() || '';
   row.dataset.description = cells[2]?.textContent.trim() || '';
   row.dataset.date = date;
   row.dataset.amount = String(amount);
-  return { type, category: row.dataset.category, description: row.dataset.description, date, amount };
+  row.dataset.signedAmount = String(signedAmount);
+  return { type, category: row.dataset.category, description: row.dataset.description, date, amount, signedAmount };
 }
 function compareRows(a, b) {
   const x = getRowData(a), y = getRowData(b);
   let result = 0;
-  if (sortKey === 'amount') result = x.amount - y.amount;
+  if (sortKey === 'amount') result = x.signedAmount - y.signedAmount;
   else if (sortKey === 'date') result = x.date.localeCompare(y.date);
   else if (sortKey === 'type') result = x.type.localeCompare(y.type);
   else result = x[sortKey].localeCompare(y[sortKey], 'ar', { sensitivity: 'base' });
