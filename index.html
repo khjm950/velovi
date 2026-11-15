@@ -394,7 +394,7 @@
 
           <div class="form-grid forecast-grid">
             <label class="forecast-balance-field">
-              الرصيد الحالي (<span id="forecastCurrencySymbol" class="forecastCurrencySymbol">€</span>)
+              الرصيد الحالي — <bdi id="forecastCurrencySymbol" class="forecastCurrencySymbol" dir="ltr" style="white-space:nowrap;unicode-bidi:isolate">€</bdi>
               <div class="balance-input-row">
                 <input id="forecastBalance" type="text" inputmode="decimal" value="20000" aria-describedby="balanceHint" autocomplete="off" dir="ltr">
                 <button class="balance-sign-button" id="toggleBalanceSign" type="button" aria-label="تغيير إشارة الرصيد" title="تغيير إشارة الرصيد">±</button>
@@ -402,7 +402,7 @@
               <small id="balanceHint" class="field-hint">اضغط ± داخل الحقل للتبديل بين الرصيد الموجب والسالب.</small>
             </label>
             <label>
-              الفائض الشهري (<span class="forecastCurrencySymbol">€</span>)
+              الفائض الشهري — <bdi class="forecastCurrencySymbol" dir="ltr" style="white-space:nowrap;unicode-bidi:isolate">€</bdi>
               <div class="balance-input-row surplus-input-row">
                 <input id="monthlySurplus" type="text" inputmode="decimal" value="1000" autocomplete="off" dir="ltr" aria-label="الفائض الشهري">
                 <button class="balance-sign-button" id="toggleSurplusSign" type="button" aria-label="تغيير إشارة الفائض الشهري" title="تغيير إشارة الفائض الشهري">±</button>
@@ -569,7 +569,7 @@
     </form>
   </dialog>
 
-  <script src="./app.js?v=20"></script>
+  <script src="./app.js?v=21"></script>
   <script src="./install.js"></script>
 </body>
 </html>
