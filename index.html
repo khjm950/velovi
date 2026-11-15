@@ -9,7 +9,7 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
   <link rel="apple-touch-icon" href="./icon-192.png">
-  <link rel="stylesheet" href="./styles.css?v=14">
+  <link rel="stylesheet" href="./styles.css?v=15">
 
   <title>Velovi | إدارة مالية الأسرة</title>
 </head>
@@ -106,13 +106,13 @@
         </div>
 
         <div class="stats">
-          <article class="stat dashboard-card" role="button" tabindex="0" data-goto="transactions">
+          <article class="stat dashboard-card" role="button" tabindex="0" data-goto="transactions" data-transaction-filter="income">
             <span>إجمالي الإيرادات · هذا الشهر</span>
             <strong>3.200,00 €</strong>
             <small>مجموع الحركات التجريبية الظاهرة</small>
           </article>
 
-          <article class="stat dashboard-card" role="button" tabindex="0" data-goto="transactions">
+          <article class="stat dashboard-card" role="button" tabindex="0" data-goto="transactions" data-transaction-filter="expense">
             <span>إجمالي المصروفات · هذا الشهر</span>
             <strong>1.054,90 €</strong>
             <small>مجموع المصروفات التجريبية الظاهرة</small>
@@ -567,7 +567,7 @@
     </form>
   </dialog>
 
-  <script src="./app.js?v=14"></script>
+  <script src="./app.js?v=15"></script>
   <script src="./install.js"></script>
 </body>
 </html>
