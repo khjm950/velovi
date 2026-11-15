@@ -248,3 +248,8 @@ dialog form{gap:17px}
   .balance-input-row{grid-template-columns:minmax(0,1fr) 44px}
   .balance-input-row .sign-toggle{width:44px;min-width:44px;height:44px}
 }
+
+/* The balance field itself is the sign control; no extra button. */
+.balance-input-row{display:block;position:relative}
+.balance-input-row #forecastBalance{width:100%;min-width:0;touch-action:pan-y}
+#balanceHint{display:block;margin-top:7px}
