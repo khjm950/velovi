@@ -58,7 +58,7 @@ addListener(languageSetting, 'change', () => {
 });
 addListener(currencySetting, 'change', () => {
   localStorage.setItem('velovi-currency', currencySetting.value);
-  getElement('settingsStatus').textContent = 'حُفظت العملة الافتراضية للحركات الجديدة. المبالغ الحالية لا تتحول تلقائياً؛ يلزم دعم العملات وأسعار الصرف للحسابات متعددة العملات.';
+  getElement('settingsStatus').textContent = 'حُفظت العملة المفضلة. المبالغ الحالية لا تتحول تلقائياً؛ دعم العملات المتعددة وأسعار الصرف سيُضاف ضمن تطوير الحسابات المالية.';
 });
 document.querySelectorAll('[data-theme-choice]').forEach(button => {
   button.classList.toggle('active', button.dataset.themeChoice === savedTheme);
