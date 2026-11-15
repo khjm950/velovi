@@ -15,7 +15,49 @@ function showView(id) {
 }
 navItems.forEach(button => addListener(button, 'click', () => showView(button.dataset.view)));
 document.querySelectorAll('.mobile-more-menu .nav-item').forEach(button => addListener(button, 'click', () => { const menu = button.closest('details'); if (menu) menu.open = false; }));
-document.querySelectorAll('[data-goto]').forEach(button => addListener(button, 'click', () => showView(button.dataset.goto)));
+document.querySelectorAll('[data-goto]').forEach(button => {
+  addListener(button, 'click', () => showView(button.dataset.goto));
+  addListener(button, 'keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); showView(button.dataset.goto); } });
+});
+
+// Local display preferences only; no financial records are stored.
+const root = document.documentElement;
+const languageSetting = getElement('languageSetting'), currencySetting = getElement('currencySetting');
+const savedLanguage = localStorage.getItem('velovi-language') || 'ar';
+const savedCurrency = localStorage.getItem('velovi-currency') || '€';
+const savedTheme = localStorage.getItem('velovi-theme') || 'green';
+if (languageSetting) languageSetting.value = savedLanguage;
+if (currencySetting) currencySetting.value = savedCurrency;
+root.lang = savedLanguage; root.dir = savedLanguage === 'ar' ? 'rtl' : 'ltr'; root.dataset.theme = savedTheme;
+function updateCurrencySymbol(symbol) {
+  document.querySelectorAll('body *').forEach(node => { if (!node.children.length && node.textContent.includes('€')) node.textContent = node.textContent.replace(/€/g, symbol); });
+}
+updateCurrencySymbol(savedCurrency);
+addListener(languageSetting, 'change', () => {
+  root.lang = languageSetting.value; root.dir = languageSetting.value === 'ar' ? 'rtl' : 'ltr';
+  localStorage.setItem('velovi-language', languageSetting.value);
+  getElement('settingsStatus').textContent = 'حُفظ اختيار اللغة. بعض نصوص الواجهة لا تزال بالعربية في هذه النسخة.';
+});
+addListener(currencySetting, 'change', () => {
+  updateCurrencySymbol(currencySetting.value); localStorage.setItem('velovi-currency', currencySetting.value);
+  getElement('settingsStatus').textContent = 'حُفظ رمز العملة للعرض فقط؛ لم يتم تحويل القيم أو تغيير العملة المحاسبية.';
+});
+document.querySelectorAll('[data-theme-choice]').forEach(button => {
+  button.classList.toggle('active', button.dataset.themeChoice === savedTheme);
+  addListener(button, 'click', () => {
+    root.dataset.theme = button.dataset.themeChoice; localStorage.setItem('velovi-theme', button.dataset.themeChoice);
+    document.querySelectorAll('[data-theme-choice]').forEach(item => item.classList.toggle('active', item === button));
+  });
+});
+const chartType = getElement('chartType'), chartPeriod = getElement('chartPeriod');
+function renderDemoChart() {
+  const chart = getElement('expenseChart'); if (!chart) return;
+  const isBars = chartType?.value === 'bars'; chart.classList.toggle('bars', isBars);
+  if (isBars && !chart.querySelector('.chart-bar')) chart.insertAdjacentHTML('beforeend','<span class="chart-bar" style="height:80%"></span><span class="chart-bar" style="height:12%"></span><span class="chart-bar" style="height:7%"></span><span class="chart-bar" style="height:1%"></span>');
+  const labels={month:'نموذج توضيحي للشهر الحالي',quarter:'عرض تجريبي لآخر 3 أشهر',year:'عرض تجريبي لهذا العام'};
+  const label=getElement('chartPeriodLabel'); if(label) label.textContent=labels[chartPeriod?.value||'month'];
+}
+addListener(chartType,'change',renderDemoChart); addListener(chartPeriod,'change',renderDemoChart); renderDemoChart();
 
 const txDialog = getElement('transactionDialog');
 const permissionDialog = getElement('permissionDialog');
@@ -44,7 +86,7 @@ function parseAmount(value) {
   if (cleaned.includes(',')) cleaned = cleaned.replace(/\./g, '').replace(',', '.');
   else if ((cleaned.match(/\./g) || []).length > 1) cleaned = cleaned.replace(/\./g, '');
   const amount = Number(cleaned);
-  return Number.isFinite(amount) ? Math.abs(amount) : 0;
+  return Number.isFinite(amount) ? amount : 0;
 }
 function getRowData(row) {
   const cells = row.querySelectorAll('td');
@@ -52,16 +94,17 @@ function getRowData(row) {
   const typeText = badge?.textContent.trim() || cells[0]?.textContent.trim() || '';
   const type = typeText.includes('إيراد') ? 'income' : typeText.includes('مصروف') ? 'expense' : 'other';
   const date = normalizeDate(cells[3]?.textContent.trim() || '');
-  const amount = parseAmount(cells[4]?.textContent || '');
   const amountText = cells[4]?.textContent || '';
-  const signedAmount = /[−-]/.test(amountText) || type === 'expense' ? -amount : amount;
+  const amount = parseAmount(amountText);
+  const hasNegativeSign = /[−-]/.test(amountText);
+  const signedAmount = hasNegativeSign ? -Math.abs(amount) : (type === 'expense' ? -Math.abs(amount) : Math.abs(amount));
   row.dataset.type = type;
   row.dataset.category = cells[1]?.textContent.trim() || '';
   row.dataset.description = cells[2]?.textContent.trim() || '';
   row.dataset.date = date;
-  row.dataset.amount = String(amount);
+  row.dataset.amount = String(Math.abs(amount));
   row.dataset.signedAmount = String(signedAmount);
-  return { type, category: row.dataset.category, description: row.dataset.description, date, amount, signedAmount };
+  return { type, category: row.dataset.category, description: row.dataset.description, date, amount: Math.abs(amount), signedAmount };
 }
 function compareRows(a, b) {
   const x = getRowData(a), y = getRowData(b);
