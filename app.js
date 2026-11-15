@@ -30,33 +30,35 @@ document.querySelectorAll('[data-goto]').forEach(button => {
   addListener(button, 'keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); navigate(); } });
 });
 
-// Local display preferences only; no financial records are stored.
+// Local display preferences only; currency is stored as ISO 4217, never as a symbol.
 const root = document.documentElement;
 const languageSetting = getElement('languageSetting'), currencySetting = getElement('currencySetting');
 const savedLanguage = localStorage.getItem('velovi-language') || 'ar';
-const savedCurrency = localStorage.getItem('velovi-currency') || '€';
+const currencyByRegion = {
+  DE:'EUR', AT:'EUR', BE:'EUR', CY:'EUR', EE:'EUR', ES:'EUR', FI:'EUR', FR:'EUR', GR:'EUR', HR:'EUR', IE:'EUR', IT:'EUR', LT:'EUR', LU:'EUR', LV:'EUR', MT:'EUR', NL:'EUR', PT:'EUR', SI:'EUR', SK:'EUR',
+  US:'USD', GB:'GBP', CH:'CHF', SA:'SAR', AE:'AED', CA:'CAD', AU:'AUD', NZ:'NZD', JP:'JPY', CN:'CNY', IN:'INR', TR:'TRY', BR:'BRL', MX:'MXN', ZA:'ZAR',
+  SE:'SEK', NO:'NOK', DK:'DKK', PL:'PLN', CZ:'CZK', HU:'HUF', RO:'RON', BG:'BGN', IS:'ISK', SG:'SGD', HK:'HKD', KR:'KRW', TH:'THB', MY:'MYR', ID:'IDR', PH:'PHP', PK:'PKR', EG:'EGP', QA:'QAR', KW:'KWD', BH:'BHD', OM:'OMR', JO:'JOD', IL:'ILS', MA:'MAD', NG:'NGN', KE:'KES'
+};
+function detectDefaultCurrency() {
+  try {
+    const locale = new Intl.Locale(navigator.language || 'en');
+    const region = locale.region || (String(navigator.language || '').match(/-([A-Z]{2})(?:-|$)/i) || [])[1];
+    return currencyByRegion[region] || 'EUR';
+  } catch { return 'EUR'; }
+}
+const savedCurrency = localStorage.getItem('velovi-currency') || detectDefaultCurrency();
 const savedTheme = localStorage.getItem('velovi-theme') || 'green';
 if (languageSetting) languageSetting.value = savedLanguage;
 if (currencySetting) currencySetting.value = savedCurrency;
 root.lang = savedLanguage; root.dir = savedLanguage === 'ar' ? 'rtl' : 'ltr'; root.dataset.theme = savedTheme;
-let currentCurrencySymbol = '€';
-function updateCurrencySymbol(symbol) {
-  document.querySelectorAll('body *').forEach(node => {
-    if (!node.children.length && node.textContent.includes(currentCurrencySymbol)) {
-      node.textContent = node.textContent.split(currentCurrencySymbol).join(symbol);
-    }
-  });
-  currentCurrencySymbol = symbol;
-}
-updateCurrencySymbol(savedCurrency);
 addListener(languageSetting, 'change', () => {
   root.lang = languageSetting.value; root.dir = languageSetting.value === 'ar' ? 'rtl' : 'ltr';
   localStorage.setItem('velovi-language', languageSetting.value);
   getElement('settingsStatus').textContent = 'حُفظ اختيار اللغة. بعض نصوص الواجهة لا تزال بالعربية في هذه النسخة.';
 });
 addListener(currencySetting, 'change', () => {
-  updateCurrencySymbol(currencySetting.value); localStorage.setItem('velovi-currency', currencySetting.value);
-  getElement('settingsStatus').textContent = 'حُفظ رمز العملة للعرض فقط؛ لم يتم تحويل القيم أو تغيير العملة المحاسبية.';
+  localStorage.setItem('velovi-currency', currencySetting.value);
+  getElement('settingsStatus').textContent = 'حُفظت العملة الافتراضية للحركات الجديدة. المبالغ الحالية لا تتحول تلقائياً؛ يلزم دعم العملات وأسعار الصرف للحسابات متعددة العملات.';
 });
 document.querySelectorAll('[data-theme-choice]').forEach(button => {
   button.classList.toggle('active', button.dataset.themeChoice === savedTheme);
