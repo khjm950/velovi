@@ -68,7 +68,7 @@ function formatCurrencyOptionLabels() {
     const code = option.value;
     const separator = option.textContent.indexOf(' · ');
     if (!code || separator < 0) return;
-    const name = option.textContent.slice(separator + 3).replace(/\\s*\\([^)]*\\)\\s*$/, '').trim();
+    const name = option.textContent.slice(separator + 3).replace(/\s*\([^)]*\)\s*$/, '').trim();
     let symbol = code;
     try {
       symbol = new Intl.NumberFormat('en', { style: 'currency', currency: code, currencyDisplay: 'narrowSymbol' })
@@ -91,7 +91,8 @@ function refreshCurrencyDisplay() {
   const nodes = [];
   while (walker.nextNode()) nodes.push(walker.currentNode);
   nodes.forEach(node => {
-    if (node.parentElement?.closest('#txNet')) return;
+    // Currency selector labels are fixed per ISO code and must never inherit the selected display currency.
+    if (node.parentElement?.closest('#txNet, #currencySetting')) return;
     if (!originalCurrencyText.has(node)) originalCurrencyText.set(node, node.nodeValue);
     const original = originalCurrencyText.get(node);
     if (original.includes('€')) node.nodeValue = original.replace(/€/g, symbol);
