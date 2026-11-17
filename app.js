@@ -86,24 +86,12 @@ function formatPreferredCurrency(value) {
   try { return new Intl.NumberFormat(root.lang || navigator.language || 'de-DE', { style: 'currency', currency: localStorage.getItem('velovi-currency') || 'EUR', currencyDisplay: 'narrowSymbol', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value); }
   catch { return value.toFixed(2) + ' ' + getCurrencySymbol(); }
 }
-const originalCurrencyText = new WeakMap();
 function refreshCurrencyDisplay() {
   const symbol = getCurrencySymbol();
-  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-  const nodes = [];
-  while (walker.nextNode()) nodes.push(walker.currentNode);
-  nodes.forEach(node => {
-    // Currency selector labels are fixed per ISO code and must never inherit the selected display currency.
-    if (node.parentElement?.closest('#txNet, #currencySetting')) return;
-    if (!originalCurrencyText.has(node)) originalCurrencyText.set(node, node.nodeValue);
-    const original = originalCurrencyText.get(node);
-    if (original.includes('€')) node.nodeValue = original.replace(/€/g, symbol);
-  });
   document.querySelectorAll('.forecastCurrencySymbol').forEach(label => { label.textContent = symbol; });
   const initial = getElement('forecastResult')?.querySelector('b');
   if (initial) initial.textContent = formatPreferredCurrency(140000);
 }
-refreshCurrencyDisplay();
 
 root.lang = savedLanguage; root.dir = savedLanguage === 'ar' ? 'rtl' : 'ltr'; root.dataset.theme = savedTheme;
 refreshCurrencyDisplay();
