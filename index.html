@@ -26,9 +26,36 @@
 
     <div class="top-actions">
       <span class="sync"><i></i> وضع تجريبي · غير متصل بالخادم</span>
-      <button class="avatar" title="الملف الشخصي">م</button>
+      <button class="avatar" id="signOutButton" type="button" title="تسجيل الخروج" aria-label="تسجيل الخروج" hidden>خروج</button>
     </div>
   </header>
+
+  <section class="auth-gate" id="authGate" aria-live="polite">
+    <div class="auth-card">
+      <div class="auth-brand"><span class="brand-mark">V</span><div><strong>Velovi</strong><small>إدارة مالية الأسرة</small></div></div>
+      <div id="loginPanel" class="auth-panel" hidden>
+        <h1>تسجيل الدخول</h1>
+        <p class="muted">سجّل الدخول باستخدام حسابك المسجل في Velovi.</p>
+        <form id="loginForm" class="auth-form">
+          <label>البريد الإلكتروني<input id="loginEmail" type="email" autocomplete="username" required></label>
+          <label>كلمة المرور<input id="loginPassword" type="password" autocomplete="current-password" required></label>
+          <button class="primary full" id="loginSubmit" type="submit">تسجيل الدخول</button>
+        </form>
+      </div>
+      <div id="createHouseholdPanel" class="auth-panel" hidden>
+        <h1>إنشاء أسرتك</h1>
+        <p class="muted">لا توجد أسرة مرتبطة بهذا الحساب. أنشئ أسرتك للبدء.</p>
+        <form id="createHouseholdForm" class="auth-form">
+          <label>اسم الأسرة<input id="householdName" type="text" maxlength="100" required placeholder="مثلاً: أسرة خالد"></label>
+          <label>اسمك المعروض<input id="displayName" type="text" maxlength="80" required placeholder="الاسم الذي سيظهر للأعضاء"></label>
+          <button class="primary full" id="createHouseholdSubmit" type="submit">إنشاء الأسرة</button>
+        </form>
+        <button class="text-btn" id="backToLogin" type="button">العودة لتسجيل الدخول</button>
+      </div>
+      <p id="authMessage" class="auth-message" role="status"></p>
+      <p class="small muted auth-security">الاتصال يستخدم مفتاح Supabase العام فقط، وتبقى حماية البيانات مسؤولية سياسات RLS.</p>
+    </div>
+  </section>
 
   <div class="shell">
     <aside class="sidebar">
@@ -75,6 +102,7 @@
     </aside>
 
     <main class="main">
+      <div id="appMessage" class="app-message" role="status" hidden></div>
 
       <!-- الصفحة الرئيسية -->
       <section class="view active" id="home">
@@ -481,38 +509,40 @@
     </form>
   </dialog>
 
-  <!-- نافذة الصلاحيات -->
+  <!-- نافذة الصلاحيات الحقيقية -->
   <dialog id="permissionDialog">
-    <form method="dialog">
+    <form method="dialog" id="permissionForm">
       <div class="dialog-head">
         <h2>تعديل صلاحيات العضو</h2>
-        <button class="close" value="cancel">×</button>
+        <button class="close" type="button" onclick="document.getElementById('permissionDialog').close()" aria-label="إغلاق">×</button>
       </div>
-
-      <label class="check">
-        <input type="checkbox" checked>
-        السماح بإضافة الحركات
-      </label>
-
-      <label class="check">
-        <input type="checkbox" checked>
-        السماح بتعديل الحركات
-      </label>
-
-      <label class="check">
-        <input type="checkbox">
-        السماح بحذف الحركات
-      </label>
-
-      <p class="small muted">
-        هذه عناصر واجهة تجريبية؛ لا تغيّر صلاحيات حساب حقيقي بعد.
-      </p>
-
-      <button class="primary full" value="cancel">إغلاق</button>
+      <label class="check"><input id="permissionAdd" type="checkbox"> السماح بإضافة الحركات</label>
+      <label class="check"><input id="permissionEdit" type="checkbox"> السماح بتعديل الحركات</label>
+      <label class="check"><input id="permissionDelete" type="checkbox"> السماح بحذف الحركات</label>
+      <button class="primary full" type="submit">حفظ الصلاحيات</button>
     </form>
   </dialog>
 
+  <!-- نافذة إضافة عضو أو إعادة تفعيله -->
+  <dialog id="addMemberDialog">
+    <form method="dialog" id="addMemberForm">
+      <div class="dialog-head">
+        <h2>إضافة عضو إلى الأسرة</h2>
+        <button class="close" type="button" onclick="document.getElementById('addMemberDialog').close()" aria-label="إغلاق">×</button>
+      </div>
+      <p class="muted small">أدخل UID لحساب موجود مسبقاً في Supabase Authentication → Users.</p>
+      <label>معرّف المستخدم UID<input id="memberUserId" type="text" required autocomplete="off" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></label>
+      <label>الاسم المعروض<input id="memberDisplayName" type="text" maxlength="80" required></label>
+      <button class="primary full" type="submit">إضافة العضو</button>
+    </form>
+  </dialog>
+
+
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./supabase-config.js"></script>
   <script src="./app.js"></script>
+  <script src="./auth.js"></script>
   <script src="./install.js"></script>
 </body>
 </html>
