@@ -36,7 +36,7 @@ Deno.serve(async (req: Request) => {
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(householdId)) {
       return json({ error: "Invalid household" }, 400);
     }
-    if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return json({ error: "Invalid email address" }, 400);
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Invalid email address" }, 400);
     if (!displayName) return json({ error: "Display name is required" }, 400);
     let redirect: URL;
     try { redirect = new URL(redirectTo); } catch { return json({ error: "Invalid redirect URL" }, 400); }
