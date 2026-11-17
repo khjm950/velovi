@@ -667,7 +667,8 @@
     const categories=[...new Set(currentTransactions.filter(tx=>tx.transaction_type==='income'||tx.transaction_type==='expense').map(tx=>tx.category||'غير مصنف'))].sort((a,b)=>a.localeCompare(b,'ar'));
     wrap.replaceChildren();
     if(!categories.length){wrap.appendChild(emptyState('لا توجد تصنيفات في سجل الحركات بعد.'));return;}
-    const excluded=new Set(JSON.parse(localStorage.getItem('velovi-forecast-excluded')||'[]'));
+    let savedExcluded=[];try{savedExcluded=JSON.parse(localStorage.getItem('velovi-forecast-excluded')||'[]');}catch{}
+    const excluded=new Set(Array.isArray(savedExcluded)?savedExcluded:[]);
     categories.forEach(category=>{
       const label=document.createElement('label');label.className='forecast-exclusion-item';
       const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=!excluded.has(category);checkbox.dataset.category=category;
