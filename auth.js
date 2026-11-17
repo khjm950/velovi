@@ -864,7 +864,7 @@
   async function createMemberInvite() {
     const email=$('inviteEmail')?.value.trim().toLowerCase()||'';
     const displayName=$('inviteDisplayName')?.value.trim()||email.split('@')[0];
-    if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))return setMessage('أدخل بريداً إلكترونياً صحيحاً للدعوة.',true);
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return setMessage('أدخل بريداً إلكترونياً صحيحاً للدعوة.',true);
     const dialog=$('addMemberDialog');
     if(dialog?.dataset.inviteEmail===email&&dialog.dataset.inviteLink)return {email,displayName,action_link:dialog.dataset.inviteLink};
     const button=$('sendInviteEmail')||$('copyInviteLink'); if(button)button.disabled=true;
