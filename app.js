@@ -1,6 +1,6 @@
 'use strict';
 
-/* Velovi: واجهة تجريبية فقط، دون حفظ أو مزامنة. */
+/* Velovi UI interactions. Authentication and household data are handled in auth.js. */
 const getElement = id => document.getElementById(id);
 const addListener = (element, event, callback) => element?.addEventListener(event, callback);
 
@@ -183,7 +183,6 @@ addListener(fileInput, 'change', event => {
   const file = event.target.files?.[0];
   if (fileName) fileName.textContent = file ? `${file.name} — اختيار فقط، لم تتم قراءة الملف أو رفعه` : 'لم يتم اختيار ملف';
 });
-addListener(getElement('inviteMember'), 'click', () => alert('دعوات الأعضاء ستُفعّل بعد بناء نظام الحسابات وقاعدة البيانات.'));
 addListener(getElement('addAccount'), 'click', () => alert('إضافة الحسابات ستُفعّل بعد ربط قاعدة البيانات.'));
 
 if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
