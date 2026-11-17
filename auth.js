@@ -104,6 +104,10 @@
     const familySub = document.querySelector('.family-card small');
     if (familyName) familyName.textContent = householdName;
     if (familySub) familySub.textContent = 'المساحة العائلية';
+    const securityTitle = document.querySelector('.security b');
+    const securityText = document.querySelector('.security small');
+    if (securityTitle) securityTitle.textContent = 'اتصال الأسرة';
+    if (securityText) securityText.textContent = 'البيانات محمية بسياسات RLS';
   }
 
   function renderMembers(members, membership) {
@@ -287,7 +291,13 @@
     const button = $('loginSubmit');
     button.disabled = true;
     setMessage('جارٍ تسجيل الدخول...', false);
-    const result = await client.auth.signInWithPassword({ email, password });
+    let result;
+    try {
+      result = await client.auth.signInWithPassword({ email, password });
+    } catch (error) {
+      button.disabled = false;
+      return setMessage('تعذر الاتصال بخدمة تسجيل الدخول. تحقق من الإنترنت وحاول مجدداً.', true);
+    }
     button.disabled = false;
     if (result.error) return setMessage('تعذر تسجيل الدخول. تحقق من البريد وكلمة المرور وتأكيد البريد الإلكتروني.', true);
     await handleSession(result.data.session);
@@ -301,10 +311,16 @@
     const button = $('createHouseholdSubmit');
     button.disabled = true;
     setMessage('جارٍ إنشاء الأسرة...', false);
-    const result = await client.rpc('create_household', {
-      p_name: name,
-      p_display_name: displayName
-    });
+    let result;
+    try {
+      result = await client.rpc('create_household', {
+        p_name: name,
+        p_display_name: displayName
+      });
+    } catch (error) {
+      button.disabled = false;
+      return setMessage('تعذر الاتصال بقاعدة البيانات. حاول مجدداً.', true);
+    }
     button.disabled = false;
     if (result.error) return setMessage('تعذر إنشاء الأسرة: ' + result.error.message, true);
     currentMembership = null;
