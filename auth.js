@@ -655,7 +655,9 @@
     window.VELOVI_IMPORT?.clear?.();
     window.VELOVI_IMPORT?.setStatus?.('تم حفظ '+rows.length+' حركة في الحساب المحدد.');
     await loadFinancialData();
-    setMessage('تم استيراد '+rows.length+' حركة بنجاح.',false);
+    updateDashboard();
+    renderAccounts();
+    setMessage('تم استيراد '+rows.length+' حركة بنجاح وتحديث البطاقات والأرصدة.',false);
   }
   function renderForecastControls() {
     const select=$('forecastCurrency'),wrap=$('forecastExclusions');
