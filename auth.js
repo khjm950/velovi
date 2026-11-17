@@ -15,6 +15,17 @@
   let currentMembers = [];
   let currentAccounts = [];
   let currentTransactions = [];
+  let workspaceLoadPromise = null;
+
+  function withRequestTimeout(promise, operation, timeoutMs = 20000) {
+    let timer;
+    return Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timer = window.setTimeout(() => reject(new Error('انتهت مهلة الاتصال أثناء ' + operation + '. تحقق من الإنترنت وحاول إعادة التحميل.')), timeoutMs);
+      })
+    ]).finally(() => window.clearTimeout(timer));
+  }
 
   function setMessage(text, isError) {
     const inApp = !!(shell && shell.classList.contains('is-authenticated'));
@@ -746,11 +757,11 @@
 
   async function loadWorkspace() {
     setMessage('جارٍ تحميل بيانات الأسرة...', false);
-    const own = await client
+    const own = await withRequestTimeout(client
       .from('household_members')
       .select('id, household_id, user_id, display_name, role, is_active, can_add_transactions, can_edit_transactions, can_delete_transactions, can_view_other_accounts')
       .eq('user_id', currentUser.id)
-      .order('is_active', { ascending: false });
+      .order('is_active', { ascending: false }), 'قراءة عضوية الأسرة');
 
     if (own.error) throw own.error;
     const activeMemberships = (own.data || []).filter(row => row.is_active);
@@ -765,18 +776,18 @@
     }
 
     currentMembership = activeMemberships[0];
-    const householdResult = await client
+    const householdResult = await withRequestTimeout(client
       .from('households')
       .select('id, name')
       .eq('id', currentMembership.household_id)
-      .maybeSingle();
+      .maybeSingle(), 'قراءة بيانات الأسرة');
     if (householdResult.error) throw householdResult.error;
     if (!householdResult.data) throw new Error('تعذر العثور على الأسرة المرتبطة بهذا الحساب.');
 
     currentHousehold = householdResult.data;
-    await refreshMembers();
+    await withRequestTimeout(refreshMembers(), 'تحميل أعضاء الأسرة');
     clearDemoData();
-    await loadFinancialData();
+    await withRequestTimeout(loadFinancialData(), 'تحميل الحسابات والحركات');
     setHeader(currentHousehold.name, currentMembership.display_name);
     showApp();
     setMessage('', false);
@@ -799,18 +810,24 @@
       showGate('login');
       return;
     }
+    if (workspaceLoadPromise) return workspaceLoadPromise;
     currentUser = session.user;
     const signOut = $('signOutButton');
     if (signOut) signOut.hidden = false;
     const sync = document.querySelector('.sync');
     if (sync) sync.textContent = 'متصل · إعداد الأسرة';
-    try {
-      await loadWorkspace();
-    } catch (error) {
-      console.error('Velovi workspace error:', error);
-      showGate('login');
-      setMessage('تعذر تحميل بيانات الأسرة: ' + (error.message || 'خطأ غير معروف'), true);
-    }
+    workspaceLoadPromise = (async () => {
+      try {
+        await loadWorkspace();
+      } catch (error) {
+        console.error('Velovi workspace error:', error);
+        showGate('login');
+        setMessage('تعذر تحميل بيانات الأسرة: ' + (error.message || 'خطأ غير معروف'), true);
+      } finally {
+        workspaceLoadPromise = null;
+      }
+    })();
+    return workspaceLoadPromise;
   }
 
   async function signIn(event) {
