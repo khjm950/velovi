@@ -69,7 +69,8 @@ Important limitations
   history remains private.
 - Smart forecasting is a statistical heuristic based on available history,
   not an AI financial adviser. Sparse history lowers its confidence.
-- The chart still needs to be connected to actual transaction aggregates.
+- The expense chart now uses actual transaction aggregates, selected time
+  period, and the independent chart palette.
 - Full translation of every UI string is not complete; the language preference
   currently stores the selected language and sets document direction.
 - QR/barcode scanning reads a code and places it into the transaction
@@ -87,8 +88,11 @@ Database migrations / SQL references
 - `SUPABASE_RESET_MEMBER_PERMISSIONS_ON_REACTIVATION.sql`: live trigger
   function reset for all four permission defaults.
 - `SUPABASE_HARDEN_RLS_HELPERS.sql`: private-schema RLS helpers and policy
-  rewrites. These changes were applied to the live project and tested with
-  simulated admin/member JWT contexts.
+  rewrites.
+- `SUPABASE_MOVE_HOUSEHOLD_RPCS_TO_PRIVATE.sql`: moves privileged household
+  operations into the non-exposed schema and leaves SECURITY INVOKER public
+  RPC wrappers. All these changes were applied to the live project and tested
+  with simulated admin/member JWT contexts.
 
 Privacy model
 -------------
