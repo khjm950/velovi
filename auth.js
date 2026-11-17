@@ -337,7 +337,7 @@
         const edit = document.createElement('button'); edit.type='button'; edit.className='secondary'; edit.textContent='تعديل';
         edit.addEventListener('click',()=>openAccountDialog(account)); actions.appendChild(edit);
         const archive = document.createElement('button'); archive.type='button'; archive.className='text-btn danger-text';
-        archive.textContent='إيقاف الحساب';
+        archive.textContent='حذف الحساب';
         archive.addEventListener('click',()=>archiveAccount(account)); actions.appendChild(archive);
       } else {
         const readOnly = document.createElement('span'); readOnly.className='pill'; readOnly.textContent='قراءة فقط'; actions.appendChild(readOnly);
@@ -400,14 +400,15 @@
   }
   function updateDashboard() {
     const now=new Date(), month=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-    const current=currentTransactions.filter(tx=>String(tx.transaction_date).startsWith(month));
+    const monthRows=currentTransactions.filter(tx=>String(tx.transaction_date).startsWith(month));
     const sums=(type,rows)=>rows.filter(tx=>tx.transaction_type===type).reduce((map,tx)=>{
       map.set(tx.currency,(map.get(tx.currency)||0)+Number(tx.amount)); return map;
     },new Map());
     const showTotals=map=>map.size?[...map].map(([currency,value])=>formatMoney(value,currency)).join(' · '):'—';
-    const income=sums('income',current), expense=sums('expense',current);
+    const income=sums('income',currentTransactions), expense=sums('expense',currentTransactions);
+    const monthIncome=sums('income',monthRows), monthExpense=sums('expense',monthRows);
     const surplus=new Map();
-    for(const currency of new Set([...income.keys(),...expense.keys()])) surplus.set(currency,(income.get(currency)||0)-(expense.get(currency)||0));
+    for(const currency of new Set([...monthIncome.keys(),...monthExpense.keys()])) surplus.set(currency,(monthIncome.get(currency)||0)-(monthExpense.get(currency)||0));
     const balances=new Map();
     currentAccounts.filter(account=>account.is_active&&(currentMembership.role==='admin'||account.owner_member_id===currentMembership.id)).forEach(account=>{
       const txs=currentTransactions.filter(tx=>tx.account_id===account.id);
@@ -561,12 +562,12 @@
     setMessage(accountId?'تم تحديث الحساب.':'تم إنشاء الحساب وحفظه في الأسرة.',false);
   }
   async function archiveAccount(account) {
-    if(!window.confirm('سيتم إيقاف الحساب مع الاحتفاظ بسجله وحركاته. هل تريد المتابعة؟'))return;
+    if(!window.confirm('سيُحذف الحساب من قائمة الحسابات النشطة مع الاحتفاظ بسجل الحركات والتدقيق. هل تريد المتابعة؟'))return;
     const result=await client.from('financial_accounts').update({is_active:false}).eq('id',account.id).select('id').maybeSingle();
-    if(result.error)return setMessage('تعذر إيقاف الحساب: '+result.error.message,true);
-    if(!result.data)return setMessage('لم يتم إيقاف الحساب؛ تحقق من صلاحيات الوصول إليه.',true);
+    if(result.error)return setMessage('تعذر حذف الحساب: '+result.error.message,true);
+    if(!result.data)return setMessage('لم يتم حذف الحساب؛ تحقق من صلاحيات الوصول إليه.',true);
     await loadFinancialData();
-    setMessage('تم إيقاف الحساب مع الاحتفاظ بالبيانات.',false);
+    setMessage('تم حذف الحساب من القائمة النشطة مع الاحتفاظ بسجله.',false);
   }
   function openTransactionDialog(transaction=null) {
     if(!canAddTransactions()&&!transaction)return setMessage('ليست لديك صلاحية إضافة الحركات.',true);
@@ -641,7 +642,7 @@
     }).map(row=>({
       household_id:currentHousehold.id,owner_member_id:account.owner_member_id,account_id:account.id,
       transaction_type:row.type,amount:Number(row.amount),currency:account.currency,
-      description:row.description.trim(),category:'استيراد كشف حساب',transaction_date:row.date
+      description:row.description.trim(),category:(row.category||'غير مصنف').trim(),transaction_date:row.date
     }));
     if(!rows.length){
       window.VELOVI_IMPORT?.setStatus?.('لم تُحفظ حركات جديدة؛ قد تكون جميع الحركات المحددة مكررة أو غير مكتملة.');
@@ -654,7 +655,9 @@
     window.VELOVI_IMPORT?.clear?.();
     window.VELOVI_IMPORT?.setStatus?.('تم حفظ '+rows.length+' حركة في الحساب المحدد.');
     await loadFinancialData();
-    setMessage('تم استيراد '+rows.length+' حركة بنجاح.',false);
+    updateDashboard();
+    renderAccounts();
+    setMessage('تم استيراد '+rows.length+' حركة بنجاح وتحديث البطاقات والأرصدة.',false);
   }
   function renderForecastControls() {
     const select=$('forecastCurrency'),wrap=$('forecastExclusions');
@@ -858,6 +861,33 @@
     }
   }
 
+  async function createMemberInvite() {
+    const email=$('inviteEmail')?.value.trim().toLowerCase()||'';
+    const displayName=$('inviteDisplayName')?.value.trim()||email.split('@')[0];
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return setMessage('أدخل بريداً إلكترونياً صحيحاً للدعوة.',true);
+    const dialog=$('addMemberDialog');
+    if(dialog?.dataset.inviteEmail===email&&dialog.dataset.inviteLink)return {email,displayName,action_link:dialog.dataset.inviteLink};
+    const button=$('sendInviteEmail')||$('copyInviteLink'); if(button)button.disabled=true;
+    const {data,error}=await client.functions.invoke('create-family-invite',{body:{household_id:currentHousehold.id,email,display_name:displayName,redirect_to:window.location.origin+window.location.pathname}});
+    if(button)button.disabled=false;
+    if(error||!data?.action_link){setMessage('تعذر إنشاء رابط الدعوة: '+(error?.message||data?.error||'خطأ غير معروف'),true);return null;}
+    dialog.dataset.inviteEmail=email;dialog.dataset.inviteLink=data.action_link;
+    return {email,displayName,action_link:data.action_link};
+  }
+  async function sendMemberInviteEmail() {
+    const invite=await createMemberInvite(); if(!invite)return;
+    const subject=encodeURIComponent('دعوة للانضمام إلى أسرة Velovi');
+    const body=encodeURIComponent('مرحباً '+invite.displayName+'،\n\nتمت دعوتك للانضمام إلى الأسرة في Velovi لإدارة الشؤون المالية. افتح الرابط التالي لتفعيل حسابك والانضمام:\n'+invite.action_link+'\n\nإذا لم تكن تتوقع هذه الدعوة فتجاهل الرسالة.');
+    window.location.href='mailto:'+encodeURIComponent(invite.email)+'?subject='+subject+'&body='+body;
+    const status=$('inviteStatus');if(status)status.textContent='تم تجهيز رسالة الدعوة في تطبيق البريد. أرسلها لإكمال الدعوة.';
+  }
+  async function copyMemberInviteLink() {
+    const invite=await createMemberInvite(); if(!invite)return;
+    try { await navigator.clipboard.writeText(invite.action_link); }
+    catch { window.prompt('انسخ رابط الدعوة:',invite.action_link); }
+    const status=$('inviteStatus');if(status)status.textContent='تم نسخ رابط الدعوة. أرسله للعضو ليكمل تسجيل الدخول.';
+  }
+
   async function addMember(event) {
     event.preventDefault();
     const userId = $('memberUserId').value.trim();
@@ -930,12 +960,17 @@
     });
     $('signOutButton').addEventListener('click', signOut);
     $('inviteMember').addEventListener('click', () => $('addMemberDialog').showModal());
+    $('sendInviteEmail').addEventListener('click', sendMemberInviteEmail);
+    $('inviteEmail').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); sendMemberInviteEmail(); } });
+    $('copyInviteLink').addEventListener('click', copyMemberInviteLink);
+    $('addMemberDialog').addEventListener('close', () => { $('addMemberDialog').dataset.inviteEmail=''; $('addMemberDialog').dataset.inviteLink=''; });
     $('addMemberForm').addEventListener('submit', addMember);
     $('permissionForm').addEventListener('submit', savePermissions);
     $('accountForm').addEventListener('submit', saveAccount);
     $('addAccount').addEventListener('click', () => openAccountDialog());
     $('closeAccountDialog').addEventListener('click', () => $('accountDialog').close());
     $('transactionForm').addEventListener('submit', saveTransaction);
+    $('closeTransactionDialog').addEventListener('click', () => $('transactionDialog').close());
     document.querySelectorAll('[data-open-add]').forEach(button => button.addEventListener('click', event => {
       event.preventDefault();
       openTransactionDialog();

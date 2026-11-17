@@ -1,6 +1,6 @@
 'use strict';
-const CACHE_NAME = 'velovi-shell-v9';
-const APP_SHELL = ['./','./index.html','./styles.css','./app.js','./auth.js','./supabase-config.js','./manifest.webmanifest','./install.js','./icon-192.png','./icon-512.png'];
+const CACHE_NAME = 'velovi-shell-v10';
+const APP_SHELL = ['./','./index.html','./styles.css','./app.js','./auth.js','./i18n.js','./supabase-config.js','./manifest.webmanifest','./install.js','./icon-192.png','./icon-512.png'];
 const APP_FILES = new Set(APP_SHELL.map(path => new URL(path, self.registration.scope).href));
 
 self.addEventListener('install', event => {
