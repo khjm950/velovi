@@ -32,3 +32,14 @@ window.addEventListener('appinstalled', () => {
   deferredPrompt = null;
   document.getElementById('veloviInstallButton')?.remove();
 });
+
+
+// Register the PWA shell so installed Android clients can update reliably.
+if ('serviceWorker' in navigator &&
+    (location.protocol === 'https:' || location.hostname === 'localhost')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
+      .then(registration => registration.update())
+      .catch(error => console.warn('Velovi service worker registration failed:', error));
+  }, { once: true });
+}
