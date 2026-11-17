@@ -200,6 +200,7 @@
       .order('display_name', { ascending: true });
     if (result.error) throw result.error;
     currentMembers = result.data || [];
+    currentMembership = currentMembers.find(member => member.id === currentMembership.id) || currentMembership;
     renderMembers(currentMembers, currentMembership);
   }
 
@@ -267,6 +268,15 @@
     const writable = visibleAccountsForWriting();
     fillAccountSelect($('txAccount'), writable, 'اختر حساباً');
     fillAccountSelect($('importAccount'), writable, 'اختر حساباً مالياً');
+    const accountCurrency = $('accountCurrency');
+    const preferenceCurrency = $('currencySetting')?.value || localStorage.getItem('velovi-currency') || 'EUR';
+    if (accountCurrency && $('currencySetting')) {
+      const previousCurrency = accountCurrency.value || preferenceCurrency;
+      accountCurrency.replaceChildren(...[...$('currencySetting').options].map(option => {
+        const copy = document.createElement('option'); copy.value = option.value; copy.textContent = option.value; return copy;
+      }));
+      accountCurrency.value = [...accountCurrency.options].some(option => option.value === previousCurrency) ? previousCurrency : preferenceCurrency;
+    }
     const ownerSelect = $('accountOwner');
     if (ownerSelect) {
       ownerSelect.replaceChildren();
@@ -471,18 +481,20 @@
     const payload={household_id:currentHousehold.id,owner_member_id:ownerMemberId,name,account_type:$('accountType').value,currency,opening_balance:openingBalance};
     const button=$('saveAccount');button.disabled=true;
     const result=accountId
-      ? await client.from('financial_accounts').update(payload).eq('id',accountId)
+      ? await client.from('financial_accounts').update(payload).eq('id',accountId).select('id').maybeSingle()
       : await client.from('financial_accounts').insert(payload);
     button.disabled=false;
     if(result.error)return setMessage('تعذر حفظ الحساب: '+result.error.message,true);
+    if(accountId&&!result.data)return setMessage('لم يتم تعديل الحساب؛ تحقق من صلاحيات الوصول إليه.',true);
     $('accountDialog').close();
     await loadFinancialData();
     setMessage(accountId?'تم تحديث الحساب.':'تم إنشاء الحساب وحفظه في الأسرة.',false);
   }
   async function archiveAccount(account) {
     if(!window.confirm('سيتم إيقاف الحساب مع الاحتفاظ بسجله وحركاته. هل تريد المتابعة؟'))return;
-    const result=await client.from('financial_accounts').update({is_active:false}).eq('id',account.id);
+    const result=await client.from('financial_accounts').update({is_active:false}).eq('id',account.id).select('id').maybeSingle();
     if(result.error)return setMessage('تعذر إيقاف الحساب: '+result.error.message,true);
+    if(!result.data)return setMessage('لم يتم إيقاف الحساب؛ تحقق من صلاحيات الوصول إليه.',true);
     await loadFinancialData();
     setMessage('تم إيقاف الحساب مع الاحتفاظ بالبيانات.',false);
   }
@@ -526,10 +538,11 @@
     };
     const button=$('saveTx');button.disabled=true;
     const result=transactionId
-      ? await client.from('financial_transactions').update(payload).eq('id',transactionId)
+      ? await client.from('financial_transactions').update(payload).eq('id',transactionId).select('id').maybeSingle()
       : await client.from('financial_transactions').insert(payload);
     button.disabled=false;
     if(result.error)return setMessage('تعذر حفظ الحركة: '+result.error.message,true);
+    if(transactionId&&!result.data)return setMessage('لم يتم تعديل الحركة؛ تحقق من صلاحيات الوصول إليها.',true);
     $('transactionDialog').close();
     await loadFinancialData();
     setMessage(transactionId?'تم تحديث الحركة.':'تم حفظ الحركة ومزامنتها.',false);
@@ -537,8 +550,9 @@
   async function deleteTransaction(transaction) {
     if(!canDeleteTransactions(transaction))return setMessage('ليست لديك صلاحية حذف هذه الحركة.',true);
     if(!window.confirm('هل تريد حذف هذه الحركة نهائياً؟'))return;
-    const result=await client.from('financial_transactions').delete().eq('id',transaction.id);
+    const result=await client.from('financial_transactions').delete().eq('id',transaction.id).select('id').maybeSingle();
     if(result.error)return setMessage('تعذر حذف الحركة: '+result.error.message,true);
+    if(!result.data)return setMessage('لم يتم حذف الحركة؛ تحقق من صلاحيات الوصول إليها.',true);
     await loadFinancialData();
     setMessage('تم حذف الحركة.',false);
   }
@@ -790,6 +804,7 @@
     $('memberUserId').value = '';
     $('memberDisplayName').value = '';
     await refreshMembers();
+    await loadFinancialData();
     setMessage('تمت إضافة العضو أو إعادة تفعيل عضويته بالصلاحيات الافتراضية.', false);
   }
 
@@ -807,6 +822,7 @@
     if (result.error) return setMessage('تعذر تحديث الصلاحيات: ' + result.error.message, true);
     dialog.close();
     await refreshMembers();
+    await loadFinancialData();
     setMessage('تم تحديث صلاحيات العضو.', false);
   }
 
@@ -818,6 +834,7 @@
     });
     if (result.error) return setMessage('تعذرت إزالة العضو: ' + result.error.message, true);
     await refreshMembers();
+    await loadFinancialData();
     setMessage('تمت إزالة العضو مع الاحتفاظ بسجله.', false);
   }
 
