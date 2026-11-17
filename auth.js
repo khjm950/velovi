@@ -956,13 +956,17 @@
       setMessage('', false);
     });
     $('signOutButton').addEventListener('click', signOut);
-    $('inviteMember').addEventListener('click', () => $('addMemberDialog').showModal());\n    $('sendInviteEmail').addEventListener('click', sendMemberInviteEmail);\n    $('copyInviteLink').addEventListener('click', copyMemberInviteLink);\n    $('addMemberDialog').addEventListener('close', () => { $('addMemberDialog').dataset.inviteEmail=''; $('addMemberDialog').dataset.inviteLink=''; });
+    $('inviteMember').addEventListener('click', () => $('addMemberDialog').showModal());
+    $('sendInviteEmail').addEventListener('click', sendMemberInviteEmail);
+    $('copyInviteLink').addEventListener('click', copyMemberInviteLink);
+    $('addMemberDialog').addEventListener('close', () => { $('addMemberDialog').dataset.inviteEmail=''; $('addMemberDialog').dataset.inviteLink=''; });
     $('addMemberForm').addEventListener('submit', addMember);
     $('permissionForm').addEventListener('submit', savePermissions);
     $('accountForm').addEventListener('submit', saveAccount);
     $('addAccount').addEventListener('click', () => openAccountDialog());
     $('closeAccountDialog').addEventListener('click', () => $('accountDialog').close());
-    $('transactionForm').addEventListener('submit', saveTransaction);\n    $('closeTransactionDialog').addEventListener('click', () => $('transactionDialog').close());
+    $('transactionForm').addEventListener('submit', saveTransaction);
+    $('closeTransactionDialog').addEventListener('click', () => $('transactionDialog').close());
     document.querySelectorAll('[data-open-add]').forEach(button => button.addEventListener('click', event => {
       event.preventDefault();
       openTransactionDialog();
