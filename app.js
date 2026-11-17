@@ -125,6 +125,7 @@ document.querySelectorAll('[data-theme-choice]').forEach(button => {
 });
 const chartType = getElement('chartType'), chartPeriod = getElement('chartPeriod');
 function renderDemoChart() {
+  if (typeof window.VELOVI_FINANCE_CHART === 'function') { window.VELOVI_FINANCE_CHART(); return; }
   const chart = getElement('expenseChart'); if (!chart) return;
   const isBars = chartType?.value === 'bars'; chart.classList.toggle('bars', isBars);
   if (isBars) {
