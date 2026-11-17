@@ -962,7 +962,7 @@
     $('accountForm').addEventListener('submit', saveAccount);
     $('addAccount').addEventListener('click', () => openAccountDialog());
     $('closeAccountDialog').addEventListener('click', () => $('accountDialog').close());
-    $('transactionForm').addEventListener('submit', saveTransaction);
+    $('transactionForm').addEventListener('submit', saveTransaction);\n    $('closeTransactionDialog').addEventListener('click', () => $('transactionDialog').close());
     document.querySelectorAll('[data-open-add]').forEach(button => button.addEventListener('click', event => {
       event.preventDefault();
       openTransactionDialog();
