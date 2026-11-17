@@ -523,3 +523,54 @@ dialog::backdrop{background:rgba(0,0,0,.52)!important}
 #smartForecastResult.positive{color:var(--green)}
 #transactionsEmpty{margin-top:12px}
 @media(max-width:700px){.account-card-head{align-items:flex-start;flex-direction:column}.account-card-head>strong{white-space:normal}.import-source-actions>*{flex:1 1 100%}}
+
+
+/* Velovi refinement: stronger readability, tighter layout and expanded palettes. */
+:root[data-theme="rose"]{
+  --green:#6b2945;--green2:#a3456b;--mint:#f8eaf0;--ink:#35232c;--muted:#89727d;
+  --line:#eedde5;--bg:#fbf5f8;--surface:#fff;--surface-raised:#fff;--surface-muted:#fcf7f9;
+  --accent:#a3456b;--accent-strong:#6b2945;--accent-soft:#f8eaf0;
+}
+:root[data-theme="amber"]{
+  --green:#674316;--green2:#a56c1d;--mint:#fbf1dc;--ink:#332a1d;--muted:#87785f;
+  --line:#eee2c9;--bg:#fbf8f0;--surface:#fff;--surface-raised:#fff;--surface-muted:#fdfaf4;
+  --accent:#a56c1d;--accent-strong:#674316;--accent-soft:#fbf1dc;
+}
+:root[data-chart-palette="forest"]{--chart-1:#166534;--chart-2:#65a30d;--chart-3:#0f766e;--chart-4:#a3a3a3;--chart-grid:#e3ece5}
+:root[data-chart-palette="sunset"]{--chart-1:#ea580c;--chart-2:#e11d48;--chart-3:#f59e0b;--chart-4:#7c3aed;--chart-grid:#f1e5df}
+.chart-palette-choices [data-chart-palette="forest"] i{background:#166534}
+.chart-palette-choices [data-chart-palette="sunset"] i{background:#ea580c}
+.theme-choice[data-theme-choice="rose"] i{background:#a3456b}
+.theme-choice[data-theme-choice="amber"] i{background:#a56c1d}
+
+/* Readability and density: larger type, less dead space, responsive controls. */
+body{font-size:15px;line-height:1.6}
+.main{padding:24px clamp(16px,2.4vw,32px)}
+.page-heading{margin-bottom:18px}
+.page-heading h1{font-size:clamp(25px,2.2vw,32px)}
+.muted,.panel-head p{font-size:13px}
+.small,.field-hint,.stat small{font-size:12px}
+.stat{padding:16px 18px;min-height:116px}
+.stat span{font-size:13px}
+.stat strong{font-size:clamp(22px,2vw,28px);margin:8px 0 4px}
+.panel{padding:16px 18px}
+.panel h2{font-size:17px}
+td,th{font-size:13px;padding:11px 12px}
+.nav-item{font-size:14px;min-height:44px}
+.form-grid{gap:11px;margin:14px 0}
+.dialog-head{margin-bottom:14px}
+dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
+.invite-actions{display:flex;gap:9px;flex-wrap:wrap}
+.legacy-invite{border-top:1px solid var(--line);padding-top:12px;margin-top:10px}
+.legacy-invite summary{cursor:pointer;color:var(--accent);font-weight:700;margin-bottom:10px}
+@media(max-width:700px){
+  body{font-size:14.5px}
+  .main{padding:16px 12px}
+  .panel{padding:14px}
+  .stat{padding:12px;min-height:108px}
+  .stat span{font-size:11.5px}
+  .stat strong{font-size:19px}
+  .muted,.small{font-size:12px}
+  .nav-item{font-size:12px}
+  .invite-actions>*{flex:1 1 100%}
+}
