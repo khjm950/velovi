@@ -150,8 +150,8 @@
         perms.textContent = member.is_active
           ? 'إضافة ' + (member.can_add_transactions ? '✓' : '✕') +
             '　 تعديل ' + (member.can_edit_transactions ? '✓' : '✕') +
-            '　 حذف ' + (member.can_delete_transactions ? '✓' : '✕' +
-            '　 رؤية حسابات الآخرين ' + (member.can_view_other_accounts ? '✓' : '✕'))
+            '　 حذف ' + (member.can_delete_transactions ? '✓' : '✕') +
+            '　 رؤية حسابات الآخرين ' + (member.can_view_other_accounts ? '✓' : '✕')
           : 'غير نشط';
         row.appendChild(perms);
 
