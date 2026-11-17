@@ -15,10 +15,18 @@
   let currentMembers = [];
 
   function setMessage(text, isError) {
-    if (!message) return;
-    message.textContent = text || '';
-    message.classList.toggle('error', !!isError);
-    message.classList.toggle('success', !!text && !isError);
+    const inApp = !!(shell && shell.classList.contains('is-authenticated'));
+    const target = inApp ? $('appMessage') : message;
+    const other = inApp ? message : $('appMessage');
+    if (other) {
+      other.hidden = true;
+      other.textContent = '';
+    }
+    if (!target) return;
+    target.textContent = text || '';
+    target.hidden = !text;
+    target.classList.toggle('error', !!isError);
+    target.classList.toggle('success', !!text && !isError);
   }
 
   function showGate(panel) {
@@ -298,7 +306,11 @@
     button.disabled = false;
     if (result.error) return setMessage('تعذر إنشاء الأسرة: ' + result.error.message, true);
     currentMembership = null;
-    await loadWorkspace();
+    try {
+      await loadWorkspace();
+    } catch (error) {
+      setMessage('تم إنشاء الأسرة، لكن تعذر تحميلها: ' + (error.message || 'خطأ غير معروف'), true);
+    }
   }
 
   async function addMember(event) {
@@ -363,6 +375,10 @@
 
     $('loginForm').addEventListener('submit', signIn);
     $('createHouseholdForm').addEventListener('submit', createHousehold);
+    $('backToLogin').addEventListener('click', () => {
+      showGate('login');
+      setMessage('', false);
+    });
     $('signOutButton').addEventListener('click', signOut);
     $('inviteMember').addEventListener('click', () => $('addMemberDialog').showModal());
     $('addMemberForm').addEventListener('submit', addMember);
