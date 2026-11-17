@@ -197,7 +197,7 @@ function getRowData(row) {
 function compareRows(a, b) {
   const x = getRowData(a), y = getRowData(b);
   let result = 0;
-  if (sortKey === 'amount') result = x.signedAmount - y.signedAmount;
+  if (sortKey === 'amount') {\n    const left = x.type === 'expense' ? Math.abs(x.signedAmount) : x.signedAmount;\n    const right = y.type === 'expense' ? Math.abs(y.signedAmount) : y.signedAmount;\n    result = left - right;\n  }
   else if (sortKey === 'date') result = x.date.localeCompare(y.date);
   else if (sortKey === 'type') result = x.type.localeCompare(y.type);
   else result = x[sortKey].localeCompare(y[sortKey], 'ar', { sensitivity: 'base' });
@@ -356,6 +356,20 @@ function parseStatementNumber(raw) {
   else if ((value.match(/\./g)||[]).length > 1) { const parts=value.split('.'); const decimal=parts.pop(); value=parts.join('')+'.'+decimal; }
   const number=Number(value); return Number.isFinite(number) ? (negative ? -number : number) : null;
 }
+function inferStatementCategory(description, type) {
+  const value=String(description||'').toLowerCase();
+  const rules=[
+    [/miete|rent|wohnung|hausgeld|housing|landlord/,'السكن'],
+    [/supermarkt|lebensmittel|rewe|aldi|lidl|edeka|food|grocery|market/,'الطعام'],
+    [/tankstelle|shell|aral|fuel|benzin|diesel|bus|bahn|db |transport|uber/,'المواصلات'],
+    [/strom|energie|wasser|gas|internet|telekom|vodafone|utility|electric/,'فواتير المنزل'],
+    [/versicherung|insurance|krankenkasse/,'التأمين'],
+    [/gehalt|lohn|salary|wage|arbeitgeber/,'الراتب'],
+    [/amazon|online|shop|kauf|bestellung/,'التسوق']
+  ];
+  for(const [pattern,category] of rules)if(pattern.test(value))return category;
+  return type==='income'?'دخل آخر':'مصروفات أخرى';
+}
 function parseStatementLines(text) {
   const amountPattern=/[+\-−]?\s*(?:\d{1,3}(?:[.,\s]\d{3})+|\d+)[,.]\d{2}(?!\d)/g;
   const datePattern=/\b(?:\d{4}[./-]\d{1,2}[./-]\d{1,2}|\d{1,2}[./-]\d{1,2}[./-]\d{2,4})\b/;
@@ -372,7 +386,7 @@ function parseStatementLines(text) {
     const expenseHint=/(lastschrift|abbuchung|kartenzahlung|belastung|miete|rechnung|payment|debit|withdrawal)/i.test(line);
     const incomeHint=/(gehalt|lohn|gutschrift|eingang|erstattung|credit|salary|deposit)/i.test(line);
     const type=signedAmount<0||expenseHint?'expense':incomeHint?'income':'income';
-    rows.push({id:rows.length+1,selected:true,date,description:description.slice(0,180),type,amount:Math.abs(signedAmount)});
+    rows.push({id:rows.length+1,selected:true,date,description:description.slice(0,180),category:inferStatementCategory(description,type),type,amount:Math.abs(signedAmount)});
   }
   const unique=new Map(); for(const row of rows){const key=row.date+'|'+row.description.toLowerCase()+'|'+row.amount.toFixed(2)+'|'+row.type;if(!unique.has(key))unique.set(key,row);} return [...unique.values()];
 }
@@ -384,9 +398,10 @@ function renderImportRows(){
     selected.type='checkbox';selected.checked=item.selected;selected.setAttribute('aria-label','اعتماد هذه الحركة');selected.addEventListener('change',()=>{item.selected=selected.checked;updateImportCount();});selectedCell.appendChild(selected);
     const dateCell=document.createElement('td'),date=document.createElement('input');date.type='date';date.value=item.date;date.addEventListener('change',()=>{item.date=date.value;});dateCell.appendChild(date);
     const descCell=document.createElement('td'),desc=document.createElement('input');desc.type='text';desc.value=item.description;desc.maxLength=180;desc.addEventListener('input',()=>{item.description=desc.value;});descCell.appendChild(desc);
+    const categoryCell=document.createElement('td'),category=document.createElement('input');category.type='text';category.value=item.category||inferStatementCategory(item.description,item.type);category.maxLength=80;category.addEventListener('input',()=>{item.category=category.value;});categoryCell.appendChild(category);
     const typeCell=document.createElement('td'),type=document.createElement('select');[['income','إيراد'],['expense','مصروف']].forEach(pair=>{const option=document.createElement('option');option.value=pair[0];option.textContent=pair[1];type.appendChild(option);});type.value=item.type;type.addEventListener('change',()=>{item.type=type.value;});typeCell.appendChild(type);
     const amountCell=document.createElement('td'),amount=document.createElement('input');amount.type='number';amount.min='0.01';amount.step='0.01';amount.value=item.amount.toFixed(2);amount.inputMode='decimal';amount.addEventListener('change',()=>{item.amount=Number(amount.value)||0;});amountCell.appendChild(amount);
-    tr.append(selectedCell,dateCell,descCell,typeCell,amountCell);importRowsBody.appendChild(tr);
+    tr.append(selectedCell,dateCell,descCell,categoryCell,typeCell,amountCell);importRowsBody.appendChild(tr);
   });
   if(importPreview)importPreview.hidden=!extractedImportRows.length;if(importEmpty)importEmpty.hidden=!!extractedImportRows.length;updateImportCount();
 }
