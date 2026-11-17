@@ -47,7 +47,11 @@ function detectDefaultCurrency() {
     return currencyByRegion[region] || 'EUR';
   } catch { return 'EUR'; }
 }
-const legacyCurrencyCodes = {'€':'EUR','
+const legacyCurrencyCodes = {"€":"EUR","$":"USD","£":"GBP","CHF":"CHF","د.إ":"AED"};
+const storedCurrency = localStorage.getItem("velovi-currency");
+const requestedCurrency = legacyCurrencyCodes[storedCurrency] || storedCurrency || detectDefaultCurrency();
+const supportedCurrencies = new Set(Array.from(currencySetting?.options || [], option => option.value));
+const savedCurrency = supportedCurrencies.has(requestedCurrency) ? requestedCurrency : detectDefaultCurrency();
 if (savedCurrency !== storedCurrency) localStorage.setItem('velovi-currency', savedCurrency);
 const savedTheme = localStorage.getItem('velovi-theme') || 'green';
 if (languageSetting) languageSetting.value = savedLanguage;
