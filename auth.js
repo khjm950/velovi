@@ -13,6 +13,8 @@
   let currentMembership = null;
   let currentHousehold = null;
   let currentMembers = [];
+  let currentAccounts = [];
+  let currentTransactions = [];
 
   function setMessage(text, isError) {
     const inApp = !!(shell && shell.classList.contains('is-authenticated'));
@@ -49,12 +51,8 @@
   }
 
   function clearDemoData() {
-    document.querySelectorAll('#home .stat strong, #accounts .stat strong').forEach(el => {
-      el.textContent = '—';
-    });
-    document.querySelectorAll('#home .stat small, #accounts .stat small').forEach(el => {
-      el.textContent = 'بانتظار ربط البيانات المالية';
-    });
+    document.querySelectorAll('#home .stat strong, #accounts .stat strong').forEach(el => { el.textContent = '—'; });
+    document.querySelectorAll('#home .stat small').forEach(el => { el.textContent = 'جارٍ تحميل البيانات الفعلية'; });
     const txList = document.querySelector('#home .transaction-list');
     if (txList) txList.replaceChildren(emptyState('لا توجد حركات مالية مسجلة بعد.'));
     const donutWrap = document.querySelector('#home .donut-wrap');
@@ -62,30 +60,20 @@
     const legend = document.querySelector('#home .legend');
     if (legend) legend.replaceChildren();
     const txRows = $('txRows');
-    if (txRows) {
-      const row = document.createElement('tr');
-      const cell = document.createElement('td');
-      cell.colSpan = 5;
-      cell.textContent = 'لا توجد حركات مالية بعد.';
-      row.appendChild(cell);
-      txRows.replaceChildren(row);
-    }
-    const accountsStats = document.querySelector('#accounts .stats');
-    if (accountsStats) accountsStats.replaceWith(emptyState('لا توجد حسابات مالية مسجلة بعد.'));
+    if (txRows) txRows.replaceChildren();
+    const txEmpty = $('transactionsEmpty');
+    if (txEmpty) txEmpty.hidden = false;
+    const accountStats = $('accountStats');
+    if (accountStats) accountStats.replaceChildren();
+    const accountList = $('accountList');
+    if (accountList) accountList.replaceChildren(emptyState('جارٍ تحميل الحسابات...'));
     const homeNotice = document.querySelector('#home .notice');
     if (homeNotice) {
       const b = homeNotice.querySelector('b');
       const p = homeNotice.querySelector('p');
       if (b) b.textContent = 'تم الاتصال بحساب الأسرة';
-      if (p) p.textContent = 'هذه مساحة الأسرة الفعلية. ستظهر الأرصدة والحركات بعد تفعيل ربط البيانات المالية.';
+      if (p) p.textContent = 'تُحمّل الحسابات والحركات من قاعدة البيانات المشتركة بشكل آمن.';
     }
-    document.querySelectorAll('[data-open-add], #addAccount').forEach(button => {
-      button.disabled = true;
-      button.title = 'سيتم تفعيل هذه الوظيفة في مرحلة ربط البيانات المالية';
-      button.setAttribute('aria-disabled', 'true');
-    });
-    const forecast = $('forecastResult');
-    if (forecast) forecast.textContent = 'أدخل رصيدك وفائضك الشهري لحساب سيناريو افتراضي.';
   }
 
   function setHeader(householdName, displayName) {
@@ -215,11 +203,464 @@
     renderMembers(currentMembers, currentMembership);
   }
 
+
+  function canAddTransactions() {
+    return currentMembership?.role === 'admin' || currentMembership?.can_add_transactions === true;
+  }
+  function canEditTransactions(transaction) {
+    return currentMembership?.role === 'admin' ||
+      (transaction.owner_member_id === currentMembership?.id && currentMembership?.can_edit_transactions === true);
+  }
+  function canDeleteTransactions(transaction) {
+    return currentMembership?.role === 'admin' ||
+      (transaction.owner_member_id === currentMembership?.id && currentMembership?.can_delete_transactions === true);
+  }
+  function formatMoney(value, currency) {
+    const amount = Number(value) || 0;
+    try {
+      return new Intl.NumberFormat(navigator.language || 'de-DE', {
+        style: 'currency', currency: currency || 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2
+      }).format(amount);
+    } catch {
+      return amount.toFixed(2) + ' ' + (currency || 'EUR');
+    }
+  }
+  function parseMoney(value) {
+    let raw = String(value ?? '').trim().replace(/\s/g, '').replace(/[€$£]/g, '');
+    if (!raw) return NaN;
+    const comma = raw.lastIndexOf(','), dot = raw.lastIndexOf('.');
+    if (comma >= 0 && dot >= 0) {
+      raw = comma > dot ? raw.replace(/\./g, '').replace(',', '.') : raw.replace(/,/g, '');
+    } else if (comma >= 0) raw = raw.replace(/\./g, '').replace(',', '.');
+    const result = Number(raw);
+    return Number.isFinite(result) ? result : NaN;
+  }
+  function accountTypeLabel(type) {
+    return ({bank:'حساب بنكي',savings:'مدخرات',cash:'نقد',other:'أخرى'})[type] || type || 'حساب';
+  }
+  function memberName(memberId) {
+    return currentMembers.find(member => member.id === memberId)?.display_name || 'عضو الأسرة';
+  }
+  function visibleAccountsForWriting() {
+    return currentAccounts.filter(account => account.is_active &&
+      (currentMembership.role === 'admin' || account.owner_member_id === currentMembership.id));
+  }
+  function fillAccountSelect(select, accounts, placeholder) {
+    if (!select) return;
+    const previous = select.value;
+    select.replaceChildren();
+    const first = document.createElement('option');
+    first.value = '';
+    first.textContent = placeholder;
+    select.appendChild(first);
+    accounts.forEach(account => {
+      const option = document.createElement('option');
+      option.value = account.id;
+      option.textContent = account.name + ' · ' + account.currency +
+        (currentMembership.role === 'admin' ? ' · ' + memberName(account.owner_member_id) : '');
+      select.appendChild(option);
+    });
+    if (accounts.some(account => account.id === previous)) select.value = previous;
+    else if (accounts.length === 1) select.value = accounts[0].id;
+  }
+  function populateAccountSelects() {
+    const writable = visibleAccountsForWriting();
+    fillAccountSelect($('txAccount'), writable, 'اختر حساباً');
+    fillAccountSelect($('importAccount'), writable, 'اختر حساباً مالياً');
+    const ownerSelect = $('accountOwner');
+    if (ownerSelect) {
+      ownerSelect.replaceChildren();
+      currentMembers.filter(member => member.is_active && (member.role === 'member' || member.role === 'admin')).forEach(member => {
+        const option = document.createElement('option');
+        option.value = member.id;
+        option.textContent = member.display_name + (member.role === 'admin' ? ' · المدير' : '');
+        ownerSelect.appendChild(option);
+      });
+      const ownerLabel = $('accountOwnerLabel');
+      if (ownerLabel) ownerLabel.hidden = currentMembership.role !== 'admin';
+      if (currentMembership.role !== 'admin') ownerSelect.value = currentMembership.id;
+    }
+    const saveImport = $('saveImportedRows');
+    if (saveImport) saveImport.dataset.ready = String(canAddTransactions() && writable.length > 0);
+    $('importAccount')?.dispatchEvent(new Event('change', {bubbles:true}));
+    document.querySelectorAll('[data-open-add]').forEach(button => {
+      button.disabled = !canAddTransactions() || writable.length === 0;
+      button.title = button.disabled ? 'لا توجد صلاحية إضافة أو لا يوجد حساب نشط' : '';
+    });
+  }
+  function renderAccounts() {
+    const list = $('accountList');
+    const stats = $('accountStats');
+    if (!list || !stats) return;
+    list.replaceChildren();
+    stats.replaceChildren();
+    const active = currentAccounts.filter(account => account.is_active);
+    const totals = new Map();
+    active.forEach(account => {
+      const isFullView = currentMembership.role === 'admin' || account.owner_member_id === currentMembership.id;
+      const rows = isFullView ? currentTransactions.filter(tx => tx.account_id === account.id) : [];
+      const balance = Number(account.opening_balance || 0) + rows.reduce((sum, tx) => {
+        if (tx.transaction_type === 'income') return sum + Number(tx.amount);
+        if (tx.transaction_type === 'expense') return sum - Number(tx.amount);
+        return sum;
+      }, 0);
+      if (isFullView) totals.set(account.currency, (totals.get(account.currency) || 0) + balance);
+      const card = document.createElement('article');
+      card.className = 'account-card';
+      const header = document.createElement('div'); header.className = 'account-card-head';
+      const identity = document.createElement('div');
+      const title = document.createElement('h3'); title.textContent = account.name;
+      const sub = document.createElement('p'); sub.className = 'muted small';
+      sub.textContent = accountTypeLabel(account.account_type) + ' · ' + account.currency + ' · ' + memberName(account.owner_member_id);
+      identity.append(title,sub);
+      const value = document.createElement('strong'); value.className = balance < 0 ? 'negative' : 'positive';
+      value.textContent = formatMoney(balance,account.currency);
+      header.append(identity,value); card.appendChild(header);
+      if (!isFullView) {
+        const note = document.createElement('p'); note.className = 'small muted';
+        note.textContent = 'عرض الحساب فقط: المعروض هو الرصيد الافتتاحي، ولا يتضمن حركات صاحبه الخاصة.';
+        card.appendChild(note);
+      }
+      const actions = document.createElement('div'); actions.className = 'account-actions';
+      const canManage = currentMembership.role === 'admin' || account.owner_member_id === currentMembership.id;
+      if (canManage) {
+        const edit = document.createElement('button'); edit.type='button'; edit.className='secondary'; edit.textContent='تعديل';
+        edit.addEventListener('click',()=>openAccountDialog(account)); actions.appendChild(edit);
+        const archive = document.createElement('button'); archive.type='button'; archive.className='text-btn danger-text';
+        archive.textContent='إيقاف الحساب';
+        archive.addEventListener('click',()=>archiveAccount(account)); actions.appendChild(archive);
+      } else {
+        const readOnly = document.createElement('span'); readOnly.className='pill'; readOnly.textContent='قراءة فقط'; actions.appendChild(readOnly);
+      }
+      card.appendChild(actions);
+      list.appendChild(card);
+    });
+    if (!active.length) list.appendChild(emptyState('لا توجد حسابات مالية بعد. أضف حساباً للبدء.'));
+    for (const [currency,total] of totals) {
+      const stat = document.createElement('article'); stat.className='stat';
+      const label = document.createElement('span'); label.textContent='إجمالي الأرصدة · '+currency;
+      const amount = document.createElement('strong'); amount.textContent=formatMoney(total,currency);
+      const note = document.createElement('small'); note.textContent='الرصيد الافتتاحي مضافاً إليه الحركات المسجلة';
+      stat.append(label,amount,note); stats.appendChild(stat);
+    }
+  }
+  function renderTransactions() {
+    const body = $('txRows'), empty = $('transactionsEmpty');
+    if (!body) return;
+    body.replaceChildren();
+    const sorted = [...currentTransactions].sort((a,b)=>String(b.transaction_date).localeCompare(String(a.transaction_date)));
+    sorted.forEach(tx => {
+      const row = document.createElement('tr');
+      row.dataset.type = tx.transaction_type === 'income' ? 'income' : tx.transaction_type === 'expense' ? 'expense' : 'other';
+      row.dataset.category = tx.category || 'غير مصنف';
+      row.dataset.description = tx.description || '';
+      row.dataset.date = tx.transaction_date || '';
+      row.dataset.amount = String(Number(tx.amount));
+      row.dataset.signedAmount = String(tx.transaction_type === 'expense' ? -Number(tx.amount) : Number(tx.amount));
+      row.dataset.currency = tx.currency || 'EUR';
+      row.dataset.transactionId = tx.id;
+      const typeCell=document.createElement('td'), badge=document.createElement('span');
+      badge.className='pill '+(tx.transaction_type==='income'?'green':tx.transaction_type==='expense'?'red':'');
+      badge.textContent=tx.transaction_type==='income'?'إيراد':tx.transaction_type==='expense'?'مصروف':'تحويل';
+      typeCell.appendChild(badge);
+      const categoryCell=document.createElement('td'); categoryCell.textContent=tx.category || 'غير مصنف';
+      const descCell=document.createElement('td'); descCell.textContent=tx.description || '—';
+      const dateCell=document.createElement('td');
+      const date=new Date(String(tx.transaction_date)+'T12:00:00');
+      dateCell.textContent=Number.isNaN(date.getTime())?tx.transaction_date:date.toLocaleDateString('de-DE');
+      const amountCell=document.createElement('td'); amountCell.className=tx.transaction_type==='income'?'positive':tx.transaction_type==='expense'?'negative':'';
+      const amount=document.createElement('span');
+      amount.textContent=(tx.transaction_type==='income'?'+':tx.transaction_type==='expense'?'−':'')+formatMoney(Number(tx.amount),tx.currency);
+      amountCell.appendChild(amount);
+      const actions=document.createElement('span'); actions.className='tx-row-actions';
+      if (canEditTransactions(tx)) {
+        const edit=document.createElement('button'); edit.type='button'; edit.className='text-btn'; edit.textContent='تعديل';
+        edit.addEventListener('click',()=>openTransactionDialog(tx)); actions.appendChild(edit);
+      }
+      if (canDeleteTransactions(tx)) {
+        const del=document.createElement('button'); del.type='button'; del.className='text-btn danger-text'; del.textContent='حذف';
+        del.addEventListener('click',()=>deleteTransaction(tx)); actions.appendChild(del);
+      }
+      if (actions.childElementCount) amountCell.appendChild(actions);
+      row.append(typeCell,categoryCell,descCell,dateCell,amountCell);
+      body.appendChild(row);
+    });
+    if (empty) empty.hidden = currentTransactions.length !== 0;
+    $('searchTx')?.dispatchEvent(new Event('input',{bubbles:true}));
+  }
+  function updateDashboard() {
+    const now=new Date(), month=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+    const current=currentTransactions.filter(tx=>String(tx.transaction_date).startsWith(month));
+    const sums=(type,rows)=>rows.filter(tx=>tx.transaction_type===type).reduce((map,tx)=>{
+      map.set(tx.currency,(map.get(tx.currency)||0)+Number(tx.amount)); return map;
+    },new Map());
+    const showTotals=map=>map.size?[...map].map(([currency,value])=>formatMoney(value,currency)).join(' · '):'—';
+    const income=sums('income',current), expense=sums('expense',current);
+    const surplus=new Map();
+    for(const currency of new Set([...income.keys(),...expense.keys()])) surplus.set(currency,(income.get(currency)||0)-(expense.get(currency)||0));
+    const balances=new Map();
+    currentAccounts.filter(account=>account.is_active&&(currentMembership.role==='admin'||account.owner_member_id===currentMembership.id)).forEach(account=>{
+      const txs=currentTransactions.filter(tx=>tx.account_id===account.id);
+      const value=Number(account.opening_balance||0)+txs.reduce((sum,tx)=>sum+(tx.transaction_type==='income'?Number(tx.amount):tx.transaction_type==='expense'?-Number(tx.amount):0),0);
+      balances.set(account.currency,(balances.get(account.currency)||0)+value);
+    });
+    if($('dashboardIncome'))$('dashboardIncome').textContent=showTotals(income);
+    if($('dashboardExpenses'))$('dashboardExpenses').textContent=showTotals(expense);
+    if($('dashboardSurplus'))$('dashboardSurplus').textContent=showTotals(surplus);
+    if($('dashboardBalances'))$('dashboardBalances').textContent=showTotals(balances);
+    document.querySelectorAll('#home .stat small').forEach(el=>{el.textContent='من الحركات والحسابات المسجلة فعلياً';});
+    const recent=document.querySelector('#home .transaction-list');
+    if(recent){
+      recent.replaceChildren();
+      currentTransactions.slice(0,5).forEach(tx=>{
+        const item=document.createElement('div');item.className='transaction-item';
+        const desc=document.createElement('span');desc.textContent=(tx.description||tx.category||'حركة')+' · '+tx.transaction_date;
+        const amount=document.createElement('strong');amount.textContent=(tx.transaction_type==='expense'?'−':'+')+formatMoney(Number(tx.amount),tx.currency);
+        item.append(desc,amount);recent.appendChild(item);
+      });
+      if(!currentTransactions.length)recent.appendChild(emptyState('لا توجد حركات مالية مسجلة بعد.'));
+    }
+  }
+  async function loadFinancialData() {
+    const [accountsResult,transactionsResult]=await Promise.all([
+      client.from('financial_accounts')
+        .select('id,household_id,owner_member_id,name,account_type,currency,opening_balance,is_active,created_at')
+        .eq('household_id',currentHousehold.id)
+        .order('created_at',{ascending:true}),
+      client.from('financial_transactions')
+        .select('id,household_id,owner_member_id,account_id,transaction_type,amount,currency,description,category,transaction_date,transfer_group_id,created_by,created_at,updated_at')
+        .eq('household_id',currentHousehold.id)
+        .order('transaction_date',{ascending:false})
+    ]);
+    if(accountsResult.error)throw accountsResult.error;
+    if(transactionsResult.error)throw transactionsResult.error;
+    currentAccounts=accountsResult.data||[];
+    currentTransactions=transactionsResult.data||[];
+    populateAccountSelects();
+    renderAccounts();
+    renderTransactions();
+    updateDashboard();
+    renderForecastControls();
+  }
+  function openAccountDialog(account=null) {
+    const dialog=$('accountDialog'), form=$('accountForm');
+    if(!dialog||!form)return;
+    form.reset();
+    dialog.dataset.accountId=account?.id||'';
+    $('accountName').value=account?.name||'';
+    $('accountType').value=account?.account_type||'bank';
+    $('accountCurrency').value=account?.currency||localStorage.getItem('velovi-currency')||'EUR';
+    $('accountOpeningBalance').value=String(account?.opening_balance??0);
+    if($('accountOwner'))$('accountOwner').value=account?.owner_member_id||(currentMembership.role==='admin'?currentMembership.id:currentMembership.id);
+    const heading=dialog.querySelector('h2');if(heading)heading.textContent=account?'تعديل الحساب':'إضافة حساب مالي';
+    const save=$('saveAccount');if(save)save.textContent=account?'حفظ التعديلات':'حفظ الحساب';
+    dialog.showModal();
+  }
+  async function saveAccount(event) {
+    event.preventDefault();
+    const accountId=$('accountDialog').dataset.accountId||'';
+    const name=$('accountName').value.trim();
+    const currency=$('accountCurrency').value;
+    const openingBalance=parseMoney($('accountOpeningBalance').value);
+    const ownerMemberId=currentMembership.role==='admin'?$('accountOwner').value:currentMembership.id;
+    if(!name||!ownerMemberId||!Number.isFinite(openingBalance))return setMessage('تحقق من اسم الحساب وصاحبه والرصيد الافتتاحي.',true);
+    const previous=currentAccounts.find(account=>account.id===accountId);
+    if(previous&&previous.currency!==currency&&currentTransactions.some(tx=>tx.account_id===accountId)){
+      return setMessage('لا يمكن تغيير عملة حساب يحتوي على حركات. أنشئ حساباً جديداً بالعملة المطلوبة.',true);
+    }
+    const payload={household_id:currentHousehold.id,owner_member_id:ownerMemberId,name,account_type:$('accountType').value,currency,opening_balance:openingBalance};
+    const button=$('saveAccount');button.disabled=true;
+    const result=accountId
+      ? await client.from('financial_accounts').update(payload).eq('id',accountId)
+      : await client.from('financial_accounts').insert(payload);
+    button.disabled=false;
+    if(result.error)return setMessage('تعذر حفظ الحساب: '+result.error.message,true);
+    $('accountDialog').close();
+    await loadFinancialData();
+    setMessage(accountId?'تم تحديث الحساب.':'تم إنشاء الحساب وحفظه في الأسرة.',false);
+  }
+  async function archiveAccount(account) {
+    if(!window.confirm('سيتم إيقاف الحساب مع الاحتفاظ بسجله وحركاته. هل تريد المتابعة؟'))return;
+    const result=await client.from('financial_accounts').update({is_active:false}).eq('id',account.id);
+    if(result.error)return setMessage('تعذر إيقاف الحساب: '+result.error.message,true);
+    await loadFinancialData();
+    setMessage('تم إيقاف الحساب مع الاحتفاظ بالبيانات.',false);
+  }
+  function openTransactionDialog(transaction=null) {
+    if(!canAddTransactions()&&!transaction)return setMessage('ليست لديك صلاحية إضافة الحركات.',true);
+    const dialog=$('transactionDialog'),form=$('transactionForm');
+    if(!dialog||!form)return;
+    form.reset();
+    populateAccountSelects();
+    dialog.dataset.transactionId=transaction?.id||'';
+    $('txType').value=transaction?.transaction_type||'expense';
+    $('txDesc').value=transaction?.description||'';
+    $('txAmount').value=transaction?.amount??'';
+    $('txDate').value=transaction?.transaction_date||new Date().toISOString().slice(0,10);
+    $('txCategory').value=transaction?.category||'';
+    $('txAccount').value=transaction?.account_id||visibleAccountsForWriting()[0]?.id||'';
+    const heading=dialog.querySelector('h2');if(heading)heading.textContent=transaction?'تعديل حركة مالية':'إضافة حركة مالية';
+    const save=$('saveTx');if(save)save.textContent=transaction?'حفظ التعديلات':'حفظ الحركة';
+    dialog.showModal();
+  }
+  async function saveTransaction(event) {
+    if(event.submitter?.value==='cancel')return;
+    event.preventDefault();
+    const transactionId=$('transactionDialog').dataset.transactionId||'';
+    const account=currentAccounts.find(item=>item.id===$('txAccount').value&&item.is_active);
+    const amount=Number($('txAmount').value);
+    const description=$('txDesc').value.trim();
+    const date=$('txDate').value;
+    const type=$('txType').value;
+    if(!account||!description||!date||!Number.isFinite(amount)||amount<=0||!['income','expense'].includes(type)){
+      return setMessage('اختر حساباً وأدخل وصفاً وتاريخاً ومبلغاً صحيحاً أكبر من صفر.',true);
+    }
+    if(transactionId){
+      const original=currentTransactions.find(tx=>tx.id===transactionId);
+      if(!original||!canEditTransactions(original))return setMessage('ليست لديك صلاحية تعديل هذه الحركة.',true);
+    }else if(!canAddTransactions())return setMessage('ليست لديك صلاحية إضافة الحركات.',true);
+    const payload={
+      household_id:currentHousehold.id,owner_member_id:account.owner_member_id,account_id:account.id,
+      transaction_type:type,amount,currency:account.currency,description,
+      category:$('txCategory').value.trim()||'غير مصنف',transaction_date:date
+    };
+    const button=$('saveTx');button.disabled=true;
+    const result=transactionId
+      ? await client.from('financial_transactions').update(payload).eq('id',transactionId)
+      : await client.from('financial_transactions').insert(payload);
+    button.disabled=false;
+    if(result.error)return setMessage('تعذر حفظ الحركة: '+result.error.message,true);
+    $('transactionDialog').close();
+    await loadFinancialData();
+    setMessage(transactionId?'تم تحديث الحركة.':'تم حفظ الحركة ومزامنتها.',false);
+  }
+  async function deleteTransaction(transaction) {
+    if(!canDeleteTransactions(transaction))return setMessage('ليست لديك صلاحية حذف هذه الحركة.',true);
+    if(!window.confirm('هل تريد حذف هذه الحركة نهائياً؟'))return;
+    const result=await client.from('financial_transactions').delete().eq('id',transaction.id);
+    if(result.error)return setMessage('تعذر حذف الحركة: '+result.error.message,true);
+    await loadFinancialData();
+    setMessage('تم حذف الحركة.',false);
+  }
+  async function saveImportedRows() {
+    if(!canAddTransactions())return setMessage('ليست لديك صلاحية إضافة الحركات.',true);
+    const account=currentAccounts.find(item=>item.id===$('importAccount')?.value&&item.is_active);
+    const imported=window.VELOVI_IMPORT?.getSelectedRows?.()||[];
+    if(!account||!imported.length)return setMessage('اختر الحساب وحدد الحركات التي تريد حفظها.',true);
+    const existing=new Set(currentTransactions.filter(tx=>tx.account_id===account.id).map(tx=>[
+      tx.transaction_date,tx.transaction_type,(tx.description||'').trim().toLowerCase(),Number(tx.amount).toFixed(2)
+    ].join('|')));
+    const rows=imported.filter(row=>row.date&&row.description&&Number(row.amount)>0).filter(row=>{
+      const key=[row.date,row.type,(row.description||'').trim().toLowerCase(),Number(row.amount).toFixed(2)].join('|');
+      if(existing.has(key))return false;
+      existing.add(key);return true;
+    }).map(row=>({
+      household_id:currentHousehold.id,owner_member_id:account.owner_member_id,account_id:account.id,
+      transaction_type:row.type,amount:Number(row.amount),currency:account.currency,
+      description:row.description.trim(),category:'استيراد كشف حساب',transaction_date:row.date
+    }));
+    if(!rows.length){
+      window.VELOVI_IMPORT?.setStatus?.('لم تُحفظ حركات جديدة؛ قد تكون جميع الحركات المحددة مكررة أو غير مكتملة.');
+      return;
+    }
+    const button=$('saveImportedRows');button.disabled=true;
+    const result=await client.from('financial_transactions').insert(rows);
+    button.disabled=false;
+    if(result.error){window.VELOVI_IMPORT?.setStatus?.('تعذر حفظ الحركات: '+result.error.message,true);return setMessage('تعذر حفظ الحركات المستوردة: '+result.error.message,true);}
+    window.VELOVI_IMPORT?.clear?.();
+    window.VELOVI_IMPORT?.setStatus?.('تم حفظ '+rows.length+' حركة في الحساب المحدد.');
+    await loadFinancialData();
+    setMessage('تم استيراد '+rows.length+' حركة بنجاح.',false);
+  }
+  function renderForecastControls() {
+    const select=$('forecastCurrency'),wrap=$('forecastExclusions');
+    if(!select||!wrap)return;
+    const currencies=[...new Set(currentTransactions.map(tx=>tx.currency).concat(currentAccounts.map(a=>a.currency)).filter(Boolean))];
+    const previous=select.value||localStorage.getItem('velovi-forecast-currency')||currencies[0]||'';
+    select.replaceChildren();
+    currencies.forEach(currency=>{const option=document.createElement('option');option.value=currency;option.textContent=currency;select.appendChild(option);});
+    if(currencies.includes(previous))select.value=previous;
+    const categories=[...new Set(currentTransactions.filter(tx=>tx.transaction_type==='income'||tx.transaction_type==='expense').map(tx=>tx.category||'غير مصنف'))].sort((a,b)=>a.localeCompare(b,'ar'));
+    wrap.replaceChildren();
+    if(!categories.length){wrap.appendChild(emptyState('لا توجد تصنيفات في سجل الحركات بعد.'));return;}
+    const excluded=new Set(JSON.parse(localStorage.getItem('velovi-forecast-excluded')||'[]'));
+    categories.forEach(category=>{
+      const label=document.createElement('label');label.className='forecast-exclusion-item';
+      const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=!excluded.has(category);checkbox.dataset.category=category;
+      checkbox.addEventListener('change',()=>{
+        const nowExcluded=[...wrap.querySelectorAll('input[type=checkbox]:not(:checked)')].map(input=>input.dataset.category);
+        localStorage.setItem('velovi-forecast-excluded',JSON.stringify(nowExcluded));
+      });
+      const text=document.createElement('span');text.textContent=category;
+      label.append(checkbox,text);wrap.appendChild(label);
+    });
+  }
+  function calculateSmartForecast() {
+    const currency=$('forecastCurrency')?.value||currentAccounts[0]?.currency||'EUR';
+    const monthsCount=Number($('smartForecastMonths')?.value||12);
+    if(!Number.isInteger(monthsCount)||monthsCount<1||monthsCount>1200)return setMessage('مدة التوقع يجب أن تكون بين شهر واحد و1200 شهر.',true);
+    const now=new Date(),monthKeys=[];
+    for(let i=6;i>=1;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);monthKeys.push(d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'));}
+    const excluded=new Set([...($('forecastExclusions')?.querySelectorAll('input[type=checkbox]:not(:checked)')||[])].map(input=>input.dataset.category));
+    const transactions=currentTransactions.filter(tx=>(tx.transaction_type==='income'||tx.transaction_type==='expense')&&tx.currency===currency&&monthKeys.includes(String(tx.transaction_date).slice(0,7))&&!excluded.has(tx.category||'غير مصنف'));
+    const accountBalance=currentAccounts.filter(account=>account.is_active&&account.currency===currency&&(currentMembership.role==='admin'||account.owner_member_id===currentMembership.id)).reduce((sum,account)=>{
+      const accountRows=currentTransactions.filter(tx=>tx.account_id===account.id);
+      return sum+Number(account.opening_balance||0)+accountRows.reduce((s,tx)=>s+(tx.transaction_type==='income'?Number(tx.amount):tx.transaction_type==='expense'?-Number(tx.amount):0),0);
+    },0);
+    if(!transactions.length){
+      $('smartForecastResult').textContent='لا توجد حركات كافية بهذه العملة خلال الأشهر الستة السابقة لبناء توقع موثوق.';
+      return;
+    }
+    const monthlyByCategory=new Map();
+    transactions.forEach(tx=>{
+      const key=(tx.transaction_type||'')+'|'+(tx.category||'غير مصنف');
+      if(!monthlyByCategory.has(key))monthlyByCategory.set(key,new Map());
+      const monthly=monthlyByCategory.get(key),month=String(tx.transaction_date).slice(0,7);
+      monthly.set(month,(monthly.get(month)||0)+Number(tx.amount));
+    });
+    const estimates={income:0,expense:0},patterns=[];
+    for(const [key,monthly] of monthlyByCategory){
+      const [type,category]=key.split('|');
+      const values=monthKeys.map(month=>monthly.get(month)||0);
+      const active=values.filter(value=>value>0);
+      if(!active.length)continue;
+      const mean=active.reduce((s,v)=>s+v,0)/active.length;
+      const variance=active.reduce((s,v)=>s+Math.pow(v-mean,2),0)/active.length;
+      const cv=mean?Math.sqrt(variance)/mean:1;
+      let estimate=0,pattern='متغير';
+      if(active.length>=3&&cv<=0.30){const sorted=[...active].sort((x,y)=>x-y);estimate=sorted[Math.floor(sorted.length/2)];pattern='متكرر';}
+      else {const weights=values.map((_,index)=>index+1);estimate=values.reduce((s,value,index)=>s+value*weights[index],0)/weights.reduce((s,w)=>s+w,0);}
+      estimates[type]+=estimate;
+      patterns.push({category,type,estimate,pattern,months:active.length});
+    }
+    const net=estimates.income-estimates.expense;
+    const monthlyNet=monthKeys.map(month=>{
+      const rows=transactions.filter(tx=>String(tx.transaction_date).startsWith(month));
+      return rows.reduce((sum,tx)=>sum+(tx.transaction_type==='income'?Number(tx.amount):-Number(tx.amount)),0);
+    });
+    const avg=monthlyNet.reduce((s,v)=>s+v,0)/monthlyNet.length;
+    const variance=monthlyNet.reduce((s,v)=>s+Math.pow(v-avg,2),0)/monthlyNet.length;
+    const volatility=Math.sqrt(variance);
+    const annual=Number($('annualReturn')?.value||0);
+    const rate=Math.pow(1+annual/100,1/12)-1;
+    let projected=accountBalance;
+    for(let i=0;i<monthsCount;i++)projected=projected*(1+rate)+net;
+    const confidence=transactions.length>=18&&monthKeys.filter(month=>transactions.some(tx=>String(tx.transaction_date).startsWith(month))).length>=5?'متوسطة إلى جيدة':transactions.length>=6?'متوسطة':'منخفضة';
+    const result=$('smartForecastResult');result.replaceChildren();
+    const title=document.createElement('b');title.textContent='التوقع بعد '+monthsCount+' شهراً: '+formatMoney(projected,currency);
+    const details=document.createElement('p');details.textContent='الرصيد الحالي المحسوب: '+formatMoney(accountBalance,currency)+' · دخل شهري مقدّر: '+formatMoney(estimates.income,currency)+' · مصروف شهري مقدّر: '+formatMoney(estimates.expense,currency)+' · صافي شهري متوقع: '+formatMoney(net,currency);
+    const confidenceLine=document.createElement('p');confidenceLine.className='small muted';confidenceLine.textContent='مستوى الثقة: '+confidence+' · تذبذب صافي الأشهر الستة: '+formatMoney(volatility,currency)+'. التوقع يستخدم الوسيط للبنود المنتظمة والمتوسط المرجح للبنود المتغيرة.';
+    const breakdown=document.createElement('ul');breakdown.className='forecast-patterns';
+    patterns.forEach(item=>{const li=document.createElement('li');li.textContent=item.category+' — '+(item.type==='income'?'إيراد':'مصروف')+' · '+item.pattern+' · '+formatMoney(item.estimate,currency)+' شهرياً';breakdown.appendChild(li);});
+    result.append(title,details,confidenceLine,breakdown);
+    result.classList.toggle('negative',projected<0);result.classList.toggle('positive',projected>=0);
+  }
+
   async function loadWorkspace() {
     setMessage('جارٍ تحميل بيانات الأسرة...', false);
     const own = await client
       .from('household_members')
-      .select('id, household_id, user_id, display_name, role, is_active, can_add_transactions, can_edit_transactions, can_delete_transactions')
+      .select('id, household_id, user_id, display_name, role, is_active, can_add_transactions, can_edit_transactions, can_delete_transactions, can_view_other_accounts')
       .eq('user_id', currentUser.id)
       .order('is_active', { ascending: false });
 
@@ -247,6 +688,7 @@
     currentHousehold = householdResult.data;
     await refreshMembers();
     clearDemoData();
+    await loadFinancialData();
     setHeader(currentHousehold.name, currentMembership.display_name);
     showApp();
     setMessage('', false);
@@ -402,6 +844,20 @@
     $('inviteMember').addEventListener('click', () => $('addMemberDialog').showModal());
     $('addMemberForm').addEventListener('submit', addMember);
     $('permissionForm').addEventListener('submit', savePermissions);
+    $('accountForm').addEventListener('submit', saveAccount);
+    $('addAccount').addEventListener('click', () => openAccountDialog());
+    $('closeAccountDialog').addEventListener('click', () => $('accountDialog').close());
+    $('transactionForm').addEventListener('submit', saveTransaction);
+    document.querySelectorAll('[data-open-add]').forEach(button => button.addEventListener('click', event => {
+      event.preventDefault();
+      openTransactionDialog();
+    }));
+    $('saveImportedRows').addEventListener('click', saveImportedRows);
+    $('calcSmartForecast').addEventListener('click', calculateSmartForecast);
+    $('forecastCurrency').addEventListener('change', () => {
+      localStorage.setItem('velovi-forecast-currency', $('forecastCurrency').value);
+      calculateSmartForecast();
+    });
 
     client.auth.onAuthStateChange((_event, session) => {
       window.setTimeout(() => handleSession(session), 0);
