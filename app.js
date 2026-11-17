@@ -113,7 +113,7 @@ document.querySelectorAll('[data-chart-palette]').forEach(button => {
 addListener(languageSetting, 'change', () => {
   root.lang = languageSetting.value; root.dir = languageSetting.value === 'ar' ? 'rtl' : 'ltr';
   localStorage.setItem('velovi-language', languageSetting.value);
-  getElement('settingsStatus').textContent = 'حُفظ اختيار اللغة. بعض نصوص الواجهة لا تزال بالعربية في هذه النسخة.';
+  getElement('settingsStatus').textContent = 'تم حفظ اللغة.';
 });
 addListener(currencySetting, 'change', () => {
   localStorage.setItem('velovi-currency', currencySetting.value);
