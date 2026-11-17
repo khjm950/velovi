@@ -24,12 +24,17 @@ CREATE POLICY "View permitted member accounts"
 ON public.financial_accounts FOR SELECT TO authenticated
 USING (public.can_view_member_accounts(household_id, owner_member_id));
 
--- A reactivated member starts with the new visibility permission disabled.
-CREATE OR REPLACE FUNCTION public.reset_account_visibility_on_reactivation()
+-- A reactivated member always returns to the agreed default permissions:
+-- add=true, edit=true, delete=false, view-other-accounts=false.
+-- This enforces the defaults even if a member is reactivated outside the RPC.
+CREATE OR REPLACE FUNCTION public.reset_member_permissions_on_reactivation()
 RETURNS trigger LANGUAGE plpgsql SET search_path TO ''
 AS $function$
 BEGIN
   IF OLD.is_active = false AND NEW.is_active = true THEN
+    NEW.can_add_transactions := true;
+    NEW.can_edit_transactions := true;
+    NEW.can_delete_transactions := false;
     NEW.can_view_other_accounts := false;
   END IF;
   RETURN NEW;
@@ -37,9 +42,10 @@ END;
 $function$;
 
 DROP TRIGGER IF EXISTS trg_reset_account_visibility_on_reactivation ON public.household_members;
-CREATE TRIGGER trg_reset_account_visibility_on_reactivation
+DROP TRIGGER IF EXISTS trg_reset_member_permissions_on_reactivation ON public.household_members;
+CREATE TRIGGER trg_reset_member_permissions_on_reactivation
 BEFORE UPDATE OF is_active ON public.household_members
-FOR EACH ROW EXECUTE FUNCTION public.reset_account_visibility_on_reactivation();
+FOR EACH ROW EXECUTE FUNCTION public.reset_member_permissions_on_reactivation();
 
 -- Replace the previous five-argument RPC with the expanded permission function.
 DROP FUNCTION IF EXISTS public.update_member_permissions(uuid, uuid, boolean, boolean, boolean);
