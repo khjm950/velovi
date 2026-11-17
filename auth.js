@@ -98,8 +98,6 @@
       dot.style.background = '#23815c';
       sync.prepend(dot);
     }
-    const avatar = document.querySelector('.avatar');
-    if (avatar) avatar.textContent = (displayName || 'م').trim().charAt(0);
     const signOut = $('signOutButton');
     if (signOut) signOut.hidden = false;
     const familyName = document.querySelector('.family-card b');
@@ -268,6 +266,10 @@
       return;
     }
     currentUser = session.user;
+    const signOut = $('signOutButton');
+    if (signOut) signOut.hidden = false;
+    const sync = document.querySelector('.sync');
+    if (sync) sync.textContent = 'متصل · إعداد الأسرة';
     try {
       await loadWorkspace();
     } catch (error) {
