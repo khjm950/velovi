@@ -258,6 +258,17 @@
               <option value="income">الإيرادات</option>
               <option value="expense">المصروفات</option>
             </select>
+            <label class="sort-filter">الترتيب
+              <select id="sortTransactions" aria-label="ترتيب الحركات">
+                <option value="date-desc">الأحدث</option>
+                <option value="date-asc">الأقدم</option>
+                <option value="amount-desc">الأعلى مبلغاً</option>
+                <option value="amount-asc">الأقل مبلغاً</option>
+                <option value="type-asc">النوع</option>
+                <option value="category-asc">التصنيف</option>
+                <option value="description-asc">الوصف</option>
+              </select>
+            </label>
             <label class="date-filter">من <input id="dateFrom" type="date" aria-label="من تاريخ"></label>
             <label class="date-filter">إلى <input id="dateTo" type="date" aria-label="إلى تاريخ"></label>
             <button class="text-btn" id="clearFilters" type="button">مسح الفلاتر</button>
