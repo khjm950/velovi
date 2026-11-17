@@ -405,7 +405,8 @@
       map.set(tx.currency,(map.get(tx.currency)||0)+Number(tx.amount)); return map;
     },new Map());
     const showTotals=map=>map.size?[...map].map(([currency,value])=>formatMoney(value,currency)).join(' · '):'—';
-    const income=sums('income',currentTransactions), expense=sums('expense',currentTransactions);\n    const monthIncome=sums('income',monthRows), monthExpense=sums('expense',monthRows);
+    const income=sums('income',currentTransactions), expense=sums('expense',currentTransactions);
+    const monthIncome=sums('income',monthRows), monthExpense=sums('expense',monthRows);
     const surplus=new Map();
     for(const currency of new Set([...monthIncome.keys(),...monthExpense.keys()])) surplus.set(currency,(monthIncome.get(currency)||0)-(monthExpense.get(currency)||0));
     const balances=new Map();
@@ -874,7 +875,7 @@
   async function sendMemberInviteEmail() {
     const invite=await createMemberInvite(); if(!invite)return;
     const subject=encodeURIComponent('دعوة للانضمام إلى أسرة Velovi');
-    const body=encodeURIComponent('مرحباً '+invite.displayName+'،\\n\\nتمت دعوتك للانضمام إلى الأسرة في Velovi لإدارة الشؤون المالية. افتح الرابط التالي لتفعيل حسابك والانضمام:\\n'+invite.action_link+'\\n\\nإذا لم تكن تتوقع هذه الدعوة فتجاهل الرسالة.');
+    const body=encodeURIComponent('مرحباً '+invite.displayName+'،\n\nتمت دعوتك للانضمام إلى الأسرة في Velovi لإدارة الشؤون المالية. افتح الرابط التالي لتفعيل حسابك والانضمام:\n'+invite.action_link+'\n\nإذا لم تكن تتوقع هذه الدعوة فتجاهل الرسالة.');
     window.location.href='mailto:'+encodeURIComponent(invite.email)+'?subject='+subject+'&body='+body;
     const status=$('inviteStatus');if(status)status.textContent='تم تجهيز رسالة الدعوة في تطبيق البريد. أرسلها لإكمال الدعوة.';
   }
