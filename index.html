@@ -135,15 +135,15 @@
 
         <div class="stats">
           <article class="stat dashboard-card" role="button" tabindex="0" data-goto="transactions" data-transaction-filter="income">
-            <span>إجمالي الإيرادات · هذا الشهر</span>
+            <span>إجمالي الإيرادات · كل السجل</span>
             <strong id="dashboardIncome">—</strong>
-            <small>مجموع الحركات التجريبية الظاهرة</small>
+            <small>مجموع الإيرادات المسجلة في كل الفترات</small>
           </article>
 
           <article class="stat dashboard-card" role="button" tabindex="0" data-goto="transactions" data-transaction-filter="expense">
-            <span>إجمالي المصروفات · هذا الشهر</span>
+            <span>إجمالي المصروفات · كل السجل</span>
             <strong id="dashboardExpenses">—</strong>
-            <small>مجموع المصروفات التجريبية الظاهرة</small>
+            <small>مجموع المصروفات المسجلة في كل الفترات</small>
           </article>
 
           <article class="stat dashboard-card" role="button" tabindex="0" data-goto="reports">
@@ -164,7 +164,7 @@
             <div class="panel-head">
               <div>
                 <h2>آخر الحركات</h2>
-                <p class="muted">بيانات العرض التجريبي · يمكن فرز الأعمدة وتصفية السجل</p>
+                <p class="muted">الحركات المسجلة فعلياً · يمكن فرز الأعمدة وتصفية السجل</p>
               </div>
               <button class="text-btn" data-goto="transactions">عرض الكل ←</button>
             </div>
@@ -434,9 +434,7 @@
         <article class="panel settings-panel">
           <h2>اللغة والمنطقة</h2>
           <div class="form-grid">
-            <label>لغة الواجهة<select id="languageSetting">
-              <option value="ar">العربية</option><option value="de">Deutsch</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="it">Italiano</option><option value="nl">Nederlands</option><option value="tr">Türkçe</option><option value="pt">Português</option><option value="pl">Polski</option>
-            </select><small class="field-hint">يُحفظ اختيار اللغة؛ ترجمة جميع النصوص ستُستكمل لاحقاً.</small></label>
+            <label>لغة الواجهة<select id="languageSetting"><option value="ar">العربية</option><option value="de">Deutsch</option><option value="en">English</option></select><small class="field-hint">الواجهة متاحة بالعربية والألمانية والإنجليزية.</small></label>
             <label>العملة المفضلة<select id="currencySetting" dir="ltr" aria-label="العملة المفضلة">
               <option value="EUR">EUR · يورو (€)</option><option value="USD">USD · دولار أمريكي ($)</option><option value="GBP">GBP · جنيه إسترليني (£)</option><option value="CHF">CHF · فرنك سويسري</option><option value="SAR">SAR · ريال سعودي (ر.س)</option><option value="AED">AED · درهم إماراتي (د.إ)</option><option value="CAD">CAD · دولار كندي</option><option value="AUD">AUD · دولار أسترالي</option><option value="NZD">NZD · دولار نيوزيلندي</option><option value="JPY">JPY · ين ياباني (¥)</option><option value="CNY">CNY · يوان صيني (¥)</option><option value="INR">INR · روبية هندية (₹)</option><option value="TRY">TRY · ليرة تركية (₺)</option><option value="BRL">BRL · ريال برازيلي (R$)</option><option value="MXN">MXN · بيزو مكسيكي</option><option value="ZAR">ZAR · راند جنوب أفريقي</option><option value="SEK">SEK · كرونة سويدية</option><option value="NOK">NOK · كرونة نرويجية</option><option value="DKK">DKK · كرونة دنماركية</option><option value="PLN">PLN · زلوتي بولندي</option><option value="CZK">CZK · كرونة تشيكية</option><option value="HUF">HUF · فورنت مجري</option><option value="RON">RON · ليو روماني</option><option value="BGN">BGN · ليف بلغاري</option><option value="SGD">SGD · دولار سنغافوري</option><option value="HKD">HKD · دولار هونغ كونغ</option><option value="KRW">KRW · وون كوري</option><option value="THB">THB · بات تايلندي</option><option value="MYR">MYR · رينغيت ماليزي</option><option value="IDR">IDR · روبية إندونيسية</option><option value="PHP">PHP · بيزو فلبيني</option><option value="PKR">PKR · روبية باكستانية</option><option value="EGP">EGP · جنيه مصري</option><option value="QAR">QAR · ريال قطري</option><option value="KWD">KWD · دينار كويتي</option><option value="BHD">BHD · دينار بحريني</option><option value="OMR">OMR · ريال عُماني</option><option value="JOD">JOD · دينار أردني</option><option value="MAD">MAD · درهم مغربي</option><option value="NGN">NGN · نايرا نيجيرية</option><option value="KES">KES · شلن كيني</option>
             </select><small class="field-hint">تُستخدم كعملة افتراضية للحسابات الجديدة والسيناريو اليدوي. لا تحوّل أرصدة الحسابات أو الحركات المسجلة.</small></label>
@@ -445,14 +443,14 @@
           <div class="theme-choices">
             <button type="button" class="theme-choice" data-theme-choice="green"><i></i> أخضر Velovi</button>
             <button type="button" class="theme-choice" data-theme-choice="blue"><i></i> أزرق</button>
-            <button type="button" class="theme-choice" data-theme-choice="violet"><i></i> بنفسجي</button>
+            <button type="button" class="theme-choice" data-theme-choice="violet"><i></i> بنفسجي</button>\n            <button type="button" class="theme-choice" data-theme-choice="rose"><i></i> وردي</button>\n            <button type="button" class="theme-choice" data-theme-choice="amber"><i></i> ذهبي</button>
             <button type="button" class="theme-choice" data-theme-choice="dark"><i></i> داكن</button>
           </div>
           <div class="divider-line"></div><h2>ألوان الرسوم البيانية</h2>
           <div class="theme-choices chart-palette-choices">
             <button type="button" class="theme-choice" data-chart-palette="ocean"><i></i> محيطي</button>
             <button type="button" class="theme-choice" data-chart-palette="warm"><i></i> دافئ</button>
-            <button type="button" class="theme-choice" data-chart-palette="orchid"><i></i> بنفسجي</button>
+            <button type="button" class="theme-choice" data-chart-palette="orchid"><i></i> بنفسجي</button>\n            <button type="button" class="theme-choice" data-chart-palette="forest"><i></i> غابة</button>\n            <button type="button" class="theme-choice" data-chart-palette="sunset"><i></i> غروب</button>
           </div>
           <p class="small muted" id="settingsStatus" aria-live="polite">تُحفظ التفضيلات على هذا الجهاز في النسخة التجريبية.</p>
         </article>
@@ -477,7 +475,7 @@
             <div id="importEmpty" class="empty-state">بعد اختيار ملف، ستظهر الحركات المكتشفة هنا.</div>
             <div id="importPreview" hidden>
               <label class="import-account-label">الحساب الذي ستُضاف إليه الحركات<select id="importAccount" required><option value="">اختر حساباً مالياً</option></select></label>
-              <div class="table-wrap import-table-wrap"><table class="import-preview-table"><thead><tr><th>اعتماد</th><th>التاريخ</th><th>الوصف</th><th>النوع</th><th>المبلغ</th></tr></thead><tbody id="importRows"></tbody></table></div>
+              <div class="table-wrap import-table-wrap"><table class="import-preview-table"><thead><tr><th>اعتماد</th><th>التاريخ</th><th>الوصف</th><th>التصنيف</th><th>النوع</th><th>المبلغ</th></tr></thead><tbody id="importRows"></tbody></table></div>
               <div class="import-actions"><button class="secondary" id="downloadImportCsv" type="button">تنزيل CSV للمراجعة</button><button class="primary" id="saveImportedRows" type="button" disabled title="سيُفعّل بعد ربط مخطط الحركات المالية">حفظ الحركات في Velovi</button></div>
               <p class="small muted" id="importSaveNote">اختر الحساب وراجع الحركات قبل حفظها. سيتم التحقق من صلاحياتك ومنع التكرار.</p>
             </div>
@@ -506,10 +504,10 @@
 
   <!-- نافذة إضافة حركة -->
   <dialog id="transactionDialog">
-    <form method="dialog" id="transactionForm">
+    <form id="transactionForm">
       <div class="dialog-head">
         <h2>إضافة حركة مالية</h2>
-        <button class="close" value="cancel" aria-label="إغلاق">×</button>
+        <button class="close" id="closeTransactionDialog" type="button" aria-label="إغلاق">×</button>
       </div>
 
       <label>الحساب<select id="txAccount" required><option value="">اختر حساباً</option></select></label>
@@ -564,15 +562,25 @@
 
   <!-- نافذة إضافة عضو أو إعادة تفعيله -->
   <dialog id="addMemberDialog">
-    <form method="dialog" id="addMemberForm">
+    <form id="addMemberForm">
       <div class="dialog-head">
-        <h2>إضافة عضو إلى الأسرة</h2>
+        <h2>دعوة عضو إلى الأسرة</h2>
         <button class="close" type="button" onclick="document.getElementById('addMemberDialog').close()" aria-label="إغلاق">×</button>
       </div>
-      <p class="muted small">أدخل UID لحساب موجود مسبقاً في Supabase Authentication → Users.</p>
-      <label>معرّف المستخدم UID<input id="memberUserId" type="text" required autocomplete="off" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></label>
-      <label>الاسم المعروض<input id="memberDisplayName" type="text" maxlength="80" required></label>
-      <button class="primary full" type="submit">إضافة العضو</button>
+      <p class="muted small">أدخل البريد الإلكتروني لإنشاء دعوة آمنة. يمكنك فتح رسالة بريد جاهزة أو نسخ الرابط ومشاركته. يجب على العضو إكمال التحقق قبل تسجيل الدخول.</p>
+      <label>البريد الإلكتروني<input id="inviteEmail" type="email" autocomplete="email" placeholder="name@example.com"></label>
+      <label>الاسم المعروض<input id="inviteDisplayName" type="text" maxlength="80" placeholder="اسم العضو"></label>
+      <div class="invite-actions">
+        <button class="primary" id="sendInviteEmail" type="button">دعوة عبر البريد</button>
+        <button class="secondary" id="copyInviteLink" type="button">نسخ رابط الدعوة</button>
+      </div>
+      <p id="inviteStatus" class="small muted" role="status"></p>
+      <details class="legacy-invite">
+        <summary>إضافة حساب موجود بواسطة UID</summary>
+        <label>معرّف المستخدم UID<input id="memberUserId" type="text" autocomplete="off" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"></label>
+        <label>الاسم المعروض<input id="memberDisplayName" type="text" maxlength="80"></label>
+        <button class="secondary full" type="submit">إضافة الحساب الموجود</button>
+      </details>
     </form>
   </dialog>
 
@@ -584,7 +592,7 @@
   <script src="./supabase-config.js"></script>
   <script src="./app.js"></script>
   <script src="./auth.js"></script>
-  <script src="./install.js"></script>
+  <script src="./install.js"></script>\n  <script src="./i18n.js"></script>
 </body>
 </html>
 
