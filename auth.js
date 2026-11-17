@@ -84,10 +84,8 @@
       button.title = 'سيتم تفعيل هذه الوظيفة في مرحلة ربط البيانات المالية';
       button.setAttribute('aria-disabled', 'true');
     });
-    const reportInputs = document.querySelectorAll('#reports .form-grid input');
-    reportInputs.forEach(input => { input.value = '0'; });
     const forecast = $('forecastResult');
-    if (forecast) forecast.textContent = 'أدخل بياناتك لحساب سيناريو افتراضي.';
+    if (forecast) forecast.textContent = 'أدخل رصيدك وفائضك الشهري لحساب سيناريو افتراضي.';
   }
 
   function setHeader(householdName, displayName) {
@@ -152,7 +150,8 @@
         perms.textContent = member.is_active
           ? 'إضافة ' + (member.can_add_transactions ? '✓' : '✕') +
             '　 تعديل ' + (member.can_edit_transactions ? '✓' : '✕') +
-            '　 حذف ' + (member.can_delete_transactions ? '✓' : '✕')
+            '　 حذف ' + (member.can_delete_transactions ? '✓' : '✕' +
+            '　 رؤية حسابات الآخرين ' + (member.can_view_other_accounts ? '✓' : '✕'))
           : 'غير نشط';
         row.appendChild(perms);
 
@@ -201,13 +200,14 @@
     $('permissionAdd').checked = !!member.can_add_transactions;
     $('permissionEdit').checked = !!member.can_edit_transactions;
     $('permissionDelete').checked = !!member.can_delete_transactions;
+    $('permissionViewAccounts').checked = !!member.can_view_other_accounts;
     dialog.showModal();
   }
 
   async function refreshMembers() {
     const result = await client
       .from('household_members')
-      .select('id, household_id, user_id, display_name, role, is_active, can_add_transactions, can_edit_transactions, can_delete_transactions')
+      .select('id, household_id, user_id, display_name, role, is_active, can_add_transactions, can_edit_transactions, can_delete_transactions, can_view_other_accounts')
       .eq('household_id', currentMembership.household_id)
       .order('display_name', { ascending: true });
     if (result.error) throw result.error;
@@ -359,7 +359,8 @@
       p_member_id: dialog.dataset.memberId,
       p_can_add: $('permissionAdd').checked,
       p_can_edit: $('permissionEdit').checked,
-      p_can_delete: $('permissionDelete').checked
+      p_can_delete: $('permissionDelete').checked,
+      p_can_view_other_accounts: $('permissionViewAccounts').checked
     });
     if (result.error) return setMessage('تعذر تحديث الصلاحيات: ' + result.error.message, true);
     dialog.close();
