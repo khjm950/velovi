@@ -315,6 +315,42 @@
       'متصل':'Connected','يتطلب تسجيل الدخول':'Sign in required','تسجيل الخروج':'Sign out'
     }
   };
+
+  // Additional coverage for import review, settings, dashboard and dynamic status text.
+  Object.assign(dictionaries.de, {
+    'اعتماد':'Übernehmen','التاريخ':'Datum','الوصف':'Beschreibung','التصنيف':'Kategorie','النوع':'Typ','المبلغ':'Betrag',
+    'الحساب الذي ستُضاف إليه الحركات':'Konto für importierte Buchungen','تحقق من التاريخ والوصف والمبلغ ونوع الحركة.':'Datum, Beschreibung, Betrag und Buchungsart prüfen.',
+    'بعد اختيار ملف، ستظهر الحركات المكتشفة هنا.':'Nach Auswahl einer Datei werden erkannte Buchungen hier angezeigt.',
+    'تنزيل CSV للمراجعة':'CSV zur Prüfung herunterladen','حفظ الحركات في Velovi':'Buchungen in Velovi speichern',
+    'اختر الحساب وراجع الحركات قبل حفظها. سيتم التحقق من صلاحياتك ومنع التكرار.':'Konto auswählen und Buchungen vor dem Speichern prüfen. Berechtigungen und Duplikate werden kontrolliert.',
+    'ملاحظة:':'Hinweis:','غير مفعّل بعد':'Noch nicht aktiviert','المزامنة البنكية التلقائية':'Automatische Banksynchronisierung',
+    'ألوان الرسوم البيانية':'Diagrammfarben','محيطي':'Ozean','دافئ':'Warm','بنفسجي':'Violett','غابة':'Wald','غروب':'Sonnenuntergang',
+    'تم تغيير ألوان الرسوم البيانية بشكل مستقل عن ألوان التطبيق.':'Diagrammfarben wurden unabhängig vom App-Design geändert.',
+    'تم حفظ اللغة.':'Sprache gespeichert.','تم حفظ اللغة':'Sprache gespeichert','تم حفظ التفضيلات.':'Einstellungen gespeichert.',
+    'جارٍ تحميل الحسابات...':'Konten werden geladen…','متصل بحساب الأسرة':'Mit dem Familienkonto verbunden',
+    'تم الاتصال بحساب الأسرة':'Mit dem Familienkonto verbunden','تسجيل الخروج':'Abmelden','تسجيل الدخول':'Anmelden',
+    'إضافة حركة':'Buchung hinzufügen','حفظ':'Speichern','إغلاق':'Schließen','إلغاء':'Abbrechen',
+    'الرصيد الحالي':'Aktueller Kontostand','الحركات المالية':'Finanzbuchungen','المزيد':'Mehr',
+    'الصفحة الرئيسية':'Startseite','إعدادات التطبيق':'App-Einstellungen','العملة المفضلة':'Bevorzugte Währung',
+    'الواجهة متاحة بالعربية والألمانية والإنجليزية.':'Die Oberfläche ist auf Arabisch, Deutsch und Englisch verfügbar.'
+  });
+  Object.assign(dictionaries.en, {
+    'اعتماد':'Include','التاريخ':'Date','الوصف':'Description','التصنيف':'Category','النوع':'Type','المبلغ':'Amount',
+    'الحساب الذي ستُضاف إليه الحركات':'Account for imported transactions','تحقق من التاريخ والوصف والمبلغ ونوع الحركة.':'Check the date, description, amount and transaction type.',
+    'بعد اختيار ملف، ستظهر الحركات المكتشفة هنا.':'Detected transactions will appear here after you choose a file.',
+    'تنزيل CSV للمراجعة':'Download CSV for review','حفظ الحركات في Velovi':'Save transactions to Velovi',
+    'اختر الحساب وراجع الحركات قبل حفظها. سيتم التحقق من صلاحياتك ومنع التكرار.':'Choose an account and review transactions before saving. Permissions and duplicates will be checked.',
+    'ملاحظة:':'Note:','غير مفعّل بعد':'Not enabled yet','المزامنة البنكية التلقائية':'Automatic bank synchronization',
+    'ألوان الرسوم البيانية':'Chart colors','محيطي':'Ocean','دافئ':'Warm','بنفسجي':'Purple','غابة':'Forest','غروب':'Sunset',
+    'تم تغيير ألوان الرسوم البيانية بشكل مستقل عن ألوان التطبيق.':'Chart colors were changed independently of the app theme.',
+    'تم حفظ اللغة.':'Language saved.','تم حفظ اللغة':'Language saved.','تم حفظ التفضيلات.':'Preferences saved.',
+    'جارٍ تحميل الحسابات...':'Loading accounts…','متصل بحساب الأسرة':'Connected to family account',
+    'تم الاتصال بحساب الأسرة':'Connected to family account','تسجيل الخروج':'Sign out','تسجيل الدخول':'Sign in',
+    'إضافة حركة':'Add transaction','حفظ':'Save','إغلاق':'Close','إلغاء':'Cancel',
+    'الرصيد الحالي':'Current balance','الحركات المالية':'Financial transactions','المزيد':'More',
+    'الصفحة الرئيسية':'Home','إعدادات التطبيق':'App settings','العملة المفضلة':'Preferred currency',
+    'الواجهة متاحة بالعربية والألمانية والإنجليزية.':'The interface is available in Arabic, German and English.'
+  });
   const originals = new WeakMap();
   const attrOriginals = new WeakMap();
   const languageSelect = document.getElementById('languageSetting');
