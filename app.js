@@ -1,6 +1,6 @@
 'use strict';
 
-/* Velovi: واجهة تجريبية فقط، دون حفظ أو مزامنة. */
+/* Velovi: authenticated family finance PWA; durable financial writes live in auth.js. */
 const getElement = id => document.getElementById(id);
 const addListener = (element, event, callback) => element?.addEventListener(event, callback);
 
