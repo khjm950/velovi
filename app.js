@@ -89,8 +89,12 @@ function formatPreferredCurrency(value) {
 function refreshCurrencyDisplay() {
   const symbol = getCurrencySymbol();
   document.querySelectorAll('.forecastCurrencySymbol').forEach(label => { label.textContent = symbol; });
-  const initial = getElement('forecastResult')?.querySelector('b');
-  if (initial) initial.textContent = formatPreferredCurrency(140000);
+  const manualResult = getElement('forecastResult');
+  const storedValue = Number(manualResult?.dataset.numericValue);
+  const valueLabel = manualResult?.querySelector('b');
+  if (manualResult?.dataset.numericValue && Number.isFinite(storedValue) && valueLabel) {
+    valueLabel.textContent = formatPreferredCurrency(storedValue);
+  }
 }
 
 root.lang = savedLanguage; root.dir = savedLanguage === 'ar' ? 'rtl' : 'ltr'; root.dataset.theme = savedTheme;
@@ -314,6 +318,7 @@ addListener(forecastButton, 'click', () => {
   const rate = Math.pow(1 + annual / 100, 1 / 12) - 1;
   let future = balance;
   for (let month = 0; month < months; month++) future = future * (1 + rate) + monthly;
+  result.dataset.numericValue = String(future);
   result.replaceChildren(document.createTextNode(`الرصيد الحسابي الافتراضي بعد ${months} شهراً: `));
   const value = document.createElement('b');
   value.textContent = formatPreferredCurrency(future);
