@@ -197,7 +197,11 @@ function getRowData(row) {
 function compareRows(a, b) {
   const x = getRowData(a), y = getRowData(b);
   let result = 0;
-  if (sortKey === 'amount') {\n    const left = x.type === 'expense' ? Math.abs(x.signedAmount) : x.signedAmount;\n    const right = y.type === 'expense' ? Math.abs(y.signedAmount) : y.signedAmount;\n    result = left - right;\n  }
+  if (sortKey === 'amount') {
+    const left = x.type === 'expense' ? Math.abs(x.signedAmount) : x.signedAmount;
+    const right = y.type === 'expense' ? Math.abs(y.signedAmount) : y.signedAmount;
+    result = left - right;
+  }
   else if (sortKey === 'date') result = x.date.localeCompare(y.date);
   else if (sortKey === 'type') result = x.type.localeCompare(y.type);
   else result = x[sortKey].localeCompare(y[sortKey], 'ar', { sensitivity: 'base' });
