@@ -325,8 +325,10 @@
     const trimmed = source.trim();
     if (!trimmed) return;
     const translated = dictionaries[lang]?.[trimmed];
-    if (translated) node.nodeValue = source.replace(trimmed, translated);
-    else node.nodeValue = source;
+    const nextValue = translated ? source.replace(trimmed, translated) : source;
+    // Avoid writing identical text: the MutationObserver watches characterData.
+    // Rewriting unchanged nodes would trigger itself indefinitely and freeze the UI.
+    if (node.nodeValue !== nextValue) node.nodeValue = nextValue;
   }
   function translateElement(element, lang) {
     const attrs = ['placeholder','title','aria-label'];
