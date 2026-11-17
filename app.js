@@ -387,10 +387,12 @@ function parseStatementLines(text) {
   const ignored=/(anfangs?saldo|endsaldo|kontostand|neuer saldo|alter saldo|gesamt|summe|übertrag|saldo vortrag|opening balance|closing balance|balance brought forward)/i; const rows=[];
   for (const rawLine of String(text||'').split(/\r?\n/)) {
     const line=rawLine.replace(/\s+/g,' ').trim(); if(!line||ignored.test(line)) continue;
-    const dateMatch=line.match(datePattern), amounts=[...line.matchAll(amountPattern)]; if(!dateMatch||!amounts.length) continue;
+    const dateMatch=line.match(datePattern); if(!dateMatch) continue;
+    const lineWithoutDate=line.replace(dateMatch[0],' ');
+    const amounts=[...lineWithoutDate.matchAll(amountPattern)]; if(!amounts.length) continue;
     const chosen=amounts[0], signedAmount=parseStatementNumber(chosen[0]); if(signedAmount===null||Math.abs(signedAmount)<0.0001) continue;
     const date=normalizeStatementDate(dateMatch[0]); if(!date) continue;
-    let description=line.replace(dateMatch[0],' ').replace(chosen[0],' ').replace(/\s+/g,' ').trim(); description=description.replace(/^[|:;\-–\s]+|[|:;\-–\s]+$/g,'');
+    let description=lineWithoutDate.replace(chosen[0],' ').replace(/\s+/g,' ').trim(); description=description.replace(/^[|:;\-–\s]+|[|:;\-–\s]+$/g,'');
     if(description.length<2) description='حركة مستخرجة من الكشف';
     const expenseHint=/(lastschrift|abbuchung|kartenzahlung|belastung|miete|rechnung|payment|debit|withdrawal)/i.test(line);
     const incomeHint=/(gehalt|lohn|gutschrift|eingang|erstattung|credit|salary|deposit)/i.test(line);
