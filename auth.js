@@ -961,6 +961,7 @@
     $('signOutButton').addEventListener('click', signOut);
     $('inviteMember').addEventListener('click', () => $('addMemberDialog').showModal());
     $('sendInviteEmail').addEventListener('click', sendMemberInviteEmail);
+    $('inviteEmail').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); sendMemberInviteEmail(); } });
     $('copyInviteLink').addEventListener('click', copyMemberInviteLink);
     $('addMemberDialog').addEventListener('close', () => { $('addMemberDialog').dataset.inviteEmail=''; $('addMemberDialog').dataset.inviteLink=''; });
     $('addMemberForm').addEventListener('submit', addMember);
