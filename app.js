@@ -151,9 +151,7 @@ function renderDemoChart() {
 }
 addListener(chartType,'change',renderDemoChart); addListener(chartPeriod,'change',renderDemoChart); renderDemoChart();
 
-const txDialog = getElement('transactionDialog');
 const permissionDialog = getElement('permissionDialog');
-document.querySelectorAll('[data-open-add]').forEach(button => addListener(button, 'click', () => txDialog?.showModal?.()));
 document.querySelectorAll('[data-permission]').forEach(button => addListener(button, 'click', () => permissionDialog?.showModal?.()));
 
 const rowsContainer = getElement('txRows');
@@ -184,19 +182,24 @@ function getRowData(row) {
   const cells = row.querySelectorAll('td');
   const badge = cells[0]?.querySelector('.pill');
   const typeText = badge?.textContent.trim() || cells[0]?.textContent.trim() || '';
-  const type = typeText.includes('إيراد') ? 'income' : typeText.includes('مصروف') ? 'expense' : 'other';
-  const date = normalizeDate(cells[3]?.textContent.trim() || '');
+  const type = row.dataset.type || (typeText.includes('إيراد') ? 'income' : typeText.includes('مصروف') ? 'expense' : 'other');
+  const date = row.dataset.date || normalizeDate(cells[3]?.textContent.trim() || '');
   const amountText = cells[4]?.textContent || '';
-  const amount = parseAmount(amountText);
+  const parsedAmount = parseAmount(amountText);
+  const amount = row.dataset.amount !== undefined ? Number(row.dataset.amount) : parsedAmount;
   const hasNegativeSign = /[−-]/.test(amountText);
-  const signedAmount = hasNegativeSign ? -Math.abs(amount) : (type === 'expense' ? -Math.abs(amount) : Math.abs(amount));
+  const signedAmount = row.dataset.signedAmount !== undefined
+    ? Number(row.dataset.signedAmount)
+    : (hasNegativeSign ? -Math.abs(amount) : (type === 'expense' ? -Math.abs(amount) : Math.abs(amount)));
   row.dataset.type = type;
-  row.dataset.category = cells[1]?.textContent.trim() || '';
-  row.dataset.description = cells[2]?.textContent.trim() || '';
+  row.dataset.category = row.dataset.category || cells[1]?.textContent.trim() || '';
+  row.dataset.description = row.dataset.description || cells[2]?.textContent.trim() || '';
   row.dataset.date = date;
   row.dataset.amount = String(Math.abs(amount));
   row.dataset.signedAmount = String(signedAmount);
-  return { type, category: row.dataset.category, description: row.dataset.description, date, amount: Math.abs(amount), signedAmount };
+  const currency = row.dataset.currency || localStorage.getItem('velovi-currency') || 'EUR';
+  row.dataset.currency = currency;
+  return { type, category: row.dataset.category, description: row.dataset.description, date, amount: Math.abs(amount), signedAmount, currency };
 }
 function compareRows(a, b) {
   const x = getRowData(a), y = getRowData(b);
@@ -214,17 +217,19 @@ function applyTransactionView() {
   const from = dateFrom?.value || '';
   const to = dateTo?.value || '';
   const rows = [...rowsContainer.querySelectorAll('tr')];
-  let net = 0, count = 0;
+  const totals = new Map();
+  let count = 0;
   rows.forEach(row => {
     const d = getRowData(row);
     const amountText = d.amount.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const amountDigits = String(d.amount);
     const normalizedQuery = query.replace(/\s/g, '').replace(',', '.');
     const numericQuery = normalizedQuery && /^-?\d+(\.\d*)?$/.test(normalizedQuery);
+    const amountQuery = normalizedQuery.replace(/^-/, '');
     const matchesSearch = !query ||
       row.textContent.toLocaleLowerCase().includes(query) ||
-      (numericQuery && (amountDigits.includes(normalizedQuery.replace(/^-/, '')) ||
-        amountText.replace(/\./g, '').replace(',', '.').includes(normalizedQuery.replace(/^-/, ''))));
+      (numericQuery && (amountDigits.includes(amountQuery) ||
+        amountText.replace(/\./g, '').replace(',', '.').includes(amountQuery)));
     const matches = matchesSearch &&
       (selectedType === 'all' || d.type === selectedType) &&
       (!from || (d.date && d.date >= from)) &&
@@ -232,19 +237,28 @@ function applyTransactionView() {
     row.hidden = !matches;
     if (matches) {
       count++;
-      if (d.type === 'income') net += d.amount;
-      else if (d.type === 'expense') net -= d.amount;
-      // أي نوع آخر، بما فيه التحويلات مستقبلاً، لا يدخل في الصافي.
+      if (d.type === 'income' || d.type === 'expense') {
+        const previous = totals.get(d.currency) || 0;
+        totals.set(d.currency, previous + (d.type === 'income' ? d.amount : -d.amount));
+      }
     }
   });
   rows.sort(compareRows).forEach(row => rowsContainer.appendChild(row));
   if (netElement) {
-    netElement.textContent = `${net.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${getCurrencySymbol()}`;
-    netElement.classList.toggle('positive', net > 0);
-    netElement.classList.toggle('negative', net < 0);
-    netElement.classList.toggle('neutral', net === 0);
+    const entries = [...totals.entries()];
+    netElement.textContent = entries.length
+      ? entries.map(([currency, value]) => {
+          try { return new Intl.NumberFormat(root.lang || navigator.language || 'de-DE', { style: 'currency', currency, maximumFractionDigits: 2 }).format(value); }
+          catch { return value.toFixed(2) + ' ' + currency; }
+        }).join(' · ')
+      : '—';
+    netElement.classList.toggle('positive', entries.length === 1 && entries[0][1] > 0);
+    netElement.classList.toggle('negative', entries.length === 1 && entries[0][1] < 0);
+    netElement.classList.toggle('neutral', entries.length !== 1 || entries[0]?.[1] === 0);
   }
   if (countElement) countElement.textContent = String(count);
+  const empty = getElement('transactionsEmpty');
+  if (empty) empty.hidden = count !== 0;
   document.querySelectorAll('.sort-header').forEach(button => {
     const active = button.dataset.sort === sortKey;
     const th = button.closest('th');
@@ -278,40 +292,7 @@ addListener(getElement('clearFilters'), 'click', () => {
 });
 applyTransactionView();
 
-const transactionForm = getElement('transactionForm');
-addListener(transactionForm, 'submit', event => {
-  if (event.submitter?.value === 'cancel') return;
-  event.preventDefault();
-  const description = getElement('txDesc')?.value.trim() || '';
-  const amount = Number(getElement('txAmount')?.value);
-  const date = getElement('txDate')?.value || '';
-  const type = getElement('txType')?.value || 'expense';
-  const category = getElement('txCategory')?.value.trim() || 'غير مصنف';
-  if (!rowsContainer) return alert('تعذر العثور على جدول الحركات.');
-  if (!description || !date || !Number.isFinite(amount) || amount <= 0) return alert('أدخل وصفاً صحيحاً ومبلغاً أكبر من صفر وتاريخ الحركة.');
-  if (!['income', 'expense'].includes(type)) return alert('نوع الحركة غير صحيح.');
-
-  const row = document.createElement('tr');
-  const typeCell = document.createElement('td');
-  const badge = document.createElement('span');
-  badge.className = type === 'income' ? 'pill green' : 'pill red';
-  badge.textContent = type === 'income' ? 'إيراد' : 'مصروف';
-  typeCell.appendChild(badge);
-  const categoryCell = document.createElement('td'); categoryCell.textContent = category;
-  const descriptionCell = document.createElement('td'); descriptionCell.textContent = description;
-  const dateCell = document.createElement('td');
-  const parsedDate = new Date(`${date}T12:00:00`);
-  dateCell.textContent = Number.isNaN(parsedDate.getTime()) ? date : parsedDate.toLocaleDateString('de-DE');
-  const amountCell = document.createElement('td');
-  amountCell.classList.toggle('positive', type === 'income');
-  amountCell.textContent = `${type === 'income' ? '+' : '−'}${amount.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${getCurrencySymbol()}`;
-  row.append(typeCell, categoryCell, descriptionCell, dateCell, amountCell);
-  rowsContainer.appendChild(row);
-  applyTransactionView();
-  txDialog?.close();
-  transactionForm.reset();
-  alert('أضيفت الحركة إلى العرض التجريبي فقط، ولن تُحفظ بعد إغلاق الصفحة.');
-});
+// Transaction and account writes are handled by auth.js after a verified Supabase session is loaded.
 
 const balanceInput = getElement('forecastBalance');
 function bindSignToggle(inputId, buttonId) {
@@ -401,7 +382,7 @@ function parseStatementLines(text) {
   }
   const unique=new Map(); for(const row of rows){const key=row.date+'|'+row.description.toLowerCase()+'|'+row.amount.toFixed(2)+'|'+row.type;if(!unique.has(key))unique.set(key,row);} return [...unique.values()];
 }
-function updateImportCount(){const count=extractedImportRows.filter(row=>row.selected).length;if(importCount)importCount.textContent=count+' من '+extractedImportRows.length+' حركة';const save=getElement('saveImportedRows');if(save)save.disabled=true;const download=getElement('downloadImportCsv');if(download)download.disabled=count===0;}
+function updateImportCount(){const count=extractedImportRows.filter(row=>row.selected).length;if(importCount)importCount.textContent=count+' من '+extractedImportRows.length+' حركة';const save=getElement('saveImportedRows');if(save)save.disabled=count===0||!getElement('importAccount')?.value||save.dataset.ready!=='true';const download=getElement('downloadImportCsv');if(download)download.disabled=count===0;}
 function renderImportRows(){
   if(!importRowsBody)return; importRowsBody.replaceChildren();
   extractedImportRows.forEach(item=>{
@@ -435,7 +416,64 @@ async function processImportFile(file){
   }catch(error){console.error('Velovi import error:',error);setImportProgress(error.message||'تعذرت قراءة الملف.',0);}
 }
 addListener(fileInput,'change',event=>processImportFile(event.target.files?.[0]));
+addListener(getElement('cameraInput'),'change',event=>processImportFile(event.target.files?.[0]));
+addListener(getElement('captureFile'),'click',()=>getElement('cameraInput')?.click());
+window.VELOVI_IMPORT = {
+  getSelectedRows: () => extractedImportRows.filter(row => row.selected).map(row => ({...row})),
+  clear: () => { extractedImportRows = []; renderImportRows(); if (fileName) fileName.textContent = 'تم حفظ الحركات المستخرجة.'; },
+  setStatus: (message, isError = false) => { if (importSaveNote) { importSaveNote.textContent = message; importSaveNote.classList.toggle('error', isError); } }
+};
 addListener(getElement('downloadImportCsv'),'click',()=>{const rows=extractedImportRows.filter(row=>row.selected&&row.date&&row.description&&row.amount>0);if(!rows.length)return;const esc=value=>'"'+String(value??'').replace(/"/g,'""')+'"';const csv=['date,type,description,amount',...rows.map(row=>[row.date,row.type,row.description,row.amount.toFixed(2)].map(esc).join(','))].join('\r\n');const blob=new Blob(['\uFEFF',csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='velovi-import-review.csv';link.click();URL.revokeObjectURL(url);});
+
+const scanCodeButton = getElement('scanCodeButton');
+const barcodeDialog = getElement('barcodeDialog');
+const barcodeVideo = getElement('barcodeVideo');
+let barcodeStream = null;
+let barcodeFrame = 0;
+let barcodeDetector = null;
+function stopBarcodeScanner() {
+  if (barcodeFrame) cancelAnimationFrame(barcodeFrame);
+  barcodeFrame = 0;
+  if (barcodeStream) barcodeStream.getTracks().forEach(track => track.stop());
+  barcodeStream = null;
+  if (barcodeVideo) barcodeVideo.srcObject = null;
+}
+addListener(getElement('closeBarcodeDialog'),'click',()=>{stopBarcodeScanner();barcodeDialog?.close();});
+addListener(barcodeDialog,'close',stopBarcodeScanner);
+addListener(scanCodeButton,'click',async()=>{
+  if (!('BarcodeDetector' in window) || !navigator.mediaDevices?.getUserMedia) {
+    alert('مسح QR والباركود المباشر غير مدعوم في هذا المتصفح. يمكنك استخدام التقاط صورة أو اختيار ملف.');
+    return;
+  }
+  try {
+    barcodeDetector = new BarcodeDetector({formats:['qr_code','code_128','code_39','ean_13','ean_8','upc_a','upc_e','itf']});
+    barcodeStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
+    barcodeVideo.srcObject = barcodeStream;
+    await barcodeVideo.play();
+    barcodeDialog.showModal();
+    const scan = async () => {
+      if (!barcodeStream || !barcodeVideo || barcodeVideo.readyState < 2) return;
+      try {
+        const codes = await barcodeDetector.detect(barcodeVideo);
+        if (codes.length) {
+          const value = codes[0].rawValue || '';
+          const result = getElement('barcodeResult');
+          if (result) result.textContent = 'تمت قراءة الرمز: ' + value;
+          const description = getElement('txDesc');
+          if (description && !description.value) description.value = value;
+          stopBarcodeScanner();
+          return;
+        }
+      } catch (error) { console.warn('Barcode scan:',error); }
+      barcodeFrame = requestAnimationFrame(scan);
+    };
+    barcodeFrame = requestAnimationFrame(scan);
+  } catch (error) {
+    stopBarcodeScanner();
+    alert('تعذر تشغيل الكاميرا. تحقق من إذن الكاميرا واستخدم اتصال HTTPS.');
+  }
+});
+
 if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(error => console.error('تعذر تسجيل Service Worker:', error)));
 }
