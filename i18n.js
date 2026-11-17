@@ -112,6 +112,13 @@
       'QAR · ريال قطري':'QAR · Katar-Riyal','KWD · دينار كويتي':'KWD · Kuwait-Dinar','BHD · دينار بحريني':'BHD · Bahrain-Dinar',
       'OMR · ريال عُماني':'OMR · Omanischer Rial','JOD · دينار أردني':'JOD · Jordanischer Dinar','MAD · درهم مغربي':'MAD · Marokkanischer Dirham',
       'NGN · نايرا نيجيرية':'NGN · Nigerianischer Naira','KES · شلن كيني':'KES · Kenianischer Schilling',
+      'مثلاً: أسرة خالد':'z. B. Familie Müller','الاسم الذي سيظهر للأعضاء':'Name, der Mitgliedern angezeigt wird',
+      'التنقل الرئيسي':'Hauptnavigation','بحث في الحركات':'Buchungen suchen','تصفية حسب نوع الحركة':'Nach Buchungstyp filtern',
+      'ترتيب الحركات':'Buchungen sortieren','من تاريخ':'Ab Datum','إلى تاريخ':'Bis Datum',
+      'تغيير إشارة الفائض الشهري':'Vorzeichen des monatlichen Überschusses ändern',
+      'سيُفعّل بعد ربط مخطط الحركات المالية':'Wird nach Anbindung des Buchungsschemas aktiviert',
+      'مثلاً: الحساب الجاري':'z. B. Girokonto','مثلاً: راتب أو مشتريات':'z. B. Gehalt oder Einkauf',
+      'مثلاً: السكن، الطعام، الراتب':'z. B. Wohnen, Lebensmittel, Gehalt','اسم العضو':'Mitgliedsname',
       'متصل':'Verbunden','يتطلب تسجيل الدخول':'Anmeldung erforderlich','تسجيل الخروج':'Abmelden'
     },
     en: {
@@ -224,6 +231,13 @@
       'QAR · ريال قطري':'QAR · Qatari Riyal','KWD · دينار كويتي':'KWD · Kuwaiti Dinar','BHD · دينار بحريني':'BHD · Bahraini Dinar',
       'OMR · ريال عُماني':'OMR · Omani Rial','JOD · دينار أردني':'JOD · Jordanian Dinar','MAD · درهم مغربي':'MAD · Moroccan Dirham',
       'NGN · نايرا نيجيرية':'NGN · Nigerian Naira','KES · شلن كيني':'KES · Kenyan Shilling',
+      'مثلاً: أسرة خالد':'e.g. Smith family','الاسم الذي سيظهر للأعضاء':'Name shown to members',
+      'التنقل الرئيسي':'Main navigation','بحث في الحركات':'Search transactions','تصفية حسب نوع الحركة':'Filter by transaction type',
+      'ترتيب الحركات':'Sort transactions','من تاريخ':'From date','إلى تاريخ':'To date',
+      'تغيير إشارة الفائض الشهري':'Toggle monthly surplus sign',
+      'سيُفعّل بعد ربط مخطط الحركات المالية':'Enabled after the transaction schema is connected',
+      'مثلاً: الحساب الجاري':'e.g. Checking account','مثلاً: راتب أو مشتريات':'e.g. Salary or groceries',
+      'مثلاً: السكن، الطعام، الراتب':'e.g. Housing, food, salary','اسم العضو':'Member name',
       'متصل':'Connected','يتطلب تسجيل الدخول':'Sign in required','تسجيل الخروج':'Sign out'
     }
   };
