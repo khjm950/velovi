@@ -21,3 +21,34 @@
 .sort-header:focus-visible{outline:2px solid var(--green2);outline-offset:3px;border-radius:4px}
 tr[hidden]{display:none}
 @media(max-width:700px){.date-filter{flex:1 1 145px}.date-filter input{width:100%;flex:1}.transaction-summary{flex-wrap:wrap}.transaction-summary>div{flex:1;min-width:120px}}
+
+
+/* Supabase authentication and real household workspace */
+.shell{display:none}
+.shell.is-authenticated{display:grid}
+.auth-gate{min-height:calc(100vh - 72px);display:grid;place-items:center;padding:28px 16px}
+.auth-gate[hidden],.auth-panel[hidden],[hidden]{display:none!important}
+.auth-card{width:min(100%,460px);background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;box-shadow:0 12px 40px #173f3510}
+.auth-brand{display:flex;align-items:center;gap:12px;margin-bottom:26px}
+.auth-brand strong{font-size:22px;display:block}
+.auth-brand small{color:var(--muted)}
+.auth-panel h1{font-size:24px;margin:0 0 8px}
+.auth-form{display:grid;gap:15px;margin-top:22px}
+.auth-form label{display:grid;gap:7px;color:#53615a;font-size:13px}
+.auth-form input{width:100%;padding:12px}
+.auth-message{min-height:22px;margin:16px 0 0;font-size:13px;color:var(--green2)}
+.auth-message.error{color:#b94a48}
+.auth-message.success{color:#23815c}
+.auth-security{border-top:1px solid var(--line);padding-top:14px;margin-top:12px}
+.app-message{padding:11px 14px;margin-bottom:16px;border-radius:9px;background:var(--mint);color:var(--green);font-size:13px}
+.app-message.error{background:#fbefed;color:#a64c43}
+.empty-state{padding:24px 12px;text-align:center;color:var(--muted);font-size:13px}
+.member-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.danger-text{color:#b94a48}
+#signOutButton{cursor:pointer}
+@media(max-width:700px){
+  .shell.is-authenticated{display:block}
+  .auth-gate{min-height:calc(100vh - 62px);padding:18px 12px}
+  .auth-card{padding:22px}
+  .member-actions{width:100%;padding-right:48px}
+}
