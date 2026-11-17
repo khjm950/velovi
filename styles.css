@@ -575,3 +575,26 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
   .invite-actions>*{flex:1 1 100%}
 }
 
+
+/* Import review: full-width mobile cards with explicit field labels. */
+.import-grid{grid-template-columns:minmax(0,1fr)!important}
+.import-preview-table{width:100%;min-width:0}
+.import-preview-table input,.import-preview-table select{width:100%;min-width:0;min-height:46px;padding:10px 12px;font-size:15px;line-height:1.4}
+.import-preview-table td:first-child input{width:22px;min-width:22px;min-height:22px}
+.import-account-label{font-size:15px;gap:9px}
+.import-account-label select{width:100%;max-width:none;min-height:48px;font-size:15px}
+@media(max-width:700px){
+  .import-table-wrap{overflow:visible;margin:0}
+  .import-preview-table{display:block;width:100%;min-width:0}
+  .import-preview-table tbody{display:grid;gap:14px;width:100%}
+  .import-preview-table tbody tr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;width:100%;padding:14px;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:0 3px 12px rgba(23,63,53,.04)}
+  .import-preview-table tbody td{display:flex;flex-direction:column;justify-content:flex-start;gap:7px;min-width:0;padding:0;border:0;font-size:15px;overflow-wrap:anywhere}
+  .import-preview-table tbody td::before,.import-preview-table tbody td:nth-child(n)::before{content:attr(data-label);font-size:13px;font-weight:700;color:var(--muted)}
+  .import-preview-table tbody td:nth-child(3){grid-column:1/-1}
+  .import-preview-table tbody td:first-child{flex-direction:row;align-items:center;gap:10px}
+  .import-preview-table tbody td:first-child::before{content:attr(data-label)}
+  .import-preview-table tbody td:first-child input{width:24px;height:24px;min-width:24px;min-height:24px}
+  .import-preview-table input,.import-preview-table select{min-height:50px;font-size:16px;padding:11px 12px}
+  .import-preview-table td:nth-child(3) input{min-height:54px}
+  .import-actions>*{flex:1 1 100%;min-height:48px;font-size:15px}
+}
