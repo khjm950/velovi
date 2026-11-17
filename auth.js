@@ -55,8 +55,8 @@
     document.querySelectorAll('#home .stat small').forEach(el => { el.textContent = 'جارٍ تحميل البيانات الفعلية'; });
     const txList = document.querySelector('#home .transaction-list');
     if (txList) txList.replaceChildren(emptyState('لا توجد حركات مالية مسجلة بعد.'));
-    const donutWrap = document.querySelector('#home .donut-wrap');
-    if (donutWrap) donutWrap.replaceChildren(emptyState('سيظهر التوزيع بعد إضافة الحركات.'));
+    const chart = $('expenseChart');
+    if (chart) { chart.classList.remove('bars'); chart.style.removeProperty('background'); chart.replaceChildren(); }
     const legend = document.querySelector('#home .legend');
     if (legend) legend.replaceChildren();
     const txRows = $('txRows');
@@ -431,6 +431,72 @@
       if(!currentTransactions.length)recent.appendChild(emptyState('لا توجد حركات مالية مسجلة بعد.'));
     }
   }
+
+  function renderExpenseChart() {
+    const chart=$('expenseChart'),legend=document.querySelector('#home .legend'),period=$('chartPeriod'),label=$('chartPeriodLabel');
+    if(!chart||!legend)return;
+    const now=new Date(),periodValue=period?.value||'month';
+    let start;
+    if(periodValue==='year')start=new Date(now.getFullYear(),0,1);
+    else if(periodValue==='quarter')start=new Date(now.getFullYear(),now.getMonth()-2,1);
+    else start=new Date(now.getFullYear(),now.getMonth(),1);
+    const expenses=currentTransactions.filter(tx=>{
+      if(tx.transaction_type!=='expense')return false;
+      const date=new Date(String(tx.transaction_date)+'T12:00:00');
+      return !Number.isNaN(date.getTime())&&date>=start&&date<=now;
+    });
+    const available=[...new Set(expenses.map(tx=>tx.currency).filter(Boolean))];
+    const preferred=localStorage.getItem('velovi-currency')||'EUR';
+    const currency=available.includes(preferred)?preferred:available[0];
+    const totals=new Map();
+    expenses.filter(tx=>tx.currency===currency).forEach(tx=>{
+      const category=tx.category||'غير مصنف';
+      totals.set(category,(totals.get(category)||0)+Number(tx.amount));
+    });
+    let entries=[...totals].sort((a,b)=>b[1]-a[1]);
+    if(entries.length>4){const rest=entries.slice(3).reduce((sum,item)=>sum+item[1],0);entries=entries.slice(0,3).concat([['أخرى',rest]]);}
+    const total=entries.reduce((sum,item)=>sum+item[1],0);
+    const labels={month:'هذا الشهر',quarter:'آخر 3 أشهر',year:'هذا العام'};
+    if(label)label.textContent=labels[periodValue]+' · '+(currency||'لا توجد بيانات');
+    chart.classList.toggle('bars',period?.value!==undefined&&getElement('chartType')?.value==='bars');
+    chart.replaceChildren();
+    legend.replaceChildren();
+    const colors=['var(--chart-1)','var(--chart-2)','var(--chart-3)','var(--chart-4)'];
+    if(!total){
+      chart.classList.remove('bars');
+      chart.style.background='conic-gradient(var(--line) 0 100%)';
+      const center=document.createElement('div'),bold=document.createElement('b'),small=document.createElement('small');
+      bold.textContent='—';small.textContent='لا توجد مصروفات';
+      center.append(bold,small);chart.appendChild(center);
+      return;
+    }
+    const parts=[];let angle=0;
+    entries.forEach(([category,value],index)=>{
+      const end=angle+(value/total*360);
+      parts.push(colors[index]+' '+angle.toFixed(2)+'deg '+end.toFixed(2)+'deg');
+      angle=end;
+      const item=document.createElement('span'),swatch=document.createElement('i'),name=document.createElement('span'),percent=document.createElement('b');
+      swatch.style.background=colors[index];name.textContent=category;percent.textContent=(value/total*100).toFixed(1)+'%';
+      item.append(swatch,name,percent);legend.appendChild(item);
+    });
+    const isBars=getElement('chartType')?.value==='bars';
+    chart.classList.toggle('bars',isBars);
+    if(isBars){
+      chart.style.setProperty('background','repeating-linear-gradient(to top,var(--chart-grid) 0 1px,transparent 1px 42px),var(--surface)','important');
+      const max=Math.max(...entries.map(item=>item[1]));
+      entries.forEach(([category,value],index)=>{
+        const bar=document.createElement('span');bar.className='chart-bar';
+        bar.style.height=Math.max(5,value/max*100)+'%';bar.style.background=colors[index];bar.title=category+' · '+formatMoney(value,currency);
+        chart.appendChild(bar);
+      });
+    }else{
+      chart.style.background='conic-gradient('+parts.join(',')+')';
+      const center=document.createElement('div'),bold=document.createElement('b'),small=document.createElement('small');
+      bold.textContent=formatMoney(total,currency);small.textContent='إجمالي المصروفات';
+      center.append(bold,small);chart.appendChild(center);
+    }
+  }
+
   async function loadFinancialData() {
     const [accountsResult,transactionsResult]=await Promise.all([
       client.from('financial_accounts')
@@ -450,6 +516,8 @@
     renderAccounts();
     renderTransactions();
     updateDashboard();
+    renderExpenseChart();
+    window.VELOVI_FINANCE_CHART = renderExpenseChart;
     renderForecastControls();
   }
   function openAccountDialog(account=null) {
@@ -871,6 +939,8 @@
     }));
     $('saveImportedRows').addEventListener('click', saveImportedRows);
     $('calcSmartForecast').addEventListener('click', calculateSmartForecast);
+    $('chartType').addEventListener('change', () => window.VELOVI_FINANCE_CHART?.());
+    $('chartPeriod').addEventListener('change', () => window.VELOVI_FINANCE_CHART?.());
     $('forecastCurrency').addEventListener('change', () => {
       localStorage.setItem('velovi-forecast-currency', $('forecastCurrency').value);
       calculateSmartForecast();
