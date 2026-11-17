@@ -57,7 +57,7 @@ Implemented in this branch
 - Settings for language, currency preference, theme, and independent chart
   palette. Currency preference is a default/display preference, not an FX
   conversion engine.
-- PWA cache bumped to v8 so installed devices fetch the new application shell.
+- PWA cache bumped to v9 so installed devices fetch the new application shell.
 
 Important limitations
 ---------------------
