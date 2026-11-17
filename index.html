@@ -68,26 +68,36 @@
         <span class="chevron">⌄</span>
       </div>
 
-      <nav>
+      <nav aria-label="التنقل الرئيسي">
         <button class="nav-item active" data-view="home">
-          <span>▦</span> الرئيسية
+          <span aria-hidden="true">⌂</span> الرئيسية
         </button>
         <button class="nav-item" data-view="transactions">
-          <span>↕</span> الحركات المالية
+          <span aria-hidden="true">↕</span> الحركات
         </button>
         <button class="nav-item" data-view="accounts">
-          <span>▤</span> الحسابات
+          <span aria-hidden="true">▤</span> الحسابات
         </button>
-        <button class="nav-item" data-view="members">
-          <span>♧</span> أفراد الأسرة والصلاحيات
+        <button class="nav-item nav-secondary" data-view="members">
+          <span aria-hidden="true">♧</span> أفراد الأسرة والصلاحيات
         </button>
-        <button class="nav-item" data-view="reports">
-          <span>◷</span> التقارير والتوقعات
+        <button class="nav-item nav-secondary" data-view="reports">
+          <span aria-hidden="true">◷</span> التقارير والتوقعات
         </button>
-        <button class="nav-item" data-view="ing">
-          <span>⇄</span> الاستيراد البنكي
+        <button class="nav-item nav-secondary" data-view="ing">
+          <span aria-hidden="true">⇄</span> الاستيراد البنكي
         </button>
+        <button class="nav-item nav-secondary" data-view="settings"><span aria-hidden="true">⚙</span> الإعدادات</button>
       </nav>
+      <details class="mobile-more">
+        <summary><span aria-hidden="true">•••</span><span>المزيد</span></summary>
+        <div class="mobile-more-menu">
+          <button class="nav-item" data-view="members"><span aria-hidden="true">♧</span> أفراد الأسرة والصلاحيات</button>
+          <button class="nav-item" data-view="reports"><span aria-hidden="true">◷</span> التقارير والتوقعات</button>
+          <button class="nav-item" data-view="ing"><span aria-hidden="true">⇄</span> الاستيراد البنكي</button>
+          <button class="nav-item" data-view="settings"><span aria-hidden="true">⚙</span> الإعدادات</button>
+        </div>
+      </details>
 
       <div class="sidebar-bottom">
         <div class="security">
@@ -124,25 +134,25 @@
         </div>
 
         <div class="stats">
-          <article class="stat">
+          <article class="stat dashboard-card" role="button" tabindex="0" data-goto="transactions" data-transaction-filter="income">
             <span>إجمالي الإيرادات · هذا الشهر</span>
             <strong>3.200,00 €</strong>
             <small>مجموع الحركات التجريبية الظاهرة</small>
           </article>
 
-          <article class="stat">
+          <article class="stat dashboard-card" role="button" tabindex="0" data-goto="transactions" data-transaction-filter="expense">
             <span>إجمالي المصروفات · هذا الشهر</span>
             <strong>1.054,90 €</strong>
             <small>مجموع المصروفات التجريبية الظاهرة</small>
           </article>
 
-          <article class="stat">
+          <article class="stat dashboard-card" role="button" tabindex="0" data-goto="reports">
             <span>الفائض الشهري</span>
             <strong>2.145,10 €</strong>
             <small>الإيرادات مطروحاً منها المصروفات</small>
           </article>
 
-          <article class="stat">
+          <article class="stat dashboard-card" role="button" tabindex="0" data-goto="accounts">
             <span>إجمالي الأرصدة المعروضة</span>
             <strong>17.200,00 €</strong>
             <small>مجموع الحساب الجاري والمدخرات والنقد</small>
@@ -202,12 +212,16 @@
             <div class="panel-head">
               <div>
                 <h2>توزيع المصروفات</h2>
-                <p class="muted">نموذج توضيحي للشهر الحالي</p>
+                <p class="muted" id="chartPeriodLabel">نموذج توضيحي للشهر الحالي</p>
+              </div>
+              <div class="chart-controls">
+                <label>الفترة<select id="chartPeriod"><option value="month">هذا الشهر</option><option value="quarter">آخر 3 أشهر</option><option value="year">هذا العام</option></select></label>
+                <label>طريقة العرض<select id="chartType"><option value="donut">دائري</option><option value="bars">أعمدة</option></select></label>
               </div>
             </div>
 
             <div class="donut-wrap">
-              <div class="donut">
+              <div class="donut" id="expenseChart">
                 <div>
                   <b>1.054,90 €</b>
                   <small>الإجمالي</small>
@@ -392,29 +406,36 @@
             </div>
           </div>
 
-          <div class="form-grid">
-            <label>
-              الرصيد الحالي (€)
-              <input type="number" value="20000">
+          <div class="form-grid forecast-grid">
+            <label class="forecast-balance-field">
+              الرصيد الحالي — <bdi id="forecastCurrencySymbol" class="forecastCurrencySymbol" dir="ltr" style="white-space:nowrap;unicode-bidi:isolate">€</bdi>
+              <div class="balance-input-row">
+                <input id="forecastBalance" type="text" inputmode="decimal" value="20000" aria-describedby="balanceHint" autocomplete="off" dir="ltr">
+                <button class="balance-sign-button" id="toggleBalanceSign" type="button" aria-label="تغيير إشارة الرصيد" title="تغيير إشارة الرصيد">±</button>
+              </div>
+              <small id="balanceHint" class="field-hint">اضغط ± داخل الحقل للتبديل بين الرصيد الموجب والسالب.</small>
             </label>
             <label>
-              الفائض الشهري (€)
-              <input type="number" value="1000">
+              الفائض الشهري — <bdi class="forecastCurrencySymbol" dir="ltr" style="white-space:nowrap;unicode-bidi:isolate">€</bdi>
+              <div class="balance-input-row surplus-input-row">
+                <input id="monthlySurplus" type="text" inputmode="decimal" value="1000" autocomplete="off" dir="ltr" aria-label="الفائض الشهري">
+                <button class="balance-sign-button" id="toggleSurplusSign" type="button" aria-label="تغيير إشارة الفائض الشهري" title="تغيير إشارة الفائض الشهري">±</button>
+              </div>
             </label>
             <label>
-              عدد السنوات
-              <input id="years" type="number" min="1" max="100" value="10">
+              مدة التوقع (بالأشهر)
+              <input id="forecastMonths" type="number" min="1" max="1200" step="1" value="120">
             </label>
             <label>
               العائد السنوي (%)
-              <input type="number" value="0" step=".1">
+              <input id="annualReturn" type="number" value="0" step="0.1">
             </label>
           </div>
 
-          <button class="primary" id="calcForecast">حساب التوقع</button>
+          <button class="primary" id="calcForecast" type="button">حساب التوقع</button>
 
-          <div class="forecast-result" id="forecastResult">
-            الرصيد المتوقع بعد 10 سنوات: <b>140.000 €</b>
+          <div class="forecast-result" id="forecastResult" aria-live="polite">
+            الرصيد المتوقع بعد 120 شهراً: <b>140.000 €</b>
           </div>
 
           <p class="muted small">
@@ -423,40 +444,60 @@
         </article>
       </section>
 
+      <section class="view" id="settings">
+        <div class="page-heading"><div><p class="eyebrow">تفضيلات التطبيق</p><h1>الإعدادات</h1><p class="muted">تخصيص اللغة والعملة والمظهر</p></div></div>
+        <article class="panel settings-panel">
+          <h2>اللغة والمنطقة</h2>
+          <div class="form-grid">
+            <label>لغة الواجهة<select id="languageSetting">
+              <option value="ar">العربية</option><option value="de">Deutsch</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="it">Italiano</option><option value="nl">Nederlands</option><option value="tr">Türkçe</option><option value="pt">Português</option><option value="pl">Polski</option>
+            </select><small class="field-hint">يُحفظ اختيار اللغة؛ ترجمة جميع النصوص ستُستكمل لاحقاً.</small></label>
+            <label>العملة المفضلة<select id="currencySetting" dir="ltr" aria-label="العملة المفضلة">
+              <option value="EUR">EUR · يورو (€)</option><option value="USD">USD · دولار أمريكي ($)</option><option value="GBP">GBP · جنيه إسترليني (£)</option><option value="CHF">CHF · فرنك سويسري</option><option value="SAR">SAR · ريال سعودي (ر.س)</option><option value="AED">AED · درهم إماراتي (د.إ)</option><option value="CAD">CAD · دولار كندي</option><option value="AUD">AUD · دولار أسترالي</option><option value="NZD">NZD · دولار نيوزيلندي</option><option value="JPY">JPY · ين ياباني (¥)</option><option value="CNY">CNY · يوان صيني (¥)</option><option value="INR">INR · روبية هندية (₹)</option><option value="TRY">TRY · ليرة تركية (₺)</option><option value="BRL">BRL · ريال برازيلي (R$)</option><option value="MXN">MXN · بيزو مكسيكي</option><option value="ZAR">ZAR · راند جنوب أفريقي</option><option value="SEK">SEK · كرونة سويدية</option><option value="NOK">NOK · كرونة نرويجية</option><option value="DKK">DKK · كرونة دنماركية</option><option value="PLN">PLN · زلوتي بولندي</option><option value="CZK">CZK · كرونة تشيكية</option><option value="HUF">HUF · فورنت مجري</option><option value="RON">RON · ليو روماني</option><option value="BGN">BGN · ليف بلغاري</option><option value="SGD">SGD · دولار سنغافوري</option><option value="HKD">HKD · دولار هونغ كونغ</option><option value="KRW">KRW · وون كوري</option><option value="THB">THB · بات تايلندي</option><option value="MYR">MYR · رينغيت ماليزي</option><option value="IDR">IDR · روبية إندونيسية</option><option value="PHP">PHP · بيزو فلبيني</option><option value="PKR">PKR · روبية باكستانية</option><option value="EGP">EGP · جنيه مصري</option><option value="QAR">QAR · ريال قطري</option><option value="KWD">KWD · دينار كويتي</option><option value="BHD">BHD · دينار بحريني</option><option value="OMR">OMR · ريال عُماني</option><option value="JOD">JOD · دينار أردني</option><option value="MAD">MAD · درهم مغربي</option><option value="NGN">NGN · نايرا نيجيرية</option><option value="KES">KES · شلن كيني</option>
+            </select><small class="field-hint">تُقترح تلقائياً حسب منطقة الجهاز، ويمكن تغييرها. يُقترح الاختيار تلقائياً حسب منطقة الجهاز ويمكن تغييره. اختيار العملة لا يحوّل المبالغ الحالية.</small></label>
+          </div>
+          <div class="divider-line"></div><h2>المظهر والألوان</h2>
+          <div class="theme-choices">
+            <button type="button" class="theme-choice" data-theme-choice="green"><i></i> أخضر Velovi</button>
+            <button type="button" class="theme-choice" data-theme-choice="blue"><i></i> أزرق</button>
+            <button type="button" class="theme-choice" data-theme-choice="violet"><i></i> بنفسجي</button>
+            <button type="button" class="theme-choice" data-theme-choice="dark"><i></i> داكن</button>
+          </div>
+          <div class="divider-line"></div><h2>ألوان الرسوم البيانية</h2>
+          <div class="theme-choices chart-palette-choices">
+            <button type="button" class="theme-choice" data-chart-palette="ocean"><i></i> محيطي</button>
+            <button type="button" class="theme-choice" data-chart-palette="warm"><i></i> دافئ</button>
+            <button type="button" class="theme-choice" data-chart-palette="orchid"><i></i> بنفسجي</button>
+          </div>
+          <p class="small muted" id="settingsStatus" aria-live="polite">تُحفظ التفضيلات على هذا الجهاز في النسخة التجريبية.</p>
+        </article>
+      </section>
+
       <!-- الاستيراد البنكي -->
       <section class="view" id="ing">
-        <div class="page-heading">
-          <div>
-            <p class="eyebrow">استيراد بنكي</p>
-            <h1>استيراد كشوف الحسابات</h1>
-            <p class="muted">استيراد الحركات المالية من مختلف البنوك</p>
-          </div>
-        </div>
-
-        <div class="content-grid">
+        <div class="page-heading"><div><p class="eyebrow">استيراد بنكي</p><h1>استيراد كشوف الحسابات</h1><p class="muted">قراءة كشوف PDF والصور ومراجعة الحركات قبل اعتمادها</p></div></div>
+        <div class="content-grid import-grid">
           <article class="panel">
-            <span class="big-icon">⇧</span>
-            <h2>استيراد ملف الحركات</h2>
-            <p class="muted">
-              يمكن اختيار ملف للمعاينة فقط. قراءة CSV وExcel والصيغ البنكية واستيرادها غير مفعّلة بعد.
-            </p>
-            <button class="secondary" id="chooseFile">اختيار ملف</button>
-            <input id="fileInput" type="file" accept=".csv,.txt,.xml,.xlsx,.xls" hidden>
-            <p class="small muted" id="fileName">لم يتم اختيار ملف. لا تُرفع الملفات ولا تُقرأ محتوياتها.</p>
+            <span class="big-icon">⇧</span><h2>قراءة كشف حساب PDF أو صورة</h2>
+            <p class="muted">اختر ملف PDF أو JPG أو PNG. تتم القراءة داخل جهازك ولا يُرفع الملف إلى خادم خارجي.</p>
+            <button class="secondary" id="chooseFile" type="button">اختيار ملف</button>
+            <input id="fileInput" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" hidden>
+            <p class="small muted" id="fileName">لم يتم اختيار ملف.</p>
+            <div id="importProgress" class="import-progress" hidden><div class="import-progress-track"><span id="importProgressBar"></span></div><p id="importStatus" class="small muted" role="status">جارٍ تجهيز الملف...</p></div>
+            <div class="import-note"><b>ملاحظة:</b> قد تحتاج الصور المائلة أو منخفضة الدقة إلى مراجعة يدوية. لا تعتمد الحركات تلقائياً.</div>
           </article>
-
           <article class="panel">
-            <span class="big-icon">⟳</span>
-            <h2>المزامنة البنكية التلقائية</h2>
-            <p class="muted">
-              ندرس ربطاً مصرفياً آمناً يدعم أكبر عدد ممكن من البنوك الأوروبية عبر مزود متخصص.
-            </p>
-            <span class="pill amber">لم يتم تفعيل الربط بعد</span>
-            <p class="small muted">
-              لن نطلب منك إدخال كلمة مرور البنك في هذه الواجهة التجريبية.
-            </p>
+            <div class="panel-head"><div><h2>مراجعة البيانات المستخرجة</h2><p class="muted">تحقق من التاريخ والوصف والمبلغ ونوع الحركة.</p></div><span class="pill amber" id="importCount">0 حركة</span></div>
+            <div id="importEmpty" class="empty-state">بعد اختيار ملف، ستظهر الحركات المكتشفة هنا.</div>
+            <div id="importPreview" hidden>
+              <div class="table-wrap import-table-wrap"><table class="import-preview-table"><thead><tr><th>اعتماد</th><th>التاريخ</th><th>الوصف</th><th>النوع</th><th>المبلغ</th></tr></thead><tbody id="importRows"></tbody></table></div>
+              <div class="import-actions"><button class="secondary" id="downloadImportCsv" type="button">تنزيل CSV للمراجعة</button><button class="primary" id="saveImportedRows" type="button" disabled title="سيُفعّل بعد ربط مخطط الحركات المالية">حفظ الحركات في Velovi</button></div>
+              <p class="small muted" id="importSaveNote">استخراج البيانات ومعاينتها متاح الآن. سيُفعّل الحفظ المباشر بعد استكمال ربط جدول الحركات والتحقق من أعمدته.</p>
+            </div>
+            <details class="import-raw-details"><summary>عرض النص الذي قرأه النظام</summary><pre id="importRawText" dir="auto"></pre></details>
           </article>
         </div>
+        <article class="panel import-bank-note"><h2>المزامنة البنكية التلقائية</h2><p class="muted">ربط البنك مباشرة عبر مزود مصرفي متخصص ما زال قيد الدراسة. لن نطلب كلمة مرور البنك في Velovi.</p><span class="pill amber">غير مفعّل بعد</span></article>
       </section>
 
     </main>
@@ -519,6 +560,7 @@
       <label class="check"><input id="permissionAdd" type="checkbox"> السماح بإضافة الحركات</label>
       <label class="check"><input id="permissionEdit" type="checkbox"> السماح بتعديل الحركات</label>
       <label class="check"><input id="permissionDelete" type="checkbox"> السماح بحذف الحركات</label>
+      <label class="check"><input id="permissionViewAccounts" type="checkbox"> السماح برؤية حسابات الأعضاء الآخرين (قراءة فقط)</label>
       <button class="primary full" type="submit">حفظ الصلاحيات</button>
     </form>
   </dialog>
@@ -539,6 +581,8 @@
 
 
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="./supabase-config.js"></script>
   <script src="./app.js"></script>
