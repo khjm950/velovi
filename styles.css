@@ -598,3 +598,36 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
   .import-preview-table td:nth-child(3) input{min-height:54px}
   .import-actions>*{flex:1 1 100%;min-height:48px;font-size:15px}
 }
+
+/* Import date: keep the complete day/month/year visible in RTL layouts. */
+.import-preview-table input[type="date"]{
+  direction:ltr!important;
+  text-align:center!important;
+  unicode-bidi:isolate;
+  font-variant-numeric:tabular-nums;
+  min-width:0;
+  width:100%;
+  padding-inline:6px;
+}
+@media(max-width:700px){
+  .import-preview-table td[data-label="التاريخ"] input[type="date"]{
+    min-width:0;
+    width:100%;
+    min-height:52px;
+    font-size:15px;
+    letter-spacing:0;
+  }
+}
+/* Palette selectors must outrank legacy theme-specific chart backgrounds. */
+:root[data-chart-palette] .donut:not(.bars){
+  background:conic-gradient(var(--chart-1) 0 80.6%,var(--chart-2) 80.6% 92.6%,var(--chart-3) 92.6% 100%)!important;
+}
+:root[data-chart-palette] .legend .l1{background:var(--chart-1)!important}
+:root[data-chart-palette] .legend .l2{background:var(--chart-2)!important}
+:root[data-chart-palette] .legend .l3{background:var(--chart-3)!important}
+:root[data-chart-palette] .legend .l4{background:var(--chart-4)!important}
+:root[data-chart-palette] .donut.bars{background:repeating-linear-gradient(to top,var(--chart-grid) 0 1px,transparent 1px 42px),var(--surface)!important}
+:root[data-chart-palette] .donut.bars .chart-bar:nth-of-type(1){background:var(--chart-1)!important}
+:root[data-chart-palette] .donut.bars .chart-bar:nth-of-type(2){background:var(--chart-2)!important}
+:root[data-chart-palette] .donut.bars .chart-bar:nth-of-type(3){background:var(--chart-3)!important}
+:root[data-chart-palette] .donut.bars .chart-bar:nth-of-type(4){background:var(--chart-4)!important}
