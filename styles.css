@@ -575,4 +575,3 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
   .invite-actions>*{flex:1 1 100%}
 }
 
-#authGate,#authGate .auth-card,#authGate .auth-panel,#loginForm,#loginForm label,#loginForm input,#loginForm button{pointer-events:auto}#authGate{position:relative;z-index:10}#authGate .auth-card,#loginForm{position:relative}#loginForm input{position:relative;z-index:11;display:block;min-height:52px;width:100%;box-sizing:border-box;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;touch-action:manipulation}#loginForm label{cursor:text}#loginForm button{min-height:52px;touch-action:manipulation}
