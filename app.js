@@ -416,13 +416,13 @@ async function processImportFile(file){
   }catch(error){console.error('Velovi import error:',error);setImportProgress(error.message||'تعذرت قراءة الملف.',0);}
 }
 addListener(fileInput,'change',event=>processImportFile(event.target.files?.[0]));
+addListener(getElement('importAccount'),'change',updateImportCount);
 addListener(getElement('cameraInput'),'change',event=>processImportFile(event.target.files?.[0]));
 addListener(getElement('captureFile'),'click',()=>getElement('cameraInput')?.click());
 window.VELOVI_IMPORT = {
   getSelectedRows: () => extractedImportRows.filter(row => row.selected).map(row => ({...row})),
   clear: () => { extractedImportRows = []; renderImportRows(); if (fileName) fileName.textContent = 'تم حفظ الحركات المستخرجة.'; },
-  setStatus: (message, isError = false) => { if (importSaveNote) { importSaveNote.textContent = message; importSaveNote.classList.toggle('error', isError); } }
-};
+  setStatus: (message, isError = false) => { const note = getElement('importSaveNote'); if (note) { note.textContent = message; note.classList.toggle('error', isError); } }};
 addListener(getElement('downloadImportCsv'),'click',()=>{const rows=extractedImportRows.filter(row=>row.selected&&row.date&&row.description&&row.amount>0);if(!rows.length)return;const esc=value=>'"'+String(value??'').replace(/"/g,'""')+'"';const csv=['date,type,description,amount',...rows.map(row=>[row.date,row.type,row.description,row.amount.toFixed(2)].map(esc).join(','))].join('\r\n');const blob=new Blob(['\uFEFF',csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='velovi-import-review.csv';link.click();URL.revokeObjectURL(url);});
 
 const scanCodeButton = getElement('scanCodeButton');
@@ -446,7 +446,10 @@ addListener(scanCodeButton,'click',async()=>{
     return;
   }
   try {
-    barcodeDetector = new BarcodeDetector({formats:['qr_code','code_128','code_39','ean_13','ean_8','upc_a','upc_e','itf']});
+    const supported = await BarcodeDetector.getSupportedFormats();
+    const formats = ['qr_code','code_128','code_39','ean_13','ean_8','upc_a','upc_e','itf'].filter(format => supported.includes(format));
+    if (!formats.length) throw new Error('لا توجد صيغ QR أو باركود مدعومة في هذا المتصفح.');
+    barcodeDetector = new BarcodeDetector({formats});
     barcodeStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
     barcodeVideo.srcObject = barcodeStream;
     await barcodeVideo.play();
