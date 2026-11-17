@@ -464,6 +464,7 @@
     const colors=['var(--chart-1)','var(--chart-2)','var(--chart-3)','var(--chart-4)'];
     if(!total){
       chart.classList.remove('bars');
+      chart.style.removeProperty('background');
       chart.style.background='conic-gradient(var(--line) 0 100%)';
       const center=document.createElement('div'),bold=document.createElement('b'),small=document.createElement('small');
       bold.textContent='—';small.textContent='لا توجد مصروفات';
@@ -490,6 +491,7 @@
         chart.appendChild(bar);
       });
     }else{
+      chart.style.removeProperty('background');
       chart.style.background='conic-gradient('+parts.join(',')+')';
       const center=document.createElement('div'),bold=document.createElement('b'),small=document.createElement('small');
       bold.textContent=formatMoney(total,currency);small.textContent='إجمالي المصروفات';
