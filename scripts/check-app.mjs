@@ -23,6 +23,9 @@ if (swRegistrations !== 1) fail('Expected one Service Worker registration, found
 if (!auth.includes('query.range(from, from + pageSize - 1)') || !auth.includes('page.length < pageSize')) {
   fail('Household financial records must be fetched with stable pagination.');
 }
+if (app.includes('renderDemoChart')) fail('Obsolete demo chart logic remains alongside the live chart.');
+if (!auth.includes("$('chartType').addEventListener('change'")) fail('Live chart type control is not wired.');
+if (!auth.includes("$('chartPeriod').addEventListener('change'")) fail('Live chart period control is not wired.');
 if (!app.includes('result = x.signedAmount - y.signedAmount')) {
   fail('Transaction amount sorting must use signed ledger amounts.');
 }
