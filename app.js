@@ -141,23 +141,7 @@ addListener(getElement('resetSettings'), 'click', () => {
   if (status) status.textContent = 'تم إرجاع الإعدادات الافتراضية. لم يتم حذف أي بيانات مالية.';
   window.VELOVI_I18N?.apply?.();
 });
-const chartType = getElement('chartType'), chartPeriod = getElement('chartPeriod');
-function renderDemoChart() {
-  if (typeof window.VELOVI_FINANCE_CHART === 'function') { window.VELOVI_FINANCE_CHART(); return; }
-  const chart = getElement('expenseChart'); if (!chart) return;
-  const isBars = chartType?.value === 'bars'; chart.classList.toggle('bars', isBars);
-  if (isBars) {
-    // Inline important background prevents the base donut gradient from showing behind bars.
-    chart.style.setProperty('background', 'repeating-linear-gradient(to top, var(--chart-grid) 0 1px, transparent 1px 42px), var(--surface)', 'important');
-    if (!chart.querySelector('.chart-bar')) chart.insertAdjacentHTML('beforeend','<span class="chart-bar" style="height:80%"></span><span class="chart-bar" style="height:12%"></span><span class="chart-bar" style="height:7%"></span><span class="chart-bar" style="height:1%"></span>');
-  } else {
-    chart.style.removeProperty('background');
-  }
-  const labels={month:'نموذج توضيحي للشهر الحالي',quarter:'عرض تجريبي لآخر 3 أشهر',year:'عرض تجريبي لهذا العام'};
-  const label=getElement('chartPeriodLabel'); if(label) label.textContent=labels[chartPeriod?.value||'month'];
-}
-addListener(chartType,'change',renderDemoChart); addListener(chartPeriod,'change',renderDemoChart); renderDemoChart();
-
+// Live chart data and chart controls are owned by auth.js.
 const permissionDialog = getElement('permissionDialog');
 document.querySelectorAll('[data-permission]').forEach(button => addListener(button, 'click', () => permissionDialog?.showModal?.()));
 
