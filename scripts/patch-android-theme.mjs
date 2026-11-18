@@ -13,9 +13,9 @@ function addItems(styleName, items) {
     const itemPattern = new RegExp('<item name="' + name + '">[\\s\\S]*?</item>');
     const item = '<item name="' + name + '">' + value + '</item>';
     if (itemPattern.test(body)) body = body.replace(itemPattern, item);
-    else body += '\\n        ' + item;
+    else body += '\n        ' + item;
   }
-  xml = xml.replace(match[0], match[1] + body + '\\n    ' + match[3]);
+  xml = xml.replace(match[0], match[1] + body + '\n    ' + match[3]);
 }
 
 addItems('AppTheme.NoActionBar', [
