@@ -404,43 +404,31 @@ dialog::backdrop{background:rgba(0,0,0,.52)!important}
 @media(max-width:700px){.sidebar{background:var(--surface)!important}.mobile-more-menu{background:var(--surface)!important}}
 
 
-/* v16: keep chart category colors independent from the selected app theme. */
+/* Chart colors follow the selected app theme, with distinct shades for category contrast. */
 :root{
-  --chart-1:#0f766e;
-  --chart-2:#3b82f6;
-  --chart-3:#d97706;
-  --chart-4:#8b5cf6;
-  --chart-grid:#e7edf0;
+  --chart-1:var(--accent);
+  --chart-2:color-mix(in srgb,var(--accent) 68%, #ffffff);
+  --chart-3:color-mix(in srgb,var(--accent) 48%, #d6a34a);
+  --chart-4:var(--accent-strong);
+  --chart-grid:var(--line);
 }
 :root[data-theme="dark"]{
-  --chart-1:#2dd4bf;
-  --chart-2:#60a5fa;
-  --chart-3:#fbbf24;
-  --chart-4:#c4b5fd;
-  --chart-grid:#3a4a50;
+  --chart-1:#75b394;
+  --chart-2:#4f9d91;
+  --chart-3:#d6ad65;
+  --chart-4:#a4d0b7;
+  --chart-grid:#35483d;
 }
-.donut:not(.bars){
-  background:conic-gradient(
-    var(--chart-1) 0 80.6%,
-    var(--chart-2) 80.6% 92.6%,
-    var(--chart-3) 92.6% 100%
-  )!important;
-}
+.donut:not(.bars){background:conic-gradient(var(--chart-1) 0 80.6%,var(--chart-2) 80.6% 92.6%,var(--chart-3) 92.6% 100%)!important}
 .legend .l1{background:var(--chart-1)!important}
 .legend .l2{background:var(--chart-2)!important}
 .legend .l3{background:var(--chart-3)!important}
 .legend .l4{background:var(--chart-4)!important}
-:root[data-theme] .donut.bars{
-  background:repeating-linear-gradient(
-    to top,var(--chart-grid) 0 1px,transparent 1px 42px
-  )!important;
-}
-:root[data-theme] .donut.bars .chart-bar{background:var(--chart-1)!important}
+:root[data-theme] .donut.bars{background:repeating-linear-gradient(to top,var(--chart-grid) 0 1px,transparent 1px 42px),var(--surface)!important}
 :root[data-theme] .donut.bars .chart-bar:nth-of-type(1){background:var(--chart-1)!important}
 :root[data-theme] .donut.bars .chart-bar:nth-of-type(2){background:var(--chart-2)!important}
 :root[data-theme] .donut.bars .chart-bar:nth-of-type(3){background:var(--chart-3)!important}
 :root[data-theme] .donut.bars .chart-bar:nth-of-type(4){background:var(--chart-4)!important}
-
 
 /* v18: keep ISO codes and currency symbols stable beside Arabic currency names. */
 #currencySetting{direction:ltr!important;text-align:left!important;unicode-bidi:plaintext}
@@ -477,13 +465,6 @@ dialog::backdrop{background:rgba(0,0,0,.52)!important}
   .member-actions{width:100%;padding-right:48px}
 }
 
-/* Independent chart palettes: these colors do not change with the app theme. */
-:root[data-chart-palette="ocean"]{--chart-1:#0f766e;--chart-2:#3b82f6;--chart-3:#d97706;--chart-4:#8b5cf6;--chart-grid:#e7edf0}
-:root[data-chart-palette="warm"]{--chart-1:#b45309;--chart-2:#be123c;--chart-3:#a16207;--chart-4:#0f766e;--chart-grid:#eee6dc}
-:root[data-chart-palette="orchid"]{--chart-1:#7c3aed;--chart-2:#db2777;--chart-3:#0891b2;--chart-4:#ca8a04;--chart-grid:#ebe5f3}
-.chart-palette-choices .theme-choice i{background:var(--chart-1)}
-.chart-palette-choices [data-chart-palette="warm"] i{background:#b45309}
-.chart-palette-choices [data-chart-palette="orchid"] i{background:#7c3aed}
 .import-progress{margin-top:15px;padding:12px;background:var(--surface-muted,#f7faf8);border:1px solid var(--line);border-radius:10px}
 .import-progress-track{height:7px;background:var(--line);border-radius:99px;overflow:hidden}
 .import-progress-track span{display:block;height:100%;width:0;background:var(--accent,var(--green2));transition:width .2s ease}
@@ -540,10 +521,6 @@ dialog::backdrop{background:rgba(0,0,0,.52)!important}
   --line:#eee2c9;--bg:#fbf8f0;--surface:#fff;--surface-raised:#fff;--surface-muted:#fdfaf4;
   --accent:#a56c1d;--accent-strong:#674316;--accent-soft:#fbf1dc;
 }
-:root[data-chart-palette="forest"]{--chart-1:#166534;--chart-2:#65a30d;--chart-3:#0f766e;--chart-4:#a3a3a3;--chart-grid:#e3ece5}
-:root[data-chart-palette="sunset"]{--chart-1:#ea580c;--chart-2:#e11d48;--chart-3:#f59e0b;--chart-4:#7c3aed;--chart-grid:#f1e5df}
-.chart-palette-choices [data-chart-palette="forest"] i{background:#166534}
-.chart-palette-choices [data-chart-palette="sunset"] i{background:#ea580c}
 .theme-choice[data-theme-choice="rose"] i{background:#a3456b}
 .theme-choice[data-theme-choice="amber"] i{background:#a56c1d}
 
@@ -622,32 +599,7 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
     letter-spacing:0;
   }
 }
-/* Palette selectors must outrank legacy theme-specific chart backgrounds. */
-:root[data-chart-palette] .donut:not(.bars){
-  background:conic-gradient(var(--chart-1) 0 80.6%,var(--chart-2) 80.6% 92.6%,var(--chart-3) 92.6% 100%)!important;
-}
-:root[data-chart-palette] .legend .l1{background:var(--chart-1)!important}
-:root[data-chart-palette] .legend .l2{background:var(--chart-2)!important}
-:root[data-chart-palette] .legend .l3{background:var(--chart-3)!important}
-:root[data-chart-palette] .legend .l4{background:var(--chart-4)!important}
-:root[data-chart-palette] .donut.bars{background:repeating-linear-gradient(to top,var(--chart-grid) 0 1px,transparent 1px 42px),var(--surface)!important}
-:root[data-chart-palette] .donut.bars .chart-bar:nth-of-type(1){background:var(--chart-1)!important}
-:root[data-chart-palette] .donut.bars .chart-bar:nth-of-type(2){background:var(--chart-2)!important}
-:root[data-chart-palette] .donut.bars .chart-bar:nth-of-type(3){background:var(--chart-3)!important}
-:root[data-chart-palette] .donut.bars .chart-bar:nth-of-type(4){background:var(--chart-4)!important}
-
-
-/* Each chart palette selector keeps its own fixed swatch color. */
-.chart-palette-choices [data-chart-palette="ocean"] i{background:#0f766e!important}
-.chart-palette-choices [data-chart-palette="warm"] i{background:#b45309!important}
-.chart-palette-choices [data-chart-palette="orchid"] i{background:#7c3aed!important}
-.chart-palette-choices [data-chart-palette="forest"] i{background:#166534!important}
-.chart-palette-choices [data-chart-palette="sunset"] i{background:#ea580c!important}
-.chart-palette-choices .theme-choice{transition:border-color .15s ease,box-shadow .15s ease,background .15s ease}
-/* Match the selected appearance button; override the chart buttons default border. */
-.chart-palette-choices .theme-choice.active{border:1px solid var(--accent)!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 20%,transparent)!important}
-
-
+/* Chart palette controls removed: charts now inherit coordinated shades from the selected app theme. */
 /* Bulk transaction selection and safe settings reset controls. */
 .bulk-actions{display:flex;align-items:center;justify-content:flex-start;gap:12px;flex-wrap:wrap;margin:0 0 14px;padding:10px 12px;background:var(--surface-muted);border:1px solid var(--line);border-radius:10px}
 .bulk-actions[hidden]{display:none}
