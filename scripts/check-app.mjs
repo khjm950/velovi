@@ -4,6 +4,7 @@ const read = path => readFileSync(path, 'utf8');
 const fail = message => { console.error('FAIL:', message); process.exitCode = 1; };
 const html = read('index.html');
 const app = read('app.js');
+const auth = read('auth.js');
 const install = read('install.js');
 const bridge = read('capacitor-bridge.js');
 const buildScript = read('scripts/build-web.mjs');
@@ -18,6 +19,9 @@ const swRegistrations = (app.match(/serviceWorker\.register/g) || []).length +
   (install.match(/serviceWorker\.register/g) || []).length;
 if (swRegistrations !== 1) fail('Expected one Service Worker registration, found ' + swRegistrations);
 
+if (!auth.includes('query.range(from, from + pageSize - 1)') || !auth.includes('page.length < pageSize')) {
+  fail('Household financial records must be fetched with stable pagination.');
+}
 if (!app.includes('result = x.signedAmount - y.signedAmount')) {
   fail('Transaction amount sorting must use signed ledger amounts.');
 }
@@ -40,7 +44,7 @@ for (const key of ['name', 'short_name', 'start_url', 'scope', 'display', 'icons
 }
 if (manifest.display !== 'standalone') fail('PWA manifest must use standalone display mode.');
 
-const browserCode = [app, read('auth.js'), read('i18n.js'), install, read('supabase-config.js')].join('\n');
+const browserCode = [app, auth, read('i18n.js'), install, read('supabase-config.js')].join('\n');
 if (/sb_secret_[A-Za-z0-9_-]{20,}/i.test(browserCode) || /service_role\s*[:=]\s*['"]eyJ/i.test(browserCode)) {
   fail('A privileged Supabase key pattern was found in browser code.');
 }
