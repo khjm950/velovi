@@ -318,6 +318,7 @@
 
   // Additional coverage for import review, settings, dashboard and dynamic status text.
   Object.assign(dictionaries.de, {
+    'تحديد الكل':'Alle auswählen',
     'اعتماد':'Übernehmen','التاريخ':'Datum','الوصف':'Beschreibung','التصنيف':'Kategorie','النوع':'Typ','المبلغ':'Betrag',
     'الحساب الذي ستُضاف إليه الحركات':'Konto für importierte Buchungen','تحقق من التاريخ والوصف والمبلغ ونوع الحركة.':'Datum, Beschreibung, Betrag und Buchungsart prüfen.',
     'بعد اختيار ملف، ستظهر الحركات المكتشفة هنا.':'Nach Auswahl einer Datei werden erkannte Buchungen hier angezeigt.',
@@ -345,6 +346,7 @@
     'تم حذف ':'Gelöscht: ',' حركة بنجاح.':' Buchungen erfolgreich.',' من أصل ':' von ',' حركة. قد تمنع صلاحيات الوصول حذف بعض الحركات.':' Buchungen. Berechtigungen können das Löschen einiger Buchungen verhindern.'
   });
   Object.assign(dictionaries.en, {
+    'تحديد الكل':'Select all',
     'إرجاع الإعدادات الافتراضية':'Restore default settings',
     'حذف المحدد':'Delete selected','0 محددة':'0 selected','تحديد كل الحركات القابلة للحذف':'Select all deletable transactions',
     'تحديد الحركة':'Select transaction','هل تريد إرجاع إعدادات اللغة والعملة والمظهر وألوان الرسوم إلى الوضع الافتراضي؟ لن تُحذف الحسابات أو الحركات.':'Restore the default language, currency, appearance and chart colors? Accounts and transactions will not be deleted.',
