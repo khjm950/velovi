@@ -1,0 +1,9 @@
+{
+  "appId": "com.velovi.familyfinance",
+  "appName": "Velovi",
+  "webDir": "www",
+  "backgroundColor": "#10241b",
+  "server": {
+    "androidScheme": "https"
+  }
+}
