@@ -11,10 +11,25 @@ const buildScript = read('scripts/build-web.mjs');
 const workflow = read('.github/workflows/android-apk.yml');
 const sw = read('sw.js');
 const manifest = JSON.parse(read('manifest.webmanifest'));
+const packageJson = JSON.parse(read('package.json'));
+const packageLock = JSON.parse(read('package-lock.json'));
 
 const ids = [...html.matchAll(/\bid=["']([^"']+)["']/g)].map(match => match[1]);
 const duplicateIds = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))];
+const scriptSources = [...html.matchAll(/<script[^>]+src=["']([^"']+)["']/g)].map(match => match[1]);
+const duplicateScripts = [...new Set(scriptSources.filter((src, index) => scriptSources.indexOf(src) !== index))];
 if (duplicateIds.length) fail('Duplicate HTML IDs: ' + duplicateIds.join(', '));
+if (duplicateScripts.length) fail('Duplicate script sources: ' + duplicateScripts.join(', '));
+const missingIds = [...new Set([
+  ...[...app.matchAll(/getElement\\(['"]([^'"]+)['"]\\)/g)].map(match => match[1]),
+  ...[...auth.matchAll(/\\$\\(['"]([^'"]+)['"]\\)/g)].map(match => match[1])
+])].filter(id => !ids.includes(id));
+if (missingIds.length) fail('JavaScript references missing HTML IDs: ' + missingIds.join(', '));
+const sorted = value => JSON.stringify(Object.fromEntries(Object.entries(value || {}).sort(([a], [b]) => a.localeCompare(b))));
+if (sorted(packageJson.dependencies) !== sorted(packageLock.packages?.['']?.dependencies) ||
+    sorted(packageJson.devDependencies) !== sorted(packageLock.packages?.['']?.devDependencies)) {
+  fail('package-lock.json does not match package.json dependencies.');
+}
 
 const swRegistrations = (app.match(/serviceWorker\.register/g) || []).length +
   (install.match(/serviceWorker\.register/g) || []).length;
