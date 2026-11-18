@@ -8,6 +8,7 @@ const auth = read('auth.js');
 const install = read('install.js');
 const bridge = read('capacitor-bridge.js');
 const buildScript = read('scripts/build-web.mjs');
+const workflow = read('.github/workflows/android-apk.yml');
 const sw = read('sw.js');
 const manifest = JSON.parse(read('manifest.webmanifest'));
 
@@ -28,6 +29,7 @@ if (!app.includes('result = x.signedAmount - y.signedAmount')) {
 if (!html.includes('./i18n.js')) fail('i18n.js is not loaded by index.html.');
 if (!html.includes('./capacitor-bridge.js')) fail('Native bridge loader is not loaded by index.html.');
 if (!buildScript.includes('capacitor-native.js')) fail('Android native bridge is not bundled for APK builds.');
+if (!workflow.includes('node scripts/patch-android-manifest.mjs')) fail('Android manifest hardening is missing from the APK workflow.');
 if (!bridge.includes('isNativePlatform')) fail('Native bridge loader is not restricted to native platforms.');
 if (!html.includes('@supabase/supabase-js@2.119.0')) fail('Supabase JS CDN version is not pinned.');
 if (!html.includes('tesseract.js@5.1.1')) fail('Tesseract.js CDN version is not pinned.');
