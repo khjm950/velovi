@@ -73,6 +73,9 @@ jobs:
       - name: Sync Capacitor assets
         run: npx cap sync android
 
+      - name: Harden Android manifest
+        run: node scripts/patch-android-manifest.mjs
+
       - name: Build installable debug APK
         run: |
           cd android
