@@ -644,7 +644,7 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
 .chart-palette-choices [data-chart-palette="forest"] i{background:#166534!important}
 .chart-palette-choices [data-chart-palette="sunset"] i{background:#ea580c!important}
 .chart-palette-choices .theme-choice{border:1px solid var(--line)!important;transition:border-color .15s ease,box-shadow .15s ease,background .15s ease}
-.chart-palette-choices .theme-choice.active{border:2px solid var(--accent)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)!important;background:color-mix(in srgb,var(--accent) 7%,var(--surface))!important}
+.chart-palette-choices .theme-choice.active{border:2px solid var(--green2)!important;box-shadow:0 0 0 2px rgba(39,102,83,.15)!important;background:var(--surface)!important}
 
 
 /* Bulk transaction selection and safe settings reset controls. */
