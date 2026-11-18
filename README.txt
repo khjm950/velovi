@@ -57,7 +57,7 @@ Implemented in this branch
 - Settings for language, currency preference, and theme. Chart shades follow the
   selected app theme with separate contrast levels. Currency preference is a
   default/display preference, not an FX conversion engine.
-- PWA cache currently uses v20 so installed devices fetch the current application shell.
+- PWA cache currently uses v22 so installed devices fetch the current application shell.
 
 Important limitations
 ---------------------
