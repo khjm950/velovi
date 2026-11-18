@@ -57,7 +57,7 @@ Implemented in this branch
 - Settings for language, currency preference, and theme. Chart shades follow the
   selected app theme with separate contrast levels. Currency preference is a
   default/display preference, not an FX conversion engine.
-- PWA cache currently uses v22 so installed devices fetch the current application shell.
+- PWA cache currently uses v23 so installed devices fetch the current application shell.
 
 Important limitations
 ---------------------
@@ -107,9 +107,9 @@ Privacy model
 PWA
 ---
 - Serve over HTTPS (or localhost during development).
-- The service worker caches the app shell and falls back to it when offline.
+- The service worker caches the app shell and pinned core CDN libraries, then falls back to them when offline.
 - Offline shell availability does not mean financial-data writes or sync are
-  available offline.
+  available offline. OCR language data and some PDF worker assets still need internet.
 
 
 Stability and Android packaging work
