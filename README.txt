@@ -69,8 +69,8 @@ Important limitations
   history remains private.
 - Smart forecasting is a statistical heuristic based on available history,
   not an AI financial adviser. Sparse history lowers its confidence.
-- The expense chart now uses actual transaction aggregates, selected time
-  period, and the independent chart palette.
+- The expense chart uses actual transaction aggregates and selected time
+  period. Its contrasting shades follow the active app theme.
 - Full translation of every UI string is not complete; the language preference
   currently stores the selected language and sets document direction.
 - QR/barcode scanning reads a code and places it into the transaction
@@ -78,7 +78,8 @@ Important limitations
   payment QR standard.
 - Automatic Open Banking connections, bank-provider cost comparison, and
   bank synchronization are not implemented.
-- Backups, recovery testing, and a production security review remain required.
+- Recovery testing and a production security review remain required. Supabase's
+  leaked-password protection is currently disabled and still needs enabling.
 
 Database migrations / SQL references
 ------------------------------------
@@ -118,6 +119,9 @@ Stability and Android packaging work
 - Service Worker registration is centralized in install.js.
 - Language formatting follows the selected interface language for money and dates.
 - Browser dependencies use exact CDN versions for Supabase JS and Tesseract.js.
-- Static source checks and a Capacitor Android Debug APK workflow are being added.
+- Static source and import-parser regression checks are in the APK workflow.
+- Capacitor builds local web assets, branded launcher/splash art, Android back-button
+  navigation, camera permission, and dark system bars; backup is disabled in the APK.
+- The workflow audits pinned npm dependencies before producing the Debug APK.
 - The generated Debug APK is for device testing only; a signed Release build requires
   a separately managed keystore and final acceptance tests.
