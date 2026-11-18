@@ -1,6 +1,9 @@
 name: Velovi Android APK
 
 on:
+  push:
+    branches:
+      - chore/velovi-stability-apk
   workflow_dispatch:
 
 permissions:
