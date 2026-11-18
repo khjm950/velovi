@@ -4,7 +4,7 @@ Velovi — implementation status
 Project
 -------
 Arabic-first, RTL family-finance PWA. Current working branch:
-`feat/permissions-import-settings-restoration`. Do not merge to main until
+`chore/velovi-stability-apk`. Do not merge to main until
 browser end-to-end tests have been completed.
 
 Live Supabase project
@@ -54,10 +54,10 @@ Implemented in this branch
   navigation.
 - Transaction search by text and amount, date range, type filter, sortable
   columns, currency-separated net total, and transaction count.
-- Settings for language, currency preference, theme, and independent chart
-  palette. Currency preference is a default/display preference, not an FX
-  conversion engine.
-- PWA cache bumped to v9 so installed devices fetch the new application shell.
+- Settings for language, currency preference, and theme. Chart shades follow the
+  selected app theme with separate contrast levels. Currency preference is a
+  default/display preference, not an FX conversion engine.
+- PWA cache currently uses v20 so installed devices fetch the current application shell.
 
 Important limitations
 ---------------------
@@ -109,3 +109,15 @@ PWA
 - The service worker caches the app shell and falls back to it when offline.
 - Offline shell availability does not mean financial-data writes or sync are
   available offline.
+
+
+Stability and Android packaging work
+------------------------------------
+- Work is isolated on `chore/velovi-stability-apk`; main is not modified.
+- Amount sorting now compares signed ledger amounts, so expenses remain negative.
+- Service Worker registration is centralized in install.js.
+- Language formatting follows the selected interface language for money and dates.
+- Browser dependencies use exact CDN versions for Supabase JS and Tesseract.js.
+- Static source checks and a Capacitor Android Debug APK workflow are being added.
+- The generated Debug APK is for device testing only; a signed Release build requires
+  a separately managed keystore and final acceptance tests.
