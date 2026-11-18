@@ -360,11 +360,21 @@ let extractedImportRows = [];
 addListener(chooseFileButton, 'click', () => fileInput?.click());
 function setImportProgress(message, percent = 0, visible = true) { if (importProgress) importProgress.hidden = !visible; if (importStatus) importStatus.textContent = message; if (importProgressBar) importProgressBar.style.width = Math.max(0,Math.min(100,percent)) + '%'; }
 function normalizeStatementDate(raw) {
-  if (!raw) return ''; const iso = raw.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
-  if (iso) return iso[1] + '-' + iso[2].padStart(2,'0') + '-' + iso[3].padStart(2,'0');
-  const local = raw.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})$/); if (!local) return '';
-  let year = Number(local[3]); if (year < 100) year += year < 70 ? 2000 : 1900;
-  return year + '-' + local[2].padStart(2,'0') + '-' + local[1].padStart(2,'0');
+  const value = String(raw || '').trim();
+  if (!value) return '';
+  const iso = value.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+  const local = iso ? null : value.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})$/);
+  if (!iso && !local) return '';
+  const year = iso ? Number(iso[1]) : (() => {
+    let parsed = Number(local[3]);
+    if (parsed < 100) parsed += parsed < 70 ? 2000 : 1900;
+    return parsed;
+  })();
+  const month = Number(iso ? iso[2] : local[2]);
+  const day = Number(iso ? iso[3] : local[1]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return '';
+  return year + '-' + String(month).padStart(2, '0') + '-' + String(day).padStart(2, '0');
 }
 function parseStatementNumber(raw) {
   let value = String(raw || '').replace(/[−–]/g,'-').replace(/[^\d,.-]/g,''); const negative = value.includes('-'); value = value.replace(/-/g,'');
