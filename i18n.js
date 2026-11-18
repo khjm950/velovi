@@ -334,6 +334,26 @@
     'الصفحة الرئيسية':'Startseite','إعدادات التطبيق':'App-Einstellungen','العملة المفضلة':'Bevorzugte Währung',
     'الواجهة متاحة بالعربية والألمانية والإنجليزية.':'Die Oberfläche ist auf Arabisch, Deutsch und Englisch verfügbar.'
   });
+  Object.assign(dictionaries.de, {
+    'إرجاع الإعدادات الافتراضية':'Standardeinstellungen wiederherstellen',
+    'حذف المحدد':'Ausgewählte löschen','0 محددة':'0 ausgewählt','تحديد كل الحركات القابلة للحذف':'Alle löschbaren Buchungen auswählen',
+    'تحديد الحركة':'Buchung auswählen','هل تريد إرجاع إعدادات اللغة والعملة والمظهر وألوان الرسوم إلى الوضع الافتراضي؟ لن تُحذف الحسابات أو الحركات.':'Möchten Sie Sprache, Währung, Design und Diagrammfarben auf die Standardwerte zurücksetzen? Konten und Buchungen bleiben erhalten.',
+    'تم إرجاع الإعدادات الافتراضية. لم يتم حذف أي بيانات مالية.':'Standardeinstellungen wiederhergestellt. Finanzdaten wurden nicht gelöscht.',
+    'لا توجد حركات محددة لديك صلاحية حذفها.':'Keine ausgewählten Buchungen dürfen gelöscht werden.',
+    'هل تريد حذف ':'Möchten Sie ',' حركة محددة نهائياً؟ لا يمكن التراجع عن الحذف.':' ausgewählte Buchungen endgültig löschen? Dies kann nicht rückgängig gemacht werden.',
+    'تعذر حذف الحركات المحددة: ':'Ausgewählte Buchungen konnten nicht gelöscht werden: ',
+    'تم حذف ':'Gelöscht: ',' حركة بنجاح.':' Buchungen erfolgreich.',' من أصل ':' von ',' حركة. قد تمنع صلاحيات الوصول حذف بعض الحركات.':' Buchungen. Berechtigungen können das Löschen einiger Buchungen verhindern.'
+  });
+  Object.assign(dictionaries.en, {
+    'إرجاع الإعدادات الافتراضية':'Restore default settings',
+    'حذف المحدد':'Delete selected','0 محددة':'0 selected','تحديد كل الحركات القابلة للحذف':'Select all deletable transactions',
+    'تحديد الحركة':'Select transaction','هل تريد إرجاع إعدادات اللغة والعملة والمظهر وألوان الرسوم إلى الوضع الافتراضي؟ لن تُحذف الحسابات أو الحركات.':'Restore the default language, currency, appearance and chart colors? Accounts and transactions will not be deleted.',
+    'تم إرجاع الإعدادات الافتراضية. لم يتم حذف أي بيانات مالية.':'Default settings restored. No financial data was deleted.',
+    'لا توجد حركات محددة لديك صلاحية حذفها.':'No selected transactions are permitted for deletion.',
+    'هل تريد حذف ':'Delete ',' حركة محددة نهائياً؟ لا يمكن التراجع عن الحذف.':' selected transactions permanently? This cannot be undone.',
+    'تعذر حذف الحركات المحددة: ':'Could not delete selected transactions: ',
+    'تم حذف ':'Deleted ',' حركة بنجاح.':' transactions successfully.',' من أصل ':' of ',' حركة. قد تمنع صلاحيات الوصول حذف بعض الحركات.':' transactions. Permissions may prevent some deletions.'
+  });
   Object.assign(dictionaries.en, {
     'اعتماد':'Include','التاريخ':'Date','الوصف':'Description','التصنيف':'Category','النوع':'Type','المبلغ':'Amount',
     'الحساب الذي ستُضاف إليه الحركات':'Account for imported transactions','تحقق من التاريخ والوصف والمبلغ ونوع الحركة.':'Check the date, description, amount and transaction type.',

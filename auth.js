@@ -365,6 +365,57 @@
       stat.append(label,amount,note); stats.appendChild(stat);
     }
   }
+  function bulkText(ar, de, en) {
+    const language = document.documentElement.lang || 'ar';
+    return language === 'de' ? de : language === 'en' ? en : ar;
+  }
+  function updateBulkSelectionUi() {
+    const all = [...document.querySelectorAll('#txRows .tx-select')];
+    const visible = all.filter(box => !box.closest('tr')?.hidden);
+    const selected = all.filter(box => box.checked);
+    const toolbar = $('bulkActions'), count = $('bulkSelectionCount');
+    const button = $('bulkDeleteTransactions'), master = $('selectAllTransactions');
+    if (toolbar) toolbar.hidden = all.length === 0;
+    if (count) count.textContent = selected.length + ' ' + bulkText('محددة', 'ausgewählt', 'selected');
+    if (button) button.disabled = selected.length === 0;
+    if (master) {
+      master.disabled = visible.length === 0;
+      master.checked = visible.length > 0 && visible.every(box => box.checked);
+      master.indeterminate = visible.some(box => box.checked) && !master.checked;
+    }
+  }
+  window.VELOVI_UPDATE_SELECTION = updateBulkSelectionUi;
+
+  async function deleteSelectedTransactions() {
+    const selected = [...document.querySelectorAll('#txRows .tx-select:checked')];
+    const ids = [...new Set(selected.map(box => box.dataset.transactionId).filter(Boolean))];
+    const permitted = ids.filter(id => {
+      const tx = currentTransactions.find(item => item.id === id);
+      return tx && canDeleteTransactions(tx);
+    });
+    if (!permitted.length) return setMessage(bulkText('لا توجد حركات محددة لديك صلاحية حذفها.', 'Keine ausgewählten Buchungen dürfen gelöscht werden.', 'No selected transactions are permitted for deletion.'), true);
+    const confirmText = bulkText(
+      'هل تريد حذف ' + permitted.length + ' حركة محددة نهائياً؟ لا يمكن التراجع عن الحذف.',
+      'Möchten Sie ' + permitted.length + ' ausgewählte Buchungen endgültig löschen? Dies kann nicht rückgängig gemacht werden.',
+      'Permanently delete ' + permitted.length + ' selected transactions? This cannot be undone.'
+    );
+    if (!window.confirm(confirmText)) return;
+    const result = await client.from('financial_transactions')
+      .delete().in('id', permitted).select('id');
+    if (result.error) return setMessage(bulkText('تعذر حذف الحركات المحددة: ', 'Ausgewählte Buchungen konnten nicht gelöscht werden: ', 'Could not delete selected transactions: ') + result.error.message, true);
+    const deleted = result.data?.length || 0;
+    await loadFinancialData();
+    if (deleted !== permitted.length) {
+      setMessage(bulkText(
+        'تم حذف ' + deleted + ' من أصل ' + permitted.length + ' حركة. قد تمنع صلاحيات الوصول حذف بعض الحركات.',
+        deleted + ' von ' + permitted.length + ' Buchungen wurden gelöscht. Berechtigungen können weitere Löschungen verhindern.',
+        deleted + ' of ' + permitted.length + ' transactions were deleted. Permissions may have prevented some deletions.'
+      ), true);
+    } else {
+      setMessage(bulkText('تم حذف ' + deleted + ' حركة بنجاح.', deleted + ' Buchungen erfolgreich gelöscht.', deleted + ' transactions deleted successfully.'), false);
+    }
+  }
+
   function renderTransactions() {
     const body = $('txRows'), empty = $('transactionsEmpty');
     if (!body) return;
@@ -403,11 +454,23 @@
         del.addEventListener('click',()=>deleteTransaction(tx)); actions.appendChild(del);
       }
       if (actions.childElementCount) amountCell.appendChild(actions);
-      row.append(typeCell,categoryCell,descCell,dateCell,amountCell);
+      const selectCell = document.createElement('td');
+      selectCell.className = 'select-column';
+      if (canDeleteTransactions(tx)) {
+        const select = document.createElement('input');
+        select.type = 'checkbox';
+        select.className = 'tx-select';
+        select.dataset.transactionId = tx.id;
+        select.setAttribute('aria-label', 'تحديد الحركة');
+        select.addEventListener('change', updateBulkSelectionUi);
+        selectCell.appendChild(select);
+      }
+      row.append(typeCell,categoryCell,descCell,dateCell,amountCell,selectCell);
       body.appendChild(row);
     });
     if (empty) empty.hidden = currentTransactions.length !== 0;
     $('searchTx')?.dispatchEvent(new Event('input',{bubbles:true}));
+    updateBulkSelectionUi();
   }
   function updateDashboard() {
     const now=new Date(), month=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
@@ -694,6 +757,16 @@
       label.append(checkbox,text);wrap.appendChild(label);
     });
   }
+  window.VELOVI_RESET_FORECAST_PREFERENCES = () => {
+    localStorage.removeItem('velovi-forecast-currency');
+    localStorage.removeItem('velovi-forecast-excluded');
+    document.querySelectorAll('#forecastExclusions input[type="checkbox"]').forEach(input => { input.checked = true; });
+    const currency = $('forecastCurrency');
+    const preferred = $('currencySetting')?.value || 'EUR';
+    if (currency && [...currency.options].some(option => option.value === preferred)) currency.value = preferred;
+    calculateSmartForecast();
+  };
+
   function calculateSmartForecast() {
     const currency=$('forecastCurrency')?.value||currentAccounts[0]?.currency||'EUR';
     const monthsCount=Number($('smartForecastMonths')?.value||12);
@@ -988,6 +1061,13 @@
     $('closeAccountDialog').addEventListener('click', () => $('accountDialog').close());
     $('transactionForm').addEventListener('submit', saveTransaction);
     $('closeTransactionDialog').addEventListener('click', () => $('transactionDialog').close());
+    $('selectAllTransactions')?.addEventListener('change', event => {
+      document.querySelectorAll('#txRows .tx-select').forEach(box => {
+        if (!box.closest('tr')?.hidden) box.checked = event.target.checked;
+      });
+      updateBulkSelectionUi();
+    });
+    $('bulkDeleteTransactions')?.addEventListener('click', deleteSelectedTransactions);
     document.querySelectorAll('[data-open-add]').forEach(button => button.addEventListener('click', event => {
       event.preventDefault();
       openTransactionDialog();

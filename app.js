@@ -127,6 +127,37 @@ document.querySelectorAll('[data-theme-choice]').forEach(button => {
     document.querySelectorAll('[data-theme-choice]').forEach(item => item.classList.toggle('active', item === button));
   });
 });
+
+// Restore local display preferences only; never touch financial or family data.
+addListener(getElement('resetSettings'), 'click', () => {
+  const resetConfirm = root.lang === 'de'
+    ? 'Sprache, Währung, Design und Diagrammfarben auf Standardwerte zurücksetzen? Konten und Buchungen bleiben erhalten.'
+    : root.lang === 'en'
+      ? 'Restore default language, currency, appearance and chart colors? Accounts and transactions will remain unchanged.'
+      : 'هل تريد إرجاع إعدادات اللغة والعملة والمظهر وألوان الرسوم إلى الوضع الافتراضي؟ لن تُحذف الحسابات أو الحركات.';
+  if (!window.confirm(resetConfirm)) return;
+  const detectedCurrency = detectDefaultCurrency();
+  const defaultCurrency = supportedCurrencies.has(detectedCurrency) ? detectedCurrency : 'EUR';
+  const defaults = {
+    'velovi-language': 'ar',
+    'velovi-currency': defaultCurrency,
+    'velovi-theme': 'green',
+    'velovi-chart-palette': 'ocean'
+  };
+  Object.entries(defaults).forEach(([key, value]) => localStorage.setItem(key, value));
+  localStorage.removeItem('velovi-forecast-currency');
+  localStorage.removeItem('velovi-forecast-excluded');
+  if (languageSetting) languageSetting.value = 'ar';
+  if (currencySetting) currencySetting.value = defaultCurrency;
+  root.lang = 'ar'; root.dir = 'rtl'; root.dataset.theme = 'green'; root.dataset.chartPalette = 'ocean';
+  document.querySelectorAll('[data-theme-choice]').forEach(item => item.classList.toggle('active', item.dataset.themeChoice === 'green'));
+  document.querySelectorAll('[data-chart-palette]').forEach(item => item.classList.toggle('active', item.dataset.chartPalette === 'ocean'));
+  refreshCurrencyDisplay();
+  window.VELOVI_RESET_FORECAST_PREFERENCES?.();
+  const status = getElement('settingsStatus');
+  if (status) status.textContent = 'تم إرجاع الإعدادات الافتراضية. لم يتم حذف أي بيانات مالية.';
+  window.VELOVI_I18N?.apply?.();
+});
 const chartType = getElement('chartType'), chartPeriod = getElement('chartPeriod');
 function renderDemoChart() {
   if (typeof window.VELOVI_FINANCE_CHART === 'function') { window.VELOVI_FINANCE_CHART(); return; }
@@ -254,6 +285,7 @@ function applyTransactionView() {
     netElement.classList.toggle('neutral', entries.length !== 1 || entries[0]?.[1] === 0);
   }
   if (countElement) countElement.textContent = String(count);
+  window.VELOVI_UPDATE_SELECTION?.();
   const empty = getElement('transactionsEmpty');
   if (empty) empty.hidden = count !== 0;
   document.querySelectorAll('.sort-header').forEach(button => {
