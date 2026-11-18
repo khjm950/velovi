@@ -68,7 +68,7 @@ jobs:
         run: npx cap add android
 
       - name: Generate Velovi launcher and splash assets
-        run: npx capacitor-assets generate --android --iconBackgroundColor '#173f35' --splashBackgroundColor '#10241b'
+        run: npx @capacitor/assets generate --android --iconBackgroundColor '#173f35' --splashBackgroundColor '#10241b'
 
       - name: Sync Capacitor assets
         run: npx cap sync android
