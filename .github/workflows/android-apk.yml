@@ -77,8 +77,11 @@ jobs:
       - name: Verify APK identity and signature
         run: |
           APK="android/app/build/outputs/apk/debug/app-debug.apk"
-          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | grep "package: name='com.velovi.familyfinance' versionName='1.0.0'"
-          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK" | grep "application-label:'Velovi'"
+          BADGING=$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK")
+          echo "$BADGING"
+          echo "$BADGING" | grep -F "package: name='com.velovi.familyfinance'"
+          echo "$BADGING" | grep -F "versionName='1.0.0'"
+          echo "$BADGING" | grep -F "application-label:'Velovi'"
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
 
       - name: Upload APK
