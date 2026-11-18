@@ -318,6 +318,8 @@
 
   // Additional coverage for import review, settings, dashboard and dynamic status text.
   Object.assign(dictionaries.de, {
+    'مساحة الأسرة':'Familienbereich',
+    'ستظهر هنا الحسابات والحركات المسجلة في مساحة الأسرة.':'Hier erscheinen die in Ihrem Familienbereich gespeicherten Konten und Buchungen.',
     'تحديد الكل':'Alle auswählen',
     'اعتماد':'Übernehmen','التاريخ':'Datum','الوصف':'Beschreibung','التصنيف':'Kategorie','النوع':'Typ','المبلغ':'Betrag',
     'الحساب الذي ستُضاف إليه الحركات':'Konto für importierte Buchungen','تحقق من التاريخ والوصف والمبلغ ونوع الحركة.':'Datum, Beschreibung, Betrag und Buchungsart prüfen.',
@@ -346,6 +348,8 @@
     'تم حذف ':'Gelöscht: ',' حركة بنجاح.':' Buchungen erfolgreich.',' من أصل ':' von ',' حركة. قد تمنع صلاحيات الوصول حذف بعض الحركات.':' Buchungen. Berechtigungen können das Löschen einiger Buchungen verhindern.'
   });
   Object.assign(dictionaries.en, {
+    'مساحة الأسرة':'Family workspace',
+    'ستظهر هنا الحسابات والحركات المسجلة في مساحة الأسرة.':'Accounts and transactions saved in your family workspace will appear here.',
     'تحديد الكل':'Select all',
     'إرجاع الإعدادات الافتراضية':'Restore default settings',
     'حذف المحدد':'Delete selected','0 محددة':'0 selected','تحديد كل الحركات القابلة للحذف':'Select all deletable transactions',
