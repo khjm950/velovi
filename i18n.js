@@ -373,6 +373,54 @@
     'الصفحة الرئيسية':'Home','إعدادات التطبيق':'App settings','العملة المفضلة':'Preferred currency',
     'الواجهة متاحة بالعربية والألمانية والإنجليزية.':'The interface is available in Arabic, German and English.'
   });
+  Object.assign(dictionaries.de, {
+    'حساب أسري متصل':'Familienkonto verbunden',
+    'تُحمّل البيانات وفق صلاحيات حسابك':'Daten werden gemäß den Kontoberechtigungen geladen',
+    'حركة مستخرجة من الكشف':'Aus dem Kontoauszug erkannte Buchung',
+    'عرض تجريبي لآخر 3 أشهر':'Vorschau der letzten 3 Monate',
+    'عرض تجريبي لهذا العام':'Vorschau für dieses Jahr',
+    'البيانات محمية بسياسات RLS':'Daten werden durch RLS-Richtlinien geschützt',
+    'مدير الأسرة':'Familienadministrator',
+    'عضو الأسرة':'Familienmitglied',
+    'عضوية غير نشطة':'Inaktive Mitgliedschaft',
+    'غير مصنف':'Nicht kategorisiert',
+    'حركة':'Buchung',
+    'حساب':'Konto',
+    'غير نشط':'Inaktiv',
+    'مدير':'Administrator',
+    'لا توجد صيغ QR أو باركود مدعومة في هذا المتصفح.':'Dieser Browser unterstützt keine QR- oder Barcodeformate.',
+    'مسح QR والباركود المباشر غير مدعوم في هذا المتصفح. يمكنك استخدام التقاط صورة أو اختيار ملف.':'Direktes QR-/Barcode-Scannen wird in diesem Browser nicht unterstützt. Sie können ein Foto aufnehmen oder eine Datei auswählen.',
+    'تم تجهيز رسالة الدعوة في تطبيق البريد. أرسلها لإكمال الدعوة.':'Die Einladungs-E-Mail wurde vorbereitet. Senden Sie sie, um die Einladung abzuschließen.',
+    'تم نسخ رابط الدعوة. أرسله للعضو ليكمل تسجيل الدخول.':'Der Einladungslink wurde kopiert. Senden Sie ihn dem Mitglied zur Anmeldung.',
+    'تم تسجيل الخروج.':'Sie wurden abgemeldet.',
+    'تم تحديث صلاحيات العضو.':'Die Berechtigungen des Mitglieds wurden aktualisiert.',
+    'تمت إزالة العضو مع الاحتفاظ بسجله.':'Das Mitglied wurde entfernt; sein Datensatz bleibt erhalten.',
+    'تمت إضافة العضو أو إعادة تفعيل عضويته بالصلاحيات الافتراضية.':'Das Mitglied wurde hinzugefügt oder mit Standardberechtigungen reaktiviert.'
+  });
+  Object.assign(dictionaries.en, {
+    'حساب أسري متصل':'Family account connected',
+    'تُحمّل البيانات وفق صلاحيات حسابك':'Data is loaded according to your account permissions',
+    'حركة مستخرجة من الكشف':'Statement-imported transaction',
+    'عرض تجريبي لآخر 3 أشهر':'Preview of the last 3 months',
+    'عرض تجريبي لهذا العام':'Preview for this year',
+    'البيانات محمية بسياسات RLS':'Data is protected by RLS policies',
+    'مدير الأسرة':'Family administrator',
+    'عضو الأسرة':'Family member',
+    'عضوية غير نشطة':'Inactive membership',
+    'غير مصنف':'Uncategorized',
+    'حركة':'Transaction',
+    'حساب':'Account',
+    'غير نشط':'Inactive',
+    'مدير':'Administrator',
+    'لا توجد صيغ QR أو باركود مدعومة في هذا المتصفح.':'This browser does not support QR or barcode formats.',
+    'مسح QR والباركود المباشر غير مدعوم في هذا المتصفح. يمكنك استخدام التقاط صورة أو اختيار ملف.':'Direct QR/barcode scanning is not supported in this browser. You can take a photo or choose a file.',
+    'تم تجهيز رسالة الدعوة في تطبيق البريد. أرسلها لإكمال الدعوة.':'The invitation email is ready in your mail app. Send it to complete the invitation.',
+    'تم نسخ رابط الدعوة. أرسله للعضو ليكمل تسجيل الدخول.':'The invitation link was copied. Send it to the member to complete sign-in.',
+    'تم تسجيل الخروج.':'You have been signed out.',
+    'تم تحديث صلاحيات العضو.':'Member permissions were updated.',
+    'تمت إزالة العضو مع الاحتفاظ بسجله.':'The member was removed while their record was retained.',
+    'تمت إضافة العضو أو إعادة تفعيل عضويته بالصلاحيات الافتراضية.':'The member was added or reactivated with default permissions.'
+  });
   const originals = new WeakMap();
   const attrOriginals = new WeakMap();
   const languageSelect = document.getElementById('languageSetting');
