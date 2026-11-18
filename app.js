@@ -99,22 +99,6 @@ function refreshCurrencyDisplay() {
 
 root.lang = savedLanguage; root.dir = savedLanguage === 'ar' ? 'rtl' : 'ltr'; root.dataset.theme = savedTheme;
 refreshCurrencyDisplay();
-const savedChartPalette = localStorage.getItem('velovi-chart-palette') || 'ocean';
-root.dataset.chartPalette = savedChartPalette;
-function applyChartPaletteSelection(selectedButton) {
-  // Use the exact same active-state mechanism as the appearance/theme choices.
-  chartPaletteButtons.forEach(item => item.classList.toggle('active', item === selectedButton));
-}
-const chartPaletteButtons = [...document.querySelectorAll('[data-chart-palette]')];
-applyChartPaletteSelection(chartPaletteButtons.find(button => button.dataset.chartPalette === savedChartPalette));
-chartPaletteButtons.forEach(button => {
-  addListener(button, 'click', () => {
-    root.dataset.chartPalette = button.dataset.chartPalette;
-    localStorage.setItem('velovi-chart-palette', button.dataset.chartPalette);
-    applyChartPaletteSelection(button);
-    const status = getElement('settingsStatus'); if (status) status.textContent = 'تم تغيير ألوان الرسوم البيانية بشكل مستقل عن ألوان التطبيق.';
-  });
-});
 addListener(languageSetting, 'change', () => {
   root.lang = languageSetting.value; root.dir = languageSetting.value === 'ar' ? 'rtl' : 'ltr';
   localStorage.setItem('velovi-language', languageSetting.value);
@@ -146,17 +130,15 @@ addListener(getElement('resetSettings'), 'click', () => {
   const defaults = {
     'velovi-language': 'ar',
     'velovi-currency': defaultCurrency,
-    'velovi-theme': 'green',
-    'velovi-chart-palette': 'ocean'
+    'velovi-theme': 'green'
   };
   Object.entries(defaults).forEach(([key, value]) => localStorage.setItem(key, value));
   localStorage.removeItem('velovi-forecast-currency');
   localStorage.removeItem('velovi-forecast-excluded');
   if (languageSetting) languageSetting.value = 'ar';
   if (currencySetting) currencySetting.value = defaultCurrency;
-  root.lang = 'ar'; root.dir = 'rtl'; root.dataset.theme = 'green'; root.dataset.chartPalette = 'ocean';
+  root.lang = 'ar'; root.dir = 'rtl'; root.dataset.theme = 'green';
   document.querySelectorAll('[data-theme-choice]').forEach(item => item.classList.toggle('active', item.dataset.themeChoice === 'green'));
-  document.querySelectorAll('[data-chart-palette]').forEach(item => item.classList.toggle('active', item.dataset.chartPalette === 'ocean'));
   refreshCurrencyDisplay();
   window.VELOVI_RESET_FORECAST_PREFERENCES?.();
   const status = getElement('settingsStatus');
