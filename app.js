@@ -101,12 +101,27 @@ root.lang = savedLanguage; root.dir = savedLanguage === 'ar' ? 'rtl' : 'ltr'; ro
 refreshCurrencyDisplay();
 const savedChartPalette = localStorage.getItem('velovi-chart-palette') || 'ocean';
 root.dataset.chartPalette = savedChartPalette;
-document.querySelectorAll('[data-chart-palette]').forEach(button => {
-  button.classList.toggle('active', button.dataset.chartPalette === savedChartPalette);
+function applyChartPaletteSelection(selectedButton) {
+  document.querySelectorAll('[data-chart-palette]').forEach(item => {
+    const selected = item === selectedButton;
+    item.classList.toggle('active', selected);
+    if (selected) {
+      // Apply the same visible selected frame used by the app-theme choices.
+      item.style.setProperty('border', '2px solid var(--green2)', 'important');
+      item.style.setProperty('box-shadow', '0 0 0 2px rgba(39,102,83,.15)', 'important');
+    } else {
+      item.style.removeProperty('border');
+      item.style.removeProperty('box-shadow');
+    }
+  });
+}
+const chartPaletteButtons = [...document.querySelectorAll('[data-chart-palette]')];
+applyChartPaletteSelection(chartPaletteButtons.find(button => button.dataset.chartPalette === savedChartPalette));
+chartPaletteButtons.forEach(button => {
   addListener(button, 'click', () => {
     root.dataset.chartPalette = button.dataset.chartPalette;
     localStorage.setItem('velovi-chart-palette', button.dataset.chartPalette);
-    document.querySelectorAll('[data-chart-palette]').forEach(item => item.classList.toggle('active', item === button));
+    applyChartPaletteSelection(button);
     const status = getElement('settingsStatus'); if (status) status.textContent = 'تم تغيير ألوان الرسوم البيانية بشكل مستقل عن ألوان التطبيق.';
   });
 });
