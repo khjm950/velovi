@@ -147,11 +147,11 @@
         const perms = document.createElement('div');
         perms.className = 'permission-summary';
         perms.textContent = member.is_active
-          ? 'إضافة ' + (member.can_add_transactions ? '✓' : '✕') +
-            '　 تعديل ' + (member.can_edit_transactions ? '✓' : '✕') +
-            '　 حذف ' + (member.can_delete_transactions ? '✓' : '✕') +
-            '　 رؤية حسابات الآخرين ' + (member.can_view_other_accounts ? '✓' : '✕')
-          : 'غير نشط';
+          ? bulkText('إضافة ', 'Hinzufügen ', 'Add ') + (member.can_add_transactions ? '✓' : '✕') +
+            '　' + bulkText('تعديل ', 'Bearbeiten ', 'Edit ') + (member.can_edit_transactions ? '✓' : '✕') +
+            '　' + bulkText('حذف ', 'Löschen ', 'Delete ') + (member.can_delete_transactions ? '✓' : '✕') +
+            '　' + bulkText('رؤية حسابات الآخرين ', 'Andere Konten sehen ', 'View other accounts ') + (member.can_view_other_accounts ? '✓' : '✕')
+          : bulkText('غير نشط', 'Inaktiv', 'Inactive');
         row.appendChild(perms);
 
         if (isAdmin) {
@@ -230,7 +230,9 @@
   function formatMoney(value, currency) {
     const amount = Number(value) || 0;
     try {
-      return new Intl.NumberFormat(navigator.language || 'de-DE', {
+      const language = document.documentElement.lang || navigator.language || 'de-DE';
+      const locale = language === 'ar' ? 'ar' : language === 'de' ? 'de-DE' : language === 'en' ? 'en-GB' : language;
+      return new Intl.NumberFormat(locale, {
         style: 'currency', currency: currency || 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2
       }).format(amount);
     } catch {
@@ -439,7 +441,9 @@
       const descCell=document.createElement('td'); descCell.textContent=tx.description || '—';
       const dateCell=document.createElement('td');
       const date=new Date(String(tx.transaction_date)+'T12:00:00');
-      dateCell.textContent=Number.isNaN(date.getTime())?tx.transaction_date:date.toLocaleDateString('de-DE');
+      const language=document.documentElement.lang||'ar';
+      const dateLocale=language==='ar'?'ar':language==='de'?'de-DE':'en-GB';
+      dateCell.textContent=Number.isNaN(date.getTime())?tx.transaction_date:date.toLocaleDateString(dateLocale);
       const amountCell=document.createElement('td'); amountCell.className=tx.transaction_type==='income'?'positive':tx.transaction_type==='expense'?'negative':'';
       const amount=document.createElement('span');
       amount.textContent=(tx.transaction_type==='income'?'+':tx.transaction_type==='expense'?'−':'')+formatMoney(Number(tx.amount),tx.currency);
