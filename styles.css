@@ -206,57 +206,19 @@ dialog form{gap:17px}
 .balance-input-row input{flex:1;min-width:0}
 .balance-input-row .sign-toggle{flex:0 0 54px;min-width:54px;font-size:20px;font-weight:700;padding-inline:8px}
 
-/* Forecast form: compact, aligned controls with a reliable touch target. */
+/* Forecast form layout. */
 .forecast-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
 .forecast-grid label{min-width:0}
-.balance-input-row{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:8px;direction:ltr}
-.balance-input-row input{width:100%;min-width:0;text-align:left;font-variant-numeric:tabular-nums}
-.balance-input-row .sign-toggle{width:52px;min-width:52px;min-height:44px;padding:0;font-size:19px;line-height:1;cursor:pointer;touch-action:manipulation;pointer-events:auto}
 .field-hint{min-height:18px}
 @media(max-width:700px){
   .forecast-grid{grid-template-columns:1fr;gap:13px}
   .forecast-grid label{width:100%}
-  .balance-input-row{grid-template-columns:minmax(0,1fr) 54px}
-  .balance-input-row .sign-toggle{width:54px;min-width:54px}
 }
-
-/* Forecast: switch to a single column on typical phone widths, including 720px browsers. */
-@media (max-width: 800px) {
-  #reports .forecast-grid {
-    grid-template-columns: minmax(0, 1fr) !important;
-    width: 100%;
-  }
-  #reports .forecast-grid > label,
-  #reports .forecast-grid input {
-    width: 100%;
-    min-width: 0;
-  }
-  #reports .panel {
-    min-width: 0;
-    overflow: hidden;
-  }
-}
-
-/* Minimal sign control: visually secondary to the balance field. */
-.balance-input-row{grid-template-columns:minmax(0,1fr) 44px;align-items:center;gap:10px}
-.balance-input-row .sign-toggle{
-  appearance:none;-webkit-appearance:none;display:inline-grid;place-items:center;
-  width:44px;min-width:44px;height:44px;min-height:44px;margin:0;padding:0;
-  border:1px solid #d9e5de;border-radius:12px;background:#f5f8f6;color:#315c4c;
-  font:600 21px/1 "IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;
-  box-shadow:none;cursor:pointer;touch-action:manipulation;
-}
-.balance-input-row .sign-toggle:active{background:#e8f1ec;transform:scale(.97)}
-.balance-input-row .sign-toggle:focus-visible{outline:2px solid #397a62;outline-offset:2px}
 @media(max-width:800px){
-  .balance-input-row{grid-template-columns:minmax(0,1fr) 44px}
-  .balance-input-row .sign-toggle{width:44px;min-width:44px;height:44px}
+  #reports .forecast-grid{grid-template-columns:minmax(0,1fr)!important;width:100%}
+  #reports .forecast-grid>label,#reports .forecast-grid input{width:100%;min-width:0}
+  #reports .panel{min-width:0;overflow:hidden}
 }
-
-/* The balance field itself is the sign control; no extra button. */
-.balance-input-row{display:block;position:relative}
-.balance-input-row #forecastBalance{width:100%;min-width:0;touch-action:pan-y}
-#balanceHint{display:block;margin-top:7px}
 
 /* Compact +/- action integrated inside the balance input. */
 .balance-input-row{position:relative;display:block}
@@ -277,19 +239,15 @@ dialog form{gap:17px}
 .balance-input-row .balance-sign-button:active{background:#e6f0e9}
 .balance-input-row .balance-sign-button:focus-visible{outline:2px solid #397a62;outline-offset:2px}
 
-/* v12: force the +/- control to render visibly inside the balance field. */
-.balance-input-row{position:relative!important;display:block!important;width:100%!important}
-.balance-input-row #forecastBalance{
-  box-sizing:border-box!important;width:100%!important;padding-inline-end:64px!important;
-}
+/* Sign control inside the forecast balance field. */
+.balance-input-row{position:relative;display:block;width:100%}
+.balance-input-row #forecastBalance{box-sizing:border-box;width:100%;padding-inline-end:64px}
 .balance-input-row #toggleBalanceSign{
-  position:absolute!important;z-index:5!important;inset-inline-end:10px!important;top:50%!important;
-  transform:translateY(-50%)!important;display:flex!important;align-items:center!important;justify-content:center!important;
-  visibility:visible!important;opacity:1!important;pointer-events:auto!important;
-  width:40px!important;min-width:40px!important;height:36px!important;min-height:36px!important;
-  margin:0!important;padding:0!important;border:1px solid #d5e2da!important;border-radius:10px!important;
-  background:#edf4ef!important;color:#173f35!important;font-size:20px!important;font-weight:700!important;
-  line-height:1!important;box-shadow:none!important;cursor:pointer!important;
+  position:absolute;z-index:5;inset-inline-end:10px;top:50%;transform:translateY(-50%);
+  display:flex;align-items:center;justify-content:center;visibility:visible;opacity:1;pointer-events:auto;
+  width:40px;min-width:40px;height:36px;min-height:36px;margin:0;padding:0;
+  border:1px solid #d5e2da;border-radius:10px;background:#edf4ef;color:#173f35;
+  font-size:20px;font-weight:700;line-height:1;box-shadow:none;cursor:pointer;
 }
 
 /* Reuse the same compact in-field sign control for monthly surplus. */
