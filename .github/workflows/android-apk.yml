@@ -6,6 +6,10 @@ on:
       - chore/velovi-stability-apk
   workflow_dispatch:
 
+concurrency:
+  group: velovi-android-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: write
 
