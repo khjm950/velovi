@@ -21,8 +21,8 @@ const duplicateScripts = [...new Set(scriptSources.filter((src, index) => script
 if (duplicateIds.length) fail('Duplicate HTML IDs: ' + duplicateIds.join(', '));
 if (duplicateScripts.length) fail('Duplicate script sources: ' + duplicateScripts.join(', '));
 const missingIds = [...new Set([
-  ...[...app.matchAll(/getElement\\(['"]([^'"]+)['"]\\)/g)].map(match => match[1]),
-  ...[...auth.matchAll(/\\$\\(['"]([^'"]+)['"]\\)/g)].map(match => match[1])
+  ...[...app.matchAll(/getElement\(['"]([^'"]+)['"]\\)/g)].map(match => match[1]),
+  ...[...auth.matchAll(/\$\(['"]([^'"]+)['"]\\)/g)].map(match => match[1])
 ])].filter(id => !ids.includes(id));
 if (missingIds.length) fail('JavaScript references missing HTML IDs: ' + missingIds.join(', '));
 const sorted = value => JSON.stringify(Object.fromEntries(Object.entries(value || {}).sort(([a], [b]) => a.localeCompare(b))));
