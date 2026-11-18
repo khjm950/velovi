@@ -1,5 +1,5 @@
 'use strict';
-const CACHE_NAME = 'velovi-shell-v23';
+const CACHE_NAME = 'velovi-shell-v24';
 const LOCAL_APP_SHELL = [
   './','./index.html','./styles.css','./app.js','./auth.js','./i18n.js',
   './supabase-config.js','./manifest.webmanifest','./install.js',
