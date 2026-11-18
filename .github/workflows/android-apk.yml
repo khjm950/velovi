@@ -76,6 +76,9 @@ jobs:
       - name: Harden Android manifest
         run: node scripts/patch-android-manifest.mjs
 
+      - name: Apply Velovi Android theme
+        run: node scripts/patch-android-theme.mjs
+
       - name: Build installable debug APK
         run: |
           cd android
