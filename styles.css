@@ -37,7 +37,7 @@ tr[hidden]{display:none}
   --shadow:0 8px 24px rgba(23,63,53,.055);
 }
 html{scroll-behavior:smooth}
-body{font-family:Tahoma,Arial,sans-serif;font-size:14px;line-height:1.55;background:var(--bg);padding-bottom:0}
+body{font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;font-size:14px;line-height:1.55;background:var(--bg);padding-bottom:0}
 button,input,select{font:inherit}
 button{ -webkit-tap-highlight-color:transparent }
 button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #9bc4ad;outline-offset:2px}
