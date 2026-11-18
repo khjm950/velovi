@@ -164,7 +164,7 @@ dialog form{gap:17px}
   table,tbody{display:block;width:100%}
   thead{display:none}
   tbody{display:grid;gap:10px}
-  tbody tr{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 3px 12px rgba(23,63,53,.035)}
+  tbody tr{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:0 12px;padding:48px 12px 10px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 3px 12px rgba(23,63,53,.035)}
   tbody tr:hover{background:#fff}
   td,th{border:0;padding:7px 2px;font-size:12px;min-width:0}
   td{display:flex;flex-direction:column;gap:3px;overflow-wrap:anywhere}
@@ -175,6 +175,10 @@ dialog form{gap:17px}
   td:nth-child(3)::before{content:"الوصف"}
   td:nth-child(4)::before{content:"التاريخ"}
   td:nth-child(5)::before{content:"المبلغ"}
+  td.select-column{position:absolute;top:8px;left:10px;width:auto;display:flex;flex-direction:row;align-items:center;gap:10px;padding:3px 0;z-index:1}
+  td.select-column::before{content:none}
+  td.select-column .tx-row-actions{display:flex;flex-direction:row;align-items:center;gap:9px;margin:0}
+  td.select-column .tx-row-actions button{font-size:12px;padding:3px 5px}
   .member-row{gap:10px}
   .form-grid{gap:12px}
   dialog{padding:20px}
@@ -639,6 +643,8 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
 .chart-palette-choices [data-chart-palette="orchid"] i{background:#7c3aed!important}
 .chart-palette-choices [data-chart-palette="forest"] i{background:#166534!important}
 .chart-palette-choices [data-chart-palette="sunset"] i{background:#ea580c!important}
+.chart-palette-choices .theme-choice{border:1px solid var(--line)!important;transition:border-color .15s ease,box-shadow .15s ease,background .15s ease}
+.chart-palette-choices .theme-choice.active{border:2px solid var(--accent)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)!important;background:color-mix(in srgb,var(--accent) 7%,var(--surface))!important}
 
 
 /* Bulk transaction selection and safe settings reset controls. */
@@ -649,6 +655,8 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
 .danger-button:disabled{opacity:.45;cursor:not-allowed}
 .select-column{width:48px;text-align:center}
 .select-column input{width:19px;height:19px;accent-color:var(--green2);cursor:pointer;vertical-align:middle}
+.bulk-select-all{display:inline-flex;align-items:center;gap:7px;color:var(--ink);font-size:13px;cursor:pointer}
+.bulk-select-all input{width:18px;height:18px;accent-color:var(--green2);cursor:pointer}
 .settings-reset{display:flex;justify-content:flex-start;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
 .settings-reset .secondary{margin-top:0}
 @media(max-width:700px){.bulk-actions{padding:10px}.select-column{width:42px}td.select-column,th.select-column{padding:10px 7px}}

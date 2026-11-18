@@ -453,7 +453,6 @@
         const del=document.createElement('button'); del.type='button'; del.className='text-btn danger-text'; del.textContent='حذف';
         del.addEventListener('click',()=>deleteTransaction(tx)); actions.appendChild(del);
       }
-      if (actions.childElementCount) amountCell.appendChild(actions);
       const selectCell = document.createElement('td');
       selectCell.className = 'select-column';
       if (canDeleteTransactions(tx)) {
@@ -465,6 +464,7 @@
         select.addEventListener('change', updateBulkSelectionUi);
         selectCell.appendChild(select);
       }
+      if (actions.childElementCount) selectCell.appendChild(actions);
       row.append(typeCell,categoryCell,descCell,dateCell,amountCell,selectCell);
       body.appendChild(row);
     });
