@@ -476,6 +476,7 @@ function stopBarcodeScanner() {
   barcodeStream = null;
   if (barcodeVideo) barcodeVideo.srcObject = null;
 }
+window.VELOVI_STOP_BARCODE_SCANNER = stopBarcodeScanner;
 addListener(getElement('closeBarcodeDialog'),'click',()=>{stopBarcodeScanner();barcodeDialog?.close();});
 addListener(barcodeDialog,'close',stopBarcodeScanner);
 addListener(scanCodeButton,'click',async()=>{
