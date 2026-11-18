@@ -164,7 +164,7 @@ dialog form{gap:17px}
   table,tbody{display:block;width:100%}
   thead{display:none}
   tbody{display:grid;gap:10px}
-  tbody tr{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 3px 12px rgba(23,63,53,.035)}
+  tbody tr{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:0 12px;padding:48px 12px 10px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 3px 12px rgba(23,63,53,.035)}
   tbody tr:hover{background:#fff}
   td,th{border:0;padding:7px 2px;font-size:12px;min-width:0}
   td{display:flex;flex-direction:column;gap:3px;overflow-wrap:anywhere}
@@ -175,6 +175,10 @@ dialog form{gap:17px}
   td:nth-child(3)::before{content:"الوصف"}
   td:nth-child(4)::before{content:"التاريخ"}
   td:nth-child(5)::before{content:"المبلغ"}
+  td.select-column{position:absolute;top:8px;left:10px;width:auto;display:flex;flex-direction:row;align-items:center;gap:10px;padding:3px 0;z-index:1}
+  td.select-column::before{content:none}
+  td.select-column .tx-row-actions{display:flex;flex-direction:row;align-items:center;gap:9px;margin:0}
+  td.select-column .tx-row-actions button{font-size:12px;padding:3px 5px}
   .member-row{gap:10px}
   .form-grid{gap:12px}
   dialog{padding:20px}
