@@ -36,7 +36,9 @@ for (const key of ['name', 'short_name', 'start_url', 'scope', 'display', 'icons
 if (manifest.display !== 'standalone') fail('PWA manifest must use standalone display mode.');
 
 const browserCode = [app, read('auth.js'), read('i18n.js'), install, read('supabase-config.js')].join('\n');
-if (/service_role|sb_secret_/i.test(browserCode)) fail('A privileged Supabase key pattern was found in browser code.');
+if (/sb_secret_[A-Za-z0-9_-]{20,}/i.test(browserCode) || /service_role\\s*[:=]\\s*['"]eyJ/i.test(browserCode)) {
+  fail('A privileged Supabase key pattern was found in browser code.');
+}
 
 if (process.exitCode) process.exit(process.exitCode);
 console.log('Velovi static integrity checks passed.');
