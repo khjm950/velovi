@@ -31,6 +31,7 @@ if (!html.includes('./capacitor-bridge.js')) fail('Native bridge loader is not l
 if (!buildScript.includes('capacitor-native.js')) fail('Android native bridge is not bundled for APK builds.');
 if (!workflow.includes('node scripts/patch-android-manifest.mjs')) fail('Android manifest hardening is missing from the APK workflow.');
 if (!workflow.includes('node scripts/patch-android-theme.mjs')) fail('Android system bar theme is missing from the APK workflow.');
+if (!workflow.includes('npx @capacitor/assets generate --android')) fail('Branded Android asset generation is missing from the APK workflow.');
 if (!bridge.includes('isNativePlatform')) fail('Native bridge loader is not restricted to native platforms.');
 if (!html.includes('@supabase/supabase-js@2.119.0')) fail('Supabase JS CDN version is not pinned.');
 if (!html.includes('tesseract.js@5.1.1')) fail('Tesseract.js CDN version is not pinned.');
