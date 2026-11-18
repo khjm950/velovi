@@ -643,8 +643,9 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
 .chart-palette-choices [data-chart-palette="orchid"] i{background:#7c3aed!important}
 .chart-palette-choices [data-chart-palette="forest"] i{background:#166534!important}
 .chart-palette-choices [data-chart-palette="sunset"] i{background:#ea580c!important}
-.chart-palette-choices .theme-choice{border:1px solid var(--line)!important;transition:border-color .15s ease,box-shadow .15s ease,background .15s ease}
-/* Chart palette choices intentionally inherit the same .theme-choice.active frame as appearance choices. */
+.chart-palette-choices .theme-choice{transition:border-color .15s ease,box-shadow .15s ease,background .15s ease}
+/* Match the selected appearance button; override the chart buttons default border. */
+.chart-palette-choices .theme-choice.active{border:1px solid var(--accent)!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 20%,transparent)!important}
 
 
 /* Bulk transaction selection and safe settings reset controls. */
