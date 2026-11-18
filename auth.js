@@ -578,21 +578,40 @@
     }
   }
 
+  async function fetchHouseholdRows(table, columns, orderBy) {
+    const pageSize = 1000;
+    const rows = [];
+    for (let from = 0; ; from += pageSize) {
+      let query = client.from(table)
+        .select(columns)
+        .eq('household_id', currentHousehold.id);
+      for (const [column, ascending] of orderBy) {
+        query = query.order(column, { ascending });
+      }
+      const result = await query.range(from, from + pageSize - 1);
+      if (result.error) throw result.error;
+      const page = result.data || [];
+      rows.push(...page);
+      if (page.length < pageSize) break;
+    }
+    return rows;
+  }
+
   async function loadFinancialData() {
-    const [accountsResult,transactionsResult]=await Promise.all([
-      client.from('financial_accounts')
-        .select('id,household_id,owner_member_id,name,account_type,currency,opening_balance,is_active,created_at')
-        .eq('household_id',currentHousehold.id)
-        .order('created_at',{ascending:true}),
-      client.from('financial_transactions')
-        .select('id,household_id,owner_member_id,account_id,transaction_type,amount,currency,description,category,transaction_date,transfer_group_id,created_by,created_at,updated_at')
-        .eq('household_id',currentHousehold.id)
-        .order('transaction_date',{ascending:false})
+    const [accounts, transactions] = await Promise.all([
+      fetchHouseholdRows(
+        'financial_accounts',
+        'id,household_id,owner_member_id,name,account_type,currency,opening_balance,is_active,created_at',
+        [['created_at', true], ['id', true]]
+      ),
+      fetchHouseholdRows(
+        'financial_transactions',
+        'id,household_id,owner_member_id,account_id,transaction_type,amount,currency,description,category,transaction_date,transfer_group_id,created_by,created_at,updated_at',
+        [['transaction_date', false], ['created_at', false], ['id', false]]
+      )
     ]);
-    if(accountsResult.error)throw accountsResult.error;
-    if(transactionsResult.error)throw transactionsResult.error;
-    currentAccounts=accountsResult.data||[];
-    currentTransactions=transactionsResult.data||[];
+    currentAccounts = accounts;
+    currentTransactions = transactions;
     populateAccountSelects();
     renderAccounts();
     renderTransactions();
@@ -864,7 +883,7 @@
     currentHousehold = householdResult.data;
     await withRequestTimeout(refreshMembers(), 'تحميل أعضاء الأسرة');
     clearDemoData();
-    await withRequestTimeout(loadFinancialData(), 'تحميل الحسابات والحركات');
+    await withRequestTimeout(loadFinancialData(), 'تحميل الحسابات والحركات', 60000);
     setHeader(currentHousehold.name, currentMembership.display_name);
     showApp();
     setMessage('', false);
