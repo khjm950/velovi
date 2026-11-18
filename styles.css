@@ -639,6 +639,8 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
 .chart-palette-choices [data-chart-palette="orchid"] i{background:#7c3aed!important}
 .chart-palette-choices [data-chart-palette="forest"] i{background:#166534!important}
 .chart-palette-choices [data-chart-palette="sunset"] i{background:#ea580c!important}
+.chart-palette-choices .theme-choice{border:1px solid var(--line)!important;transition:border-color .15s ease,box-shadow .15s ease,background .15s ease}
+.chart-palette-choices .theme-choice.active{border:2px solid var(--accent)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)!important;background:color-mix(in srgb,var(--accent) 7%,var(--surface))!important}
 
 
 /* Bulk transaction selection and safe settings reset controls. */
@@ -649,6 +651,8 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
 .danger-button:disabled{opacity:.45;cursor:not-allowed}
 .select-column{width:48px;text-align:center}
 .select-column input{width:19px;height:19px;accent-color:var(--green2);cursor:pointer;vertical-align:middle}
+.bulk-select-all{display:inline-flex;align-items:center;gap:7px;color:var(--ink);font-size:13px;cursor:pointer}
+.bulk-select-all input{width:18px;height:18px;accent-color:var(--green2);cursor:pointer}
 .settings-reset{display:flex;justify-content:flex-start;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
 .settings-reset .secondary{margin-top:0}
 @media(max-width:700px){.bulk-actions{padding:10px}.select-column{width:42px}td.select-column,th.select-column{padding:10px 7px}}
