@@ -34,6 +34,8 @@ if (!workflow.includes('node scripts/patch-android-theme.mjs')) fail('Android sy
 if (!workflow.includes('npx @capacitor/assets generate --android')) fail('Branded Android asset generation is missing from the APK workflow.');
 if (!bridge.includes('isNativePlatform')) fail('Native bridge loader is not restricted to native platforms.');
 if (!html.includes('@supabase/supabase-js@2.119.0')) fail('Supabase JS CDN version is not pinned.');
+if (!html.includes('crossorigin="anonymous"') || !sw.includes('EXTERNAL_APP_SHELL')) fail('Pinned CDN libraries are not configured for offline caching.');
+if (!sw.includes('velovi-shell-v23')) fail('Service Worker cache version is not current.');
 if (!html.includes('tesseract.js@5.1.1')) fail('Tesseract.js CDN version is not pinned.');
 
 const shellAssets = [...sw.matchAll(/['"](\.\/[^'"]+)['"]/g)]
