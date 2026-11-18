@@ -280,6 +280,7 @@
           <div class="bulk-actions" id="bulkActions" hidden>
             <span id="bulkSelectionCount" aria-live="polite">0 محددة</span>
             <button class="danger-button" id="bulkDeleteTransactions" type="button" disabled>حذف المحدد</button>
+            <label class="bulk-select-all"><input id="selectAllTransactions" type="checkbox"><span>تحديد الكل</span></label>
           </div>
           <div class="table-wrap">
             <table>
@@ -290,7 +291,6 @@
                   <th scope="col" aria-sort="none"><button class="sort-header" type="button" data-sort="description">الوصف <span aria-hidden="true">↕</span></button></th>
                   <th scope="col" aria-sort="descending"><button class="sort-header" type="button" data-sort="date">التاريخ <span aria-hidden="true">↓</span></button></th>
                   <th scope="col" aria-sort="none"><button class="sort-header" type="button" data-sort="amount">المبلغ <span aria-hidden="true">↕</span></button></th>
-                  <th scope="col" class="select-column"><input id="selectAllTransactions" type="checkbox" aria-label="تحديد كل الحركات القابلة للحذف"></th>
                 </tr>
               </thead>
               <tbody id="txRows"></tbody>
