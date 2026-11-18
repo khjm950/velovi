@@ -130,7 +130,12 @@ document.querySelectorAll('[data-theme-choice]').forEach(button => {
 
 // Restore local display preferences only; never touch financial or family data.
 addListener(getElement('resetSettings'), 'click', () => {
-  if (!window.confirm('هل تريد إرجاع إعدادات اللغة والعملة والمظهر وألوان الرسوم إلى الوضع الافتراضي؟ لن تُحذف الحسابات أو الحركات.')) return;
+  const resetConfirm = root.lang === 'de'
+    ? 'Sprache, Währung, Design und Diagrammfarben auf Standardwerte zurücksetzen? Konten und Buchungen bleiben erhalten.'
+    : root.lang === 'en'
+      ? 'Restore default language, currency, appearance and chart colors? Accounts and transactions will remain unchanged.'
+      : 'هل تريد إرجاع إعدادات اللغة والعملة والمظهر وألوان الرسوم إلى الوضع الافتراضي؟ لن تُحذف الحسابات أو الحركات.';
+  if (!window.confirm(resetConfirm)) return;
   const detectedCurrency = detectDefaultCurrency();
   const defaultCurrency = supportedCurrencies.has(detectedCurrency) ? detectedCurrency : 'EUR';
   const defaults = {
