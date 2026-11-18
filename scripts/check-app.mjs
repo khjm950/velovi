@@ -10,11 +10,11 @@ const manifest = JSON.parse(read('manifest.webmanifest'));
 
 const ids = [...html.matchAll(/\bid=["']([^"']+)["']/g)].map(match => match[1]);
 const duplicateIds = [...new Set(ids.filter((id, index) => ids.indexOf(id) !== index))];
-if (duplicateIds.length) fail(\`Duplicate HTML IDs: \${duplicateIds.join(', ')}\`);
+if (duplicateIds.length) fail('Duplicate HTML IDs: ' + duplicateIds.join(', '));
 
 const swRegistrations = (app.match(/serviceWorker\.register/g) || []).length +
   (install.match(/serviceWorker\.register/g) || []).length;
-if (swRegistrations !== 1) fail(\`Expected one Service Worker registration, found \${swRegistrations}\`);
+if (swRegistrations !== 1) fail('Expected one Service Worker registration, found ' + swRegistrations);
 
 if (!app.includes('result = x.signedAmount - y.signedAmount')) {
   fail('Transaction amount sorting must use signed ledger amounts.');
@@ -27,16 +27,16 @@ const shellAssets = [...sw.matchAll(/['"](\.\/[^'"]+)['"]/g)]
   .map(match => match[1])
   .filter(path => path !== './');
 for (const asset of shellAssets) {
-  if (!existsSync(asset.slice(2))) fail(\`Service Worker asset does not exist: \${asset}\`);
+  if (!existsSync(asset.slice(2))) fail('Service Worker asset does not exist: ' + asset);
 }
 
 for (const key of ['name', 'short_name', 'start_url', 'scope', 'display', 'icons']) {
-  if (!(key in manifest)) fail(\`Manifest is missing required field: \${key}\`);
+  if (!(key in manifest)) fail('Manifest is missing required field: ' + key);
 }
 if (manifest.display !== 'standalone') fail('PWA manifest must use standalone display mode.');
 
 const browserCode = [app, read('auth.js'), read('i18n.js'), install, read('supabase-config.js')].join('\n');
-if (/sb_secret_[A-Za-z0-9_-]{20,}/i.test(browserCode) || /service_role\\s*[:=]\\s*['"]eyJ/i.test(browserCode)) {
+if (/sb_secret_[A-Za-z0-9_-]{20,}/i.test(browserCode) || /service_role\s*[:=]\s*['"]eyJ/i.test(browserCode)) {
   fail('A privileged Supabase key pattern was found in browser code.');
 }
 
