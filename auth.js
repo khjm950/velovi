@@ -365,6 +365,44 @@
       stat.append(label,amount,note); stats.appendChild(stat);
     }
   }
+  function updateBulkSelectionUi() {
+    const all = [...document.querySelectorAll('#txRows .tx-select')];
+    const visible = all.filter(box => !box.closest('tr')?.hidden);
+    const selected = all.filter(box => box.checked);
+    const toolbar = $('bulkActions'), count = $('bulkSelectionCount');
+    const button = $('bulkDeleteTransactions'), master = $('selectAllTransactions');
+    if (toolbar) toolbar.hidden = all.length === 0;
+    if (count) count.textContent = selected.length + ' محددة';
+    if (button) button.disabled = selected.length === 0;
+    if (master) {
+      master.disabled = visible.length === 0;
+      master.checked = visible.length > 0 && visible.every(box => box.checked);
+      master.indeterminate = visible.some(box => box.checked) && !master.checked;
+    }
+  }
+  window.VELOVI_UPDATE_SELECTION = updateBulkSelectionUi;
+
+  async function deleteSelectedTransactions() {
+    const selected = [...document.querySelectorAll('#txRows .tx-select:checked')];
+    const ids = [...new Set(selected.map(box => box.dataset.transactionId).filter(Boolean))];
+    const permitted = ids.filter(id => {
+      const tx = currentTransactions.find(item => item.id === id);
+      return tx && canDeleteTransactions(tx);
+    });
+    if (!permitted.length) return setMessage('لا توجد حركات محددة لديك صلاحية حذفها.', true);
+    if (!window.confirm('هل تريد حذف ' + permitted.length + ' حركة محددة نهائياً؟ لا يمكن التراجع عن الحذف.')) return;
+    const result = await client.from('financial_transactions')
+      .delete().in('id', permitted).select('id');
+    if (result.error) return setMessage('تعذر حذف الحركات المحددة: ' + result.error.message, true);
+    const deleted = result.data?.length || 0;
+    await loadFinancialData();
+    if (deleted !== permitted.length) {
+      setMessage('تم حذف ' + deleted + ' من أصل ' + permitted.length + ' حركة. قد تمنع صلاحيات الوصول حذف بعض الحركات.', true);
+    } else {
+      setMessage('تم حذف ' + deleted + ' حركة بنجاح.', false);
+    }
+  }
+
   function renderTransactions() {
     const body = $('txRows'), empty = $('transactionsEmpty');
     if (!body) return;
@@ -403,11 +441,23 @@
         del.addEventListener('click',()=>deleteTransaction(tx)); actions.appendChild(del);
       }
       if (actions.childElementCount) amountCell.appendChild(actions);
-      row.append(typeCell,categoryCell,descCell,dateCell,amountCell);
+      const selectCell = document.createElement('td');
+      selectCell.className = 'select-column';
+      if (canDeleteTransactions(tx)) {
+        const select = document.createElement('input');
+        select.type = 'checkbox';
+        select.className = 'tx-select';
+        select.dataset.transactionId = tx.id;
+        select.setAttribute('aria-label', 'تحديد الحركة');
+        select.addEventListener('change', updateBulkSelectionUi);
+        selectCell.appendChild(select);
+      }
+      row.append(typeCell,categoryCell,descCell,dateCell,amountCell,selectCell);
       body.appendChild(row);
     });
     if (empty) empty.hidden = currentTransactions.length !== 0;
     $('searchTx')?.dispatchEvent(new Event('input',{bubbles:true}));
+    updateBulkSelectionUi();
   }
   function updateDashboard() {
     const now=new Date(), month=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
@@ -988,6 +1038,13 @@
     $('closeAccountDialog').addEventListener('click', () => $('accountDialog').close());
     $('transactionForm').addEventListener('submit', saveTransaction);
     $('closeTransactionDialog').addEventListener('click', () => $('transactionDialog').close());
+    $('selectAllTransactions')?.addEventListener('change', event => {
+      document.querySelectorAll('#txRows .tx-select').forEach(box => {
+        if (!box.closest('tr')?.hidden) box.checked = event.target.checked;
+      });
+      updateBulkSelectionUi();
+    });
+    $('bulkDeleteTransactions')?.addEventListener('click', deleteSelectedTransactions);
     document.querySelectorAll('[data-open-add]').forEach(button => button.addEventListener('click', event => {
       event.preventDefault();
       openTransactionDialog();
