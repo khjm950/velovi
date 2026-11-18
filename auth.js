@@ -958,7 +958,7 @@
     const dialog=$('addMemberDialog');
     if(dialog?.dataset.inviteEmail===email&&dialog.dataset.inviteLink)return {email,displayName,action_link:dialog.dataset.inviteLink};
     const button=$('sendInviteEmail')||$('copyInviteLink'); if(button)button.disabled=true;
-    const {data,error}=await client.functions.invoke('create-family-invite',{body:{household_id:currentHousehold.id,email,display_name:displayName,redirect_to:window.location.origin+window.location.pathname}});
+    const {data,error}=await client.functions.invoke('create-family-invite',{body:{household_id:currentHousehold.id,email,display_name:displayName,redirect_to:'https://khjm950.github.io/velovi/'}});
     if(button)button.disabled=false;
     if(error||!data?.action_link){setMessage('تعذر إنشاء رابط الدعوة: '+(error?.message||data?.error||'خطأ غير معروف'),true);return null;}
     dialog.dataset.inviteEmail=email;dialog.dataset.inviteLink=data.action_link;
