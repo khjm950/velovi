@@ -12,8 +12,12 @@ if (!manifest.includes('android.permission.CAMERA')) {
 }
 manifest = manifest.replace(/<application\b([^>]*)>/, (match, attributes) => {
   let updated = attributes;
-  if (!/\bandroid:allowBackup=/.test(updated)) updated += ' android:allowBackup="false"';
-  if (!/\bandroid:usesCleartextTraffic=/.test(updated)) updated += ' android:usesCleartextTraffic="false"';
+  if (/\bandroid:allowBackup="[^"]*"/.test(updated)) {
+    updated = updated.replace(/\bandroid:allowBackup="[^"]*"/, 'android:allowBackup="false"');
+  } else updated += ' android:allowBackup="false"';
+  if (/\bandroid:usesCleartextTraffic="[^"]*"/.test(updated)) {
+    updated = updated.replace(/\bandroid:usesCleartextTraffic="[^"]*"/, 'android:usesCleartextTraffic="false"');
+  } else updated += ' android:usesCleartextTraffic="false"';
   return '<application' + updated + '>';
 });
 
