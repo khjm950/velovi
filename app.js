@@ -99,11 +99,7 @@ function refreshCurrencyDisplay() {
 
 root.lang = savedLanguage; root.dir = savedLanguage === 'ar' ? 'rtl' : 'ltr'; root.dataset.theme = savedTheme;
 refreshCurrencyDisplay();
-addListener(languageSetting, 'change', () => {
-  root.lang = languageSetting.value; root.dir = languageSetting.value === 'ar' ? 'rtl' : 'ltr';
-  localStorage.setItem('velovi-language', languageSetting.value);
-  getElement('settingsStatus').textContent = 'تم حفظ اللغة.';
-});
+// Language persistence and translation are handled centrally by i18n.js.
 addListener(currencySetting, 'change', () => {
   localStorage.setItem('velovi-currency', currencySetting.value);
   refreshCurrencyDisplay();
@@ -216,9 +212,8 @@ function compareRows(a, b) {
   const x = getRowData(a), y = getRowData(b);
   let result = 0;
   if (sortKey === 'amount') {
-    const left = x.type === 'expense' ? Math.abs(x.signedAmount) : x.signedAmount;
-    const right = y.type === 'expense' ? Math.abs(y.signedAmount) : y.signedAmount;
-    result = left - right;
+    // Sort by the signed ledger value: expenses stay negative, income stays positive.
+    result = x.signedAmount - y.signedAmount;
   }
   else if (sortKey === 'date') result = x.date.localeCompare(y.date);
   else if (sortKey === 'type') result = x.type.localeCompare(y.type);
@@ -510,6 +505,4 @@ addListener(scanCodeButton,'click',async()=>{
   }
 });
 
-if ('serviceWorker' in navigator && /^https?:$/.test(window.location.protocol)) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(error => console.error('تعذر تسجيل Service Worker:', error)));
-}
+// Service Worker registration is centralized in install.js.
