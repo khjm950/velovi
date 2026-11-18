@@ -631,3 +631,11 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
 :root[data-chart-palette] .donut.bars .chart-bar:nth-of-type(2){background:var(--chart-2)!important}
 :root[data-chart-palette] .donut.bars .chart-bar:nth-of-type(3){background:var(--chart-3)!important}
 :root[data-chart-palette] .donut.bars .chart-bar:nth-of-type(4){background:var(--chart-4)!important}
+
+
+/* Each chart palette selector keeps its own fixed swatch color. */
+.chart-palette-choices [data-chart-palette="ocean"] i{background:#0f766e!important}
+.chart-palette-choices [data-chart-palette="warm"] i{background:#b45309!important}
+.chart-palette-choices [data-chart-palette="orchid"] i{background:#7c3aed!important}
+.chart-palette-choices [data-chart-palette="forest"] i{background:#166534!important}
+.chart-palette-choices [data-chart-palette="sunset"] i{background:#ea580c!important}
