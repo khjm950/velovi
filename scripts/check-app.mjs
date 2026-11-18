@@ -35,6 +35,7 @@ if (!buildScript.includes('capacitor-native.js')) fail('Android native bridge is
 if (!workflow.includes('node scripts/patch-android-manifest.mjs')) fail('Android manifest hardening is missing from the APK workflow.');
 if (!workflow.includes('node scripts/patch-android-theme.mjs')) fail('Android system bar theme is missing from the APK workflow.');
 if (!workflow.includes('npx @capacitor/assets generate --android')) fail('Branded Android asset generation is missing from the APK workflow.');
+if (!workflow.includes('npm ci --no-audit --no-fund') || workflow.includes('contents: write')) fail('APK workflow must use the committed lockfile with read-only repository permissions.');
 if (!bridge.includes('isNativePlatform')) fail('Native bridge loader is not restricted to native platforms.');
 if (!html.includes('@supabase/supabase-js@2.119.0')) fail('Supabase JS CDN version is not pinned.');
 if (!html.includes('crossorigin="anonymous"') || !sw.includes('EXTERNAL_APP_SHELL')) fail('Pinned CDN libraries are not configured for offline caching.');
