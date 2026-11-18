@@ -148,6 +148,7 @@ addListener(getElement('resetSettings'), 'click', () => {
   document.querySelectorAll('[data-theme-choice]').forEach(item => item.classList.toggle('active', item.dataset.themeChoice === 'green'));
   document.querySelectorAll('[data-chart-palette]').forEach(item => item.classList.toggle('active', item.dataset.chartPalette === 'ocean'));
   refreshCurrencyDisplay();
+  window.VELOVI_RESET_FORECAST_PREFERENCES?.();
   const status = getElement('settingsStatus');
   if (status) status.textContent = 'تم إرجاع الإعدادات الافتراضية. لم يتم حذف أي بيانات مالية.';
   window.VELOVI_I18N?.apply?.();
