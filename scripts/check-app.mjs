@@ -5,6 +5,8 @@ const fail = message => { console.error('FAIL:', message); process.exitCode = 1;
 const html = read('index.html');
 const app = read('app.js');
 const install = read('install.js');
+const bridge = read('capacitor-bridge.js');
+const buildScript = read('scripts/build-web.mjs');
 const sw = read('sw.js');
 const manifest = JSON.parse(read('manifest.webmanifest'));
 
@@ -20,6 +22,9 @@ if (!app.includes('result = x.signedAmount - y.signedAmount')) {
   fail('Transaction amount sorting must use signed ledger amounts.');
 }
 if (!html.includes('./i18n.js')) fail('i18n.js is not loaded by index.html.');
+if (!html.includes('./capacitor-bridge.js')) fail('Native bridge loader is not loaded by index.html.');
+if (!buildScript.includes('capacitor-native.js')) fail('Android native bridge is not bundled for APK builds.');
+if (!bridge.includes('Capacitor.isNativePlatform')) fail('Native bridge loader is not restricted to native platforms.');
 if (!html.includes('@supabase/supabase-js@2.119.0')) fail('Supabase JS CDN version is not pinned.');
 if (!html.includes('tesseract.js@5.1.1')) fail('Tesseract.js CDN version is not pinned.');
 
