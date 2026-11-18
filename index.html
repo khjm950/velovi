@@ -277,6 +277,10 @@
             <div><span>الصافي للفترة</span><strong id="txNet">—</strong></div>
             <div><span>عدد الحركات</span><strong id="txCount">0</strong></div>
           </div>
+          <div class="bulk-actions" id="bulkActions" hidden>
+            <span id="bulkSelectionCount" aria-live="polite">0 محددة</span>
+            <button class="danger-button" id="bulkDeleteTransactions" type="button" disabled>حذف المحدد</button>
+          </div>
           <div class="table-wrap">
             <table>
               <thead>
@@ -286,6 +290,7 @@
                   <th scope="col" aria-sort="none"><button class="sort-header" type="button" data-sort="description">الوصف <span aria-hidden="true">↕</span></button></th>
                   <th scope="col" aria-sort="descending"><button class="sort-header" type="button" data-sort="date">التاريخ <span aria-hidden="true">↓</span></button></th>
                   <th scope="col" aria-sort="none"><button class="sort-header" type="button" data-sort="amount">المبلغ <span aria-hidden="true">↕</span></button></th>
+                  <th scope="col" class="select-column"><input id="selectAllTransactions" type="checkbox" aria-label="تحديد كل الحركات القابلة للحذف"></th>
                 </tr>
               </thead>
               <tbody id="txRows"></tbody>
@@ -452,6 +457,7 @@
             <button type="button" class="theme-choice" data-chart-palette="warm"><i></i> دافئ</button>
             <button type="button" class="theme-choice" data-chart-palette="orchid"><i></i> بنفسجي</button>\n            <button type="button" class="theme-choice" data-chart-palette="forest"><i></i> غابة</button>\n            <button type="button" class="theme-choice" data-chart-palette="sunset"><i></i> غروب</button>
           </div>
+          <div class="settings-reset"><button type="button" class="secondary" id="resetSettings">إرجاع الإعدادات الافتراضية</button></div>
           <p class="small muted" id="settingsStatus" aria-live="polite">تُحفظ التفضيلات على هذا الجهاز في النسخة التجريبية.</p>
         </article>
       </section>
