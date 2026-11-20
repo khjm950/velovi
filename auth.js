@@ -16,6 +16,9 @@
   let currentAccounts = [];
   let currentTransactions = [];
   let workspaceLoadPromise = null;
+  let mfaLoginFactorId = null;
+  let mfaLoginChallengeId = null;
+  let mfaEnrollmentFactorId = null;
 
   function withRequestTimeout(promise, operation, timeoutMs = 20000) {
     let timer;
@@ -47,6 +50,7 @@
     if (gate) gate.hidden = false;
     if (loginPanel) loginPanel.hidden = panel !== 'login';
     if (createPanel) createPanel.hidden = panel !== 'create';
+    if ($('mfaLoginPanel')) $('mfaLoginPanel').hidden = panel !== 'mfa';
   }
 
   function showApp() {
@@ -130,10 +134,12 @@
       const name = document.createElement('b');
       name.textContent = member.display_name || 'عضو';
       const sub = document.createElement('small');
-      sub.textContent = member.user_id === currentUser.id
-        ? (member.role === 'admin' ? 'أنت · مدير الأسرة' : 'أنت · عضو الأسرة')
-        : (member.role === 'admin' ? 'مدير الأسرة' : 'عضو الأسرة');
-      if (!member.is_active) sub.textContent += ' · عضوية غير نشطة';
+      sub.textContent = !member.user_id
+        ? 'حساب محذوف · السجل المالي محفوظ'
+        : member.user_id === currentUser.id
+          ? (member.role === 'admin' ? 'أنت · مدير الأسرة' : 'أنت · عضو الأسرة')
+          : (member.role === 'admin' ? 'مدير الأسرة' : 'عضو الأسرة');
+      if (!member.is_active && member.user_id) sub.textContent += ' · عضوية غير نشطة';
       details.append(name, sub);
       person.append(avatar, details);
       row.appendChild(person);
@@ -171,17 +177,25 @@
             remove.textContent = 'إزالة العضو';
             remove.addEventListener('click', () => removeMember(member));
             actions.appendChild(remove);
-          } else {
+          } else if (member.user_id) {
             const reactivate = document.createElement('button');
             reactivate.type = 'button';
             reactivate.className = 'secondary';
             reactivate.textContent = 'إعادة التفعيل';
             reactivate.addEventListener('click', () => {
-              $('memberUserId').value = member.user_id;
+              $('memberUserId').value = member.user_id || '';
               $('memberDisplayName').value = member.display_name || '';
               $('addMemberDialog').showModal();
             });
             actions.appendChild(reactivate);
+          }
+          if (member.user_id) {
+            const permanentDelete = document.createElement('button');
+            permanentDelete.type = 'button';
+            permanentDelete.className = 'text-btn danger-text';
+            permanentDelete.textContent = 'حذف نهائي وبياناته';
+            permanentDelete.addEventListener('click', () => permanentlyDeleteMember(member));
+            actions.appendChild(permanentDelete);
           }
           row.appendChild(actions);
         }
@@ -891,7 +905,15 @@
     if (sync) sync.textContent = 'متصل · إعداد الأسرة';
     workspaceLoadPromise = (async () => {
       try {
+        const assurance = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (assurance.error) throw new Error('تعذر التحقق من مستوى المصادقة: ' + assurance.error.message);
+        if (assurance.data?.nextLevel === 'aal2' && assurance.data?.currentLevel !== 'aal2') {
+          showGate('mfa');
+          await prepareMfaLogin();
+          return;
+        }
         await loadWorkspace();
+        refreshAccountSecurityStatus();
       } catch (error) {
         console.error('Velovi workspace error:', error);
         showGate('login');
@@ -1029,6 +1051,239 @@
     setMessage('تمت إزالة العضو مع الاحتفاظ بسجله.', false);
   }
 
+  async function prepareMfaLogin() {
+    const status = $('mfaLoginStatus');
+    if (status) status.textContent = 'جارٍ تجهيز التحقق…';
+    const { data, error } = await client.auth.mfa.listFactors();
+    if (error) throw error;
+    const factor = (data.totp || []).find(item => item.status === 'verified');
+    if (!factor) throw new Error('هذا الحساب يتطلب المصادقة الثنائية، لكن لا يوجد عامل TOTP مؤكد.');
+    mfaLoginFactorId = factor.id;
+    const challenge = await client.auth.mfa.challenge({ factorId: factor.id });
+    if (challenge.error) throw challenge.error;
+    mfaLoginChallengeId = challenge.data.id;
+    if (status) status.textContent = 'أدخل الرمز الظاهر في تطبيق المصادقة.';
+  }
+
+  async function verifyMfaLogin(event) {
+    event.preventDefault();
+    const code = $('mfaLoginCode').value.trim();
+    if (!/^\d{6}$/.test(code) || !mfaLoginFactorId || !mfaLoginChallengeId) {
+      $('mfaLoginStatus').textContent = 'أدخل رمزاً صحيحاً من 6 أرقام.';
+      return;
+    }
+    const result = await client.auth.mfa.verify({
+      factorId: mfaLoginFactorId,
+      challengeId: mfaLoginChallengeId,
+      code
+    });
+    if (result.error) {
+      $('mfaLoginStatus').textContent = 'الرمز غير صحيح أو انتهت صلاحيته. حاول مجدداً.';
+      return;
+    }
+    $('mfaLoginCode').value = '';
+    mfaLoginFactorId = null;
+    mfaLoginChallengeId = null;
+    const refreshed = await client.auth.getSession();
+    if (refreshed.error || !refreshed.data.session) {
+      $('mfaLoginStatus').textContent = 'تم التحقق، لكن تعذر تحديث جلسة الدخول. أعد المحاولة.';
+      return;
+    }
+    await handleSession(refreshed.data.session);
+  }
+
+  async function refreshAccountSecurityStatus() {
+    const email = $('accountCurrentEmail');
+    if (email) email.textContent = currentUser?.email || 'غير متاح';
+    const status = $('mfaStatus');
+    if (!status) return;
+    try {
+      const { data, error } = await client.auth.mfa.listFactors();
+      if (error) throw error;
+      const verified = (data.totp || []).filter(item => item.status === 'verified');
+      const pending = (data.totp || []).filter(item => item.status !== 'verified');
+      status.textContent = verified.length
+        ? 'المصادقة الثنائية مفعّلة باستخدام تطبيق مصادقة.'
+        : 'المصادقة الثنائية غير مفعّلة.';
+      $('enableMfa').hidden = verified.length > 0 || pending.length > 0;
+      $('disableMfa').hidden = verified.length === 0;
+      if (pending.length && !mfaEnrollmentFactorId) mfaEnrollmentFactorId = pending[0].id;
+    } catch (error) {
+      status.textContent = 'تعذر قراءة حالة المصادقة الثنائية: ' + (error.message || 'خطأ');
+    }
+  }
+
+  async function beginMfaEnrollment() {
+    $('mfaManageStatus').textContent = 'جارٍ إنشاء إعداد المصادقة الثنائية…';
+    const { data, error } = await client.auth.mfa.enroll({
+      factorType: 'totp',
+      friendlyName: 'Velovi authenticator'
+    });
+    if (error) {
+      $('mfaManageStatus').textContent = 'تعذر بدء الإعداد: ' + error.message;
+      return;
+    }
+    mfaEnrollmentFactorId = data.id;
+    $('mfaQrCode').src = data.totp.qr_code;
+    $('mfaSecret').textContent = data.totp.secret;
+    $('mfaEnrollment').hidden = false;
+    $('enableMfa').hidden = true;
+    $('mfaManageStatus').textContent = 'امسح رمز QR بتطبيق المصادقة، ثم أدخل الرمز المكوّن من 6 أرقام.';
+  }
+
+  async function verifyMfaEnrollment() {
+    const code = $('mfaEnrollCode').value.trim();
+    if (!/^\d{6}$/.test(code) || !mfaEnrollmentFactorId) {
+      $('mfaManageStatus').textContent = 'أدخل رمزاً صحيحاً من 6 أرقام.';
+      return;
+    }
+    const challenge = await client.auth.mfa.challenge({ factorId: mfaEnrollmentFactorId });
+    if (challenge.error) {
+      $('mfaManageStatus').textContent = challenge.error.message;
+      return;
+    }
+    const result = await client.auth.mfa.verify({
+      factorId: mfaEnrollmentFactorId,
+      challengeId: challenge.data.id,
+      code
+    });
+    if (result.error) {
+      $('mfaManageStatus').textContent = 'تعذر تأكيد الرمز. تحقق من ساعة الهاتف وحاول مجدداً.';
+      return;
+    }
+    $('mfaEnrollment').hidden = true;
+    $('mfaEnrollCode').value = '';
+    mfaEnrollmentFactorId = null;
+    $('mfaManageStatus').textContent = 'تم تفعيل المصادقة الثنائية بنجاح.';
+    await refreshAccountSecurityStatus();
+  }
+
+  async function disableMfa() {
+    const { data, error } = await client.auth.mfa.listFactors();
+    if (error) return $('mfaManageStatus').textContent = error.message;
+    const factor = (data.totp || []).find(item => item.status === 'verified');
+    if (!factor) return refreshAccountSecurityStatus();
+    if (!window.confirm('هل تريد إلغاء المصادقة الثنائية لهذا الحساب؟')) return;
+    const result = await client.auth.mfa.unenroll({ factorId: factor.id });
+    if (result.error) {
+      $('mfaManageStatus').textContent = 'تعذر إلغاء المصادقة الثنائية: ' + result.error.message;
+      return;
+    }
+    $('mfaManageStatus').textContent = 'تم إلغاء المصادقة الثنائية.';
+    await refreshAccountSecurityStatus();
+  }
+
+  async function changePassword(event) {
+    event.preventDefault();
+    const current = $('currentPassword').value;
+    const next = $('newPassword').value;
+    if (next.length < 8 || next !== $('confirmNewPassword').value) {
+      $('passwordStatus').textContent = 'تأكد من تطابق كلمتي المرور وأن تكون الجديدة 8 أحرف على الأقل.';
+      return;
+    }
+    const result = await client.auth.updateUser({ password: next, current_password: current });
+    if (result.error) {
+      $('passwordStatus').textContent = 'تعذر تحديث كلمة المرور: ' + result.error.message;
+      return;
+    }
+    $('changePasswordForm').reset();
+    $('passwordStatus').textContent = 'تم تحديث كلمة المرور.';
+  }
+
+  async function changeEmail(event) {
+    event.preventDefault();
+    const nextEmail = $('newEmail').value.trim();
+    if (!nextEmail || nextEmail.toLowerCase() === String(currentUser?.email || '').toLowerCase()) {
+      $('emailStatus').textContent = 'أدخل بريداً إلكترونياً مختلفاً عن الحالي.';
+      return;
+    }
+    const factors = await client.auth.mfa.listFactors();
+    const hasMfa = !factors.error && (factors.data.totp || []).some(item => item.status === 'verified');
+    if (hasMfa) {
+      const assurance = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (assurance.error || assurance.data?.currentLevel !== 'aal2') {
+        $('emailStatus').textContent = 'أكمل التحقق بخطوتين من جديد قبل تغيير البريد الإلكتروني.';
+        return;
+      }
+    }
+    const result = await client.auth.updateUser({ email: nextEmail });
+    if (result.error) {
+      $('emailStatus').textContent = 'تعذر إرسال طلب تغيير البريد: ' + result.error.message;
+      return;
+    }
+    $('changeEmailForm').reset();
+    $('emailStatus').textContent = 'أُرسل رابط تأكيد إلى البريد الجديد. سيبقى البريد الحالي فعالاً حتى إتمام التحقق.';
+  }
+
+  async function signOutOtherSessions() {
+    if (!window.confirm('سيتم إنهاء جلسات Velovi على جميع الأجهزة الأخرى. هل تريد المتابعة؟')) return;
+    const result = await client.auth.signOut({ scope: 'others' });
+    $('sessionsStatus').textContent = result.error
+      ? 'تعذر إنهاء الجلسات الأخرى: ' + result.error.message
+      : 'تم إرسال طلب إنهاء الجلسات الأخرى. قد تبقى رموز الوصول الحالية صالحة حتى انتهاء مدتها.';
+  }
+
+  async function deleteOwnAccount(event) {
+    event.preventDefault();
+    if ($('deleteAccountConfirmation').value.trim() !== 'حذف حسابي') {
+      $('deleteAccountStatus').textContent = 'اكتب «حذف حسابي» كما هو للتأكيد.';
+      return;
+    }
+    if (!window.confirm('هذا الإجراء نهائي. سيُحذف حساب الدخول وتُعطّل عضوياتك، مع الاحتفاظ بالسجل المالي للأسرة. هل أنت متأكد؟')) return;
+    const factors = await client.auth.mfa.listFactors();
+    const hasMfa = !factors.error && (factors.data.totp || []).some(item => item.status === 'verified');
+    if (hasMfa) {
+      const assurance = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (assurance.error || assurance.data?.currentLevel !== 'aal2') {
+        $('deleteAccountStatus').textContent = 'أعد تسجيل الدخول وأكمل التحقق بخطوتين قبل حذف الحساب.';
+        return;
+      }
+    } else {
+      const password = $('deleteAccountPassword').value;
+      const reauth = await client.auth.signInWithPassword({ email: currentUser.email, password });
+      if (reauth.error) {
+        $('deleteAccountStatus').textContent = 'كلمة المرور الحالية غير صحيحة.';
+        return;
+      }
+    }
+    $('deleteAccountStatus').textContent = 'جارٍ حذف الحساب بأمان…';
+    const result = await client.functions.invoke('account-security', { body: { operation: 'delete_self' } });
+    if (result.error || !result.data?.success) {
+      $('deleteAccountStatus').textContent = 'تعذر إكمال حذف الحساب: ' + (result.data?.error || result.error?.message || 'خطأ غير معروف');
+      return;
+    }
+    currentUser = null;
+    currentMembership = null;
+    currentHousehold = null;
+    await client.auth.signOut({ scope: 'local' });
+    showGate('login');
+    setMessage('تم حذف حساب الدخول. بقي السجل المالي محفوظاً للأسرة.', false);
+  }
+
+  async function permanentlyDeleteMember(member) {
+    if (member.user_id === currentUser?.id || member.role === 'admin') return;
+    const [accounts, transactions] = await Promise.all([
+      client.from('financial_accounts').select('id', { count: 'exact', head: true }).eq('household_id', currentHousehold.id).eq('owner_member_id', member.id),
+      client.from('financial_transactions').select('id', { count: 'exact', head: true }).eq('household_id', currentHousehold.id).eq('owner_member_id', member.id)
+    ]);
+    if (accounts.error || transactions.error) return setMessage('تعذر قراءة عدد الحسابات والحركات قبل الحذف.', true);
+    const accountCount = accounts.count || 0;
+    const transactionCount = transactions.count || 0;
+    const confirmText = 'حذف نهائي للعضو ' + (member.display_name || '') + '؟\nسيتم حذف ' + accountCount + ' حساب مالي و' + transactionCount + ' حركة مالية من هذه الأسرة. لا يمكن التراجع عن ذلك.';
+    if (!window.confirm(confirmText)) return;
+    const result = await client.functions.invoke('account-security', {
+      body: { operation: 'delete_member', household_id: currentHousehold.id, member_id: member.id }
+    });
+    if (result.error || !result.data?.success) {
+      return setMessage('تعذر الحذف النهائي: ' + (result.data?.error || result.error?.message || 'خطأ غير معروف'), true);
+    }
+    await refreshMembers();
+    await loadFinancialData();
+    const warning = result.data.warning ? ' ' + result.data.warning :
+      result.data.auth_account_deleted === false ? ' بقي حساب الدخول فعالاً لأنه ما زال عضواً في أسرة أخرى.' : '';
+    setMessage('تم حذف بيانات العضو نهائياً من هذه الأسرة: ' + transactionCount + ' حركة و' + accountCount + ' حساب.' + warning, false);
+  }
+
   function initialize() {
     if (!window.supabase || typeof window.supabase.createClient !== 'function') {
       showGate('login');
@@ -1049,6 +1304,14 @@
       setMessage('', false);
     });
     $('signOutButton').addEventListener('click', signOut);
+    $('mfaLoginForm')?.addEventListener('submit', verifyMfaLogin);
+    $('changePasswordForm')?.addEventListener('submit', changePassword);
+    $('changeEmailForm')?.addEventListener('submit', changeEmail);
+    $('enableMfa')?.addEventListener('click', beginMfaEnrollment);
+    $('verifyMfaEnrollment')?.addEventListener('click', verifyMfaEnrollment);
+    $('disableMfa')?.addEventListener('click', disableMfa);
+    $('signOutOtherSessions')?.addEventListener('click', signOutOtherSessions);
+    $('deleteOwnAccountForm')?.addEventListener('submit', deleteOwnAccount);
     $('inviteMember').addEventListener('click', () => $('addMemberDialog').showModal());
     $('sendInviteEmail').addEventListener('click', sendMemberInviteEmail);
     $('inviteEmail').addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); sendMemberInviteEmail(); } });
