@@ -477,11 +477,17 @@
           <form id="changePasswordForm" class="auth-form">
             <label>كلمة المرور الحالية<input id="currentPassword" type="password" autocomplete="current-password" required></label>
             <label>كلمة المرور الجديدة<input id="newPassword" type="password" autocomplete="new-password" minlength="8" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,}" title="8 أحرف على الأقل، وحرف كبير وصغير ورقم ورمز خاص" required></label>
-            <p class="small muted">يجب أن تتضمن 8 أحرف على الأقل، وحرفاً كبيراً وحرفاً صغيراً ورقماً ورمزاً خاصاً.</p>
+            <ul class="password-rules" id="passwordRules" aria-label="شروط كلمة المرور">
+              <li data-rule="length">8 أحرف على الأقل</li>
+              <li data-rule="upper">حرف كبير واحد على الأقل (A-Z)</li>
+              <li data-rule="lower">حرف صغير واحد على الأقل (a-z)</li>
+              <li data-rule="number">رقم واحد على الأقل (0-9)</li>
+              <li data-rule="special">رمز خاص واحد على الأقل (!@#$…)</li>
+            </ul>
             <label>تأكيد كلمة المرور الجديدة<input id="confirmNewPassword" type="password" autocomplete="new-password" minlength="8" required></label>
             <button class="secondary" type="submit">تحديث كلمة المرور</button>
           </form>
-          <p id="passwordStatus" class="small muted" aria-live="polite"></p>
+          <p id="passwordStatus" class="password-status small" aria-live="polite"></p>
 
           <div class="divider-line"></div>
           <h3>تغيير البريد الإلكتروني</h3>
