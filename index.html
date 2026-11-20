@@ -42,6 +42,15 @@
           <button class="primary full" id="loginSubmit" type="submit">تسجيل الدخول</button>
         </form>
       </div>
+      <div id="mfaLoginPanel" class="auth-panel" hidden>
+        <h1>التحقق بخطوتين</h1>
+        <p class="muted">أدخل الرمز المكوّن من 6 أرقام من تطبيق المصادقة لإكمال تسجيل الدخول.</p>
+        <form id="mfaLoginForm" class="auth-form">
+          <label>رمز المصادقة<input id="mfaLoginCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" required></label>
+          <button class="primary full" type="submit">تأكيد الرمز</button>
+        </form>
+        <p id="mfaLoginStatus" class="auth-message" role="status"></p>
+      </div>
       <div id="createHouseholdPanel" class="auth-panel" hidden>
         <h1>إنشاء أسرتك</h1>
         <p class="muted">لا توجد أسرة مرتبطة بهذا الحساب. أنشئ أسرتك للبدء.</p>
@@ -453,7 +462,67 @@
             <button type="button" class="theme-choice" data-theme-choice="dark"><i></i> داكن</button>
           </div>
           <div class="settings-reset"><button type="button" class="secondary" id="resetSettings">إرجاع الإعدادات الافتراضية</button></div>
-          <p class="small muted" id="settingsStatus" aria-live="polite">تُحفظ التفضيلات على هذا الجهاز في النسخة التجريبية.</p>
+          <p class="small muted" id="settingsStatus" aria-live="polite">تُحفظ التفضيلات على هذا الجهاز.</p>
+        </article>
+
+        <article class="panel settings-panel account-security-panel">
+          <h2>الحساب والأمان</h2>
+          <p class="muted">إدارة بيانات الدخول وحماية حساب Velovi.</p>
+          <div class="security-account-summary">
+            <span>البريد الحالي</span><strong id="accountCurrentEmail">جارٍ التحميل…</strong>
+          </div>
+
+          <div class="divider-line"></div>
+          <h3>تغيير كلمة المرور</h3>
+          <form id="changePasswordForm" class="auth-form">
+            <label>كلمة المرور الحالية<input id="currentPassword" type="password" autocomplete="current-password" required></label>
+            <label>كلمة المرور الجديدة<input id="newPassword" type="password" autocomplete="new-password" minlength="8" required></label>
+            <label>تأكيد كلمة المرور الجديدة<input id="confirmNewPassword" type="password" autocomplete="new-password" minlength="8" required></label>
+            <button class="secondary" type="submit">تحديث كلمة المرور</button>
+          </form>
+          <p id="passwordStatus" class="small muted" aria-live="polite"></p>
+
+          <div class="divider-line"></div>
+          <h3>تغيير البريد الإلكتروني</h3>
+          <form id="changeEmailForm" class="auth-form">
+            <label>البريد الإلكتروني الجديد<input id="newEmail" type="email" autocomplete="email" required></label>
+            <label>كلمة المرور الحالية<input id="emailCurrentPassword" type="password" autocomplete="current-password" required></label>
+            <button class="secondary" type="submit">إرسال رابط تأكيد البريد</button>
+          </form>
+          <p id="emailStatus" class="small muted" aria-live="polite"></p>
+
+          <div class="divider-line"></div>
+          <h3>المصادقة الثنائية (2FA)</h3>
+          <p class="muted small">اربط تطبيق مصادقة مثل Google Authenticator أو Microsoft Authenticator، ثم أدخل الرمز لإكمال التفعيل.</p>
+          <div id="mfaStatus" class="security-status" aria-live="polite">جارٍ فحص حالة المصادقة الثنائية…</div>
+          <div id="mfaEnrollment" hidden>
+            <img id="mfaQrCode" alt="رمز QR لإعداد المصادقة الثنائية" class="mfa-qr">
+            <p class="small muted">إذا تعذر مسح الرمز، أدخل المفتاح التالي يدوياً:</p>
+            <code id="mfaSecret" class="mfa-secret"></code>
+            <label>رمز التحقق<input id="mfaEnrollCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}"></label>
+            <button type="button" class="primary" id="verifyMfaEnrollment">تأكيد وتفعيل 2FA</button>
+          </div>
+          <div class="mfa-actions">
+            <button type="button" class="secondary" id="enableMfa">إعداد المصادقة الثنائية</button>
+            <button type="button" class="secondary" id="disableMfa" hidden>إلغاء المصادقة الثنائية</button>
+          </div>
+          <p id="mfaManageStatus" class="small muted" aria-live="polite"></p>
+
+          <div class="divider-line"></div>
+          <h3>الأجهزة والجلسات</h3>
+          <p class="muted small">يمكنك إنهاء الجلسات على الأجهزة الأخرى مع إبقاء هذا الجهاز متصلاً.</p>
+          <button type="button" class="secondary" id="signOutOtherSessions">تسجيل الخروج من الأجهزة الأخرى</button>
+          <p id="sessionsStatus" class="small muted" aria-live="polite"></p>
+
+          <div class="divider-line"></div>
+          <h3 class="danger-text">حذف حسابي</h3>
+          <p class="muted small">سيُحذف حساب الدخول وتُعطّل عضوياتك. ستبقى الحركات والحسابات السابقة محفوظة في سجل الأسرة، وقد تنتقل صلاحية المدير تلقائياً إلى أقدم عضو نشط.</p>
+          <form id="deleteOwnAccountForm" class="auth-form">
+            <label>كلمة المرور الحالية<input id="deleteAccountPassword" type="password" autocomplete="current-password" required></label>
+            <label>اكتب حذف حسابي للتأكيد<input id="deleteAccountConfirmation" type="text" autocomplete="off" required></label>
+            <button class="danger-button" type="submit">حذف حسابي نهائياً</button>
+          </form>
+          <p id="deleteAccountStatus" class="small muted" aria-live="polite"></p>
         </article>
       </section>
 
