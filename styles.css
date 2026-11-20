@@ -613,3 +613,9 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
 .settings-reset{display:flex;justify-content:flex-start;margin-top:22px;padding-top:16px;border-top:1px solid var(--line)}
 .settings-reset .secondary{margin-top:0}
 @media(max-width:700px){.bulk-actions{padding:10px}.select-column{width:42px}td.select-column,th.select-column{padding:10px 7px}}
+
+
+/* Transaction page actions: add first, import directly underneath. */
+.transaction-heading-actions{display:flex;flex-direction:column;align-items:stretch;gap:8px;min-width:170px}
+.transaction-heading-actions button{white-space:nowrap}
+@media(max-width:700px){.transaction-heading-actions{width:100%;min-width:0}.transaction-heading-actions button{width:100%}}

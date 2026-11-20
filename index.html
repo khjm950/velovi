@@ -84,9 +84,6 @@
         <button class="nav-item nav-secondary" data-view="reports">
           <span aria-hidden="true">◷</span> التقارير والتوقعات
         </button>
-        <button class="nav-item nav-secondary" data-view="ing">
-          <span aria-hidden="true">⇄</span> الاستيراد البنكي
-        </button>
         <button class="nav-item nav-secondary" data-view="settings"><span aria-hidden="true">⚙</span> الإعدادات</button>
       </nav>
       <details class="mobile-more">
@@ -94,7 +91,6 @@
         <div class="mobile-more-menu">
           <button class="nav-item" data-view="members"><span aria-hidden="true">♧</span> أفراد الأسرة والصلاحيات</button>
           <button class="nav-item" data-view="reports"><span aria-hidden="true">◷</span> التقارير والتوقعات</button>
-          <button class="nav-item" data-view="ing"><span aria-hidden="true">⇄</span> الاستيراد البنكي</button>
           <button class="nav-item" data-view="settings"><span aria-hidden="true">⚙</span> الإعدادات</button>
         </div>
       </details>
@@ -247,7 +243,10 @@
             <h1>الحركات المالية</h1>
             <p class="muted">إيراداتك ومصروفاتك والتحويلات</p>
           </div>
-          <button class="primary" data-open-add>＋ إضافة حركة</button>
+          <div class="transaction-heading-actions">
+            <button class="primary" data-open-add>＋ إضافة حركة</button>
+            <button class="secondary" type="button" data-goto="ing">⇧ استيراد الحركات</button>
+          </div>
         </div>
 
         <article class="panel">
