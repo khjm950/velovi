@@ -134,10 +134,12 @@
       const name = document.createElement('b');
       name.textContent = member.display_name || 'عضو';
       const sub = document.createElement('small');
-      sub.textContent = member.user_id === currentUser.id
-        ? (member.role === 'admin' ? 'أنت · مدير الأسرة' : 'أنت · عضو الأسرة')
-        : (member.role === 'admin' ? 'مدير الأسرة' : 'عضو الأسرة');
-      if (!member.is_active) sub.textContent += ' · عضوية غير نشطة';
+      sub.textContent = !member.user_id
+        ? 'حساب محذوف · السجل المالي محفوظ'
+        : member.user_id === currentUser.id
+          ? (member.role === 'admin' ? 'أنت · مدير الأسرة' : 'أنت · عضو الأسرة')
+          : (member.role === 'admin' ? 'مدير الأسرة' : 'عضو الأسرة');
+      if (!member.is_active && member.user_id) sub.textContent += ' · عضوية غير نشطة';
       details.append(name, sub);
       person.append(avatar, details);
       row.appendChild(person);
@@ -1185,15 +1187,18 @@
   async function changeEmail(event) {
     event.preventDefault();
     const nextEmail = $('newEmail').value.trim();
-    const currentPassword = $('emailCurrentPassword').value;
     if (!nextEmail || nextEmail.toLowerCase() === String(currentUser?.email || '').toLowerCase()) {
       $('emailStatus').textContent = 'أدخل بريداً إلكترونياً مختلفاً عن الحالي.';
       return;
     }
-    const reauth = await client.auth.signInWithPassword({ email: currentUser.email, password: currentPassword });
-    if (reauth.error) {
-      $('emailStatus').textContent = 'كلمة المرور الحالية غير صحيحة.';
-      return;
+    const factors = await client.auth.mfa.listFactors();
+    const hasMfa = !factors.error && (factors.data.totp || []).some(item => item.status === 'verified');
+    if (hasMfa) {
+      const assurance = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (assurance.error || assurance.data?.currentLevel !== 'aal2') {
+        $('emailStatus').textContent = 'أكمل التحقق بخطوتين من جديد قبل تغيير البريد الإلكتروني.';
+        return;
+      }
     }
     const result = await client.auth.updateUser({ email: nextEmail });
     if (result.error) {
@@ -1219,11 +1224,21 @@
       return;
     }
     if (!window.confirm('هذا الإجراء نهائي. سيُحذف حساب الدخول وتُعطّل عضوياتك، مع الاحتفاظ بالسجل المالي للأسرة. هل أنت متأكد؟')) return;
-    const password = $('deleteAccountPassword').value;
-    const reauth = await client.auth.signInWithPassword({ email: currentUser.email, password });
-    if (reauth.error) {
-      $('deleteAccountStatus').textContent = 'كلمة المرور الحالية غير صحيحة.';
-      return;
+    const factors = await client.auth.mfa.listFactors();
+    const hasMfa = !factors.error && (factors.data.totp || []).some(item => item.status === 'verified');
+    if (hasMfa) {
+      const assurance = await client.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (assurance.error || assurance.data?.currentLevel !== 'aal2') {
+        $('deleteAccountStatus').textContent = 'أعد تسجيل الدخول وأكمل التحقق بخطوتين قبل حذف الحساب.';
+        return;
+      }
+    } else {
+      const password = $('deleteAccountPassword').value;
+      const reauth = await client.auth.signInWithPassword({ email: currentUser.email, password });
+      if (reauth.error) {
+        $('deleteAccountStatus').textContent = 'كلمة المرور الحالية غير صحيحة.';
+        return;
+      }
     }
     $('deleteAccountStatus').textContent = 'جارٍ حذف الحساب بأمان…';
     const result = await client.functions.invoke('account-security', { body: { operation: 'delete_self' } });
