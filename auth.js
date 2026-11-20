@@ -1177,8 +1177,20 @@
     event.preventDefault();
     const current = $('currentPassword').value;
     const next = $('newPassword').value;
-    if (next.length < 8 || next !== $('confirmNewPassword').value) {
-      $('passwordStatus').textContent = 'تأكد من تطابق كلمتي المرور وأن تكون الجديدة 8 أحرف على الأقل.';
+    const passwordRules = [
+      { test: /.{8,}/, message: '8 أحرف على الأقل' },
+      { test: /[A-Z]/, message: 'حرف كبير واحد على الأقل (A-Z)' },
+      { test: /[a-z]/, message: 'حرف صغير واحد على الأقل (a-z)' },
+      { test: /[0-9]/, message: 'رقم واحد على الأقل (0-9)' },
+      { test: /[^A-Za-z0-9]/, message: 'رمز خاص واحد على الأقل (!@#$…)' }
+    ];
+    const missingRules = passwordRules.filter(rule => !rule.test.test(next));
+    if (missingRules.length) {
+      $('passwordStatus').textContent = 'كلمة المرور ضعيفة. يجب أن تحتوي على: ' + missingRules.map(rule => rule.message).join('، ') + '.';
+      return;
+    }
+    if (next !== $('confirmNewPassword').value) {
+      $('passwordStatus').textContent = 'كلمتا المرور غير متطابقتين.';
       return;
     }
     const result = await client.auth.updateUser({ password: next, current_password: current });
