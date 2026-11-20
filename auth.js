@@ -1063,7 +1063,7 @@
   async function verifyMfaLogin(event) {
     event.preventDefault();
     const code = $('mfaLoginCode').value.trim();
-    if (!/^\\d{6}$/.test(code) || !mfaLoginFactorId || !mfaLoginChallengeId) {
+    if (!/^\d{6}$/.test(code) || !mfaLoginFactorId || !mfaLoginChallengeId) {
       $('mfaLoginStatus').textContent = 'أدخل رمزاً صحيحاً من 6 أرقام.';
       return;
     }
@@ -1123,7 +1123,7 @@
 
   async function verifyMfaEnrollment() {
     const code = $('mfaEnrollCode').value.trim();
-    if (!/^\\d{6}$/.test(code) || !mfaEnrollmentFactorId) {
+    if (!/^\d{6}$/.test(code) || !mfaEnrollmentFactorId) {
       $('mfaManageStatus').textContent = 'أدخل رمزاً صحيحاً من 6 أرقام.';
       return;
     }
@@ -1246,7 +1246,7 @@
     if (accounts.error || transactions.error) return setMessage('تعذر قراءة عدد الحسابات والحركات قبل الحذف.', true);
     const accountCount = accounts.count || 0;
     const transactionCount = transactions.count || 0;
-    const confirmText = 'حذف نهائي للعضو ' + (member.display_name || '') + '؟\\nسيتم حذف ' + accountCount + ' حساب مالي و' + transactionCount + ' حركة مالية من هذه الأسرة. لا يمكن التراجع عن ذلك.';
+    const confirmText = 'حذف نهائي للعضو ' + (member.display_name || '') + '؟\nسيتم حذف ' + accountCount + ' حساب مالي و' + transactionCount + ' حركة مالية من هذه الأسرة. لا يمكن التراجع عن ذلك.';
     if (!window.confirm(confirmText)) return;
     const result = await client.functions.invoke('account-security', {
       body: { operation: 'delete_member', household_id: currentHousehold.id, member_id: member.id }
