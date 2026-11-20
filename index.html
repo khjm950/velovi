@@ -476,7 +476,8 @@
           <h3>تغيير كلمة المرور</h3>
           <form id="changePasswordForm" class="auth-form">
             <label>كلمة المرور الحالية<input id="currentPassword" type="password" autocomplete="current-password" required></label>
-            <label>كلمة المرور الجديدة<input id="newPassword" type="password" autocomplete="new-password" minlength="8" required></label>
+            <label>كلمة المرور الجديدة<input id="newPassword" type="password" autocomplete="new-password" minlength="8" pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8,}" title="8 أحرف على الأقل، وحرف كبير وصغير ورقم ورمز خاص" required></label>
+            <p class="small muted">يجب أن تتضمن 8 أحرف على الأقل، وحرفاً كبيراً وحرفاً صغيراً ورقماً ورمزاً خاصاً.</p>
             <label>تأكيد كلمة المرور الجديدة<input id="confirmNewPassword" type="password" autocomplete="new-password" minlength="8" required></label>
             <button class="secondary" type="submit">تحديث كلمة المرور</button>
           </form>
