@@ -1083,7 +1083,12 @@
     $('mfaLoginCode').value = '';
     mfaLoginFactorId = null;
     mfaLoginChallengeId = null;
-    await handleSession(result.data.session);
+    const refreshed = await client.auth.getSession();
+    if (refreshed.error || !refreshed.data.session) {
+      $('mfaLoginStatus').textContent = 'تم التحقق، لكن تعذر تحديث جلسة الدخول. أعد المحاولة.';
+      return;
+    }
+    await handleSession(refreshed.data.session);
   }
 
   async function refreshAccountSecurityStatus() {
