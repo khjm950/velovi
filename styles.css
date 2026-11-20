@@ -640,3 +640,15 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
  .security-account-summary{align-items:flex-start;flex-direction:column}
  .account-security-panel .auth-form button,.mfa-actions button{width:100%;min-height:46px}
 }
+
+
+/* Live password checklist and prominent success feedback. */
+.password-rules{list-style:none;display:grid;gap:6px;margin:-5px 0 4px;padding:0}
+.password-rules li{position:relative;padding-inline-start:23px;font-size:13px;line-height:1.55;color:#b42318}
+.password-rules li::before{content:"✕";position:absolute;inset-inline-start:2px;font-weight:800}
+.password-rules li.is-valid{color:#16834a}
+.password-rules li.is-valid::before{content:"✓"}
+.password-status{margin:12px 0 0;padding:0;font-size:13px}
+.password-status.error{color:#b42318}
+.password-status.success{display:block;padding:14px 16px;margin-top:14px;border:1px solid #86cda3;border-radius:11px;background:#eaf8ef;color:#126b39;font-size:15px;font-weight:800;line-height:1.7;box-shadow:0 3px 12px rgba(18,107,57,.10)}
+:root[data-theme="dark"] .password-status.success{background:#183b29;border-color:#347d51;color:#9ce3b5}
