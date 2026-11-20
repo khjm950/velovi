@@ -906,7 +906,8 @@
     workspaceLoadPromise = (async () => {
       try {
         const assurance = await client.auth.mfa.getAuthenticatorAssuranceLevel();
-        if (!assurance.error && assurance.data?.nextLevel === 'aal2' && assurance.data?.currentLevel !== 'aal2') {
+        if (assurance.error) throw new Error('تعذر التحقق من مستوى المصادقة: ' + assurance.error.message);
+        if (assurance.data?.nextLevel === 'aal2' && assurance.data?.currentLevel !== 'aal2') {
           showGate('mfa');
           await prepareMfaLogin();
           return;
