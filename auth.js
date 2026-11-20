@@ -175,7 +175,7 @@
             remove.textContent = 'إزالة العضو';
             remove.addEventListener('click', () => removeMember(member));
             actions.appendChild(remove);
-          } else {
+          } else if (member.user_id) {
             const reactivate = document.createElement('button');
             reactivate.type = 'button';
             reactivate.className = 'secondary';
@@ -187,12 +187,14 @@
             });
             actions.appendChild(reactivate);
           }
-          const permanentDelete = document.createElement('button');
-          permanentDelete.type = 'button';
-          permanentDelete.className = 'text-btn danger-text';
-          permanentDelete.textContent = 'حذف نهائي وبياناته';
-          permanentDelete.addEventListener('click', () => permanentlyDeleteMember(member));
-          actions.appendChild(permanentDelete);
+          if (member.user_id) {
+            const permanentDelete = document.createElement('button');
+            permanentDelete.type = 'button';
+            permanentDelete.className = 'text-btn danger-text';
+            permanentDelete.textContent = 'حذف نهائي وبياناته';
+            permanentDelete.addEventListener('click', () => permanentlyDeleteMember(member));
+            actions.appendChild(permanentDelete);
+          }
           row.appendChild(actions);
         }
       }
