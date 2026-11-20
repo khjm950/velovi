@@ -619,3 +619,24 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
 .transaction-heading-actions{display:flex;flex-direction:column;align-items:stretch;gap:8px;min-width:170px}
 .transaction-heading-actions button{white-space:nowrap}
 @media(max-width:700px){.transaction-heading-actions{width:100%;min-width:0}.transaction-heading-actions button{width:100%}}
+
+
+/* Account security settings */
+.account-security-panel{margin-top:16px}
+.account-security-panel h3{font-size:15px;margin:8px 0}
+.account-security-panel .auth-form{max-width:560px;gap:12px;margin:12px 0}
+.account-security-panel .auth-form label{color:var(--ink);font-size:13px}
+.account-security-panel .auth-form input{width:100%;min-height:44px;padding:10px 12px}
+.security-account-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface-muted)}
+.security-account-summary span,.security-account-summary strong{font-size:13px;overflow-wrap:anywhere}
+.security-status{padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--surface-muted);font-size:13px;margin:10px 0}
+.mfa-qr{display:block;width:190px;height:190px;max-width:100%;padding:8px;background:#fff;border:1px solid var(--line);border-radius:10px;margin:12px 0}
+.mfa-secret{display:block;direction:ltr;unicode-bidi:isolate;overflow-wrap:anywhere;padding:10px;background:var(--surface-muted);border-radius:8px;margin:8px 0 14px}
+#mfaEnrollment label{display:grid;gap:7px;max-width:260px;margin:12px 0}
+#mfaEnrollment input{min-height:44px;padding:10px;text-align:center;letter-spacing:.25em}
+.mfa-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+.account-security-panel .danger-button{min-height:44px}
+@media(max-width:700px){
+ .security-account-summary{align-items:flex-start;flex-direction:column}
+ .account-security-panel .auth-form button,.mfa-actions button{width:100%;min-height:46px}
+}
