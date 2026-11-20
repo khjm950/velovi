@@ -1279,8 +1279,9 @@
     }
     await refreshMembers();
     await loadFinancialData();
-    const warning = result.data.warning ? ' ' + result.data.warning : '';
-    setMessage('تم حذف بيانات العضو نهائياً: ' + transactionCount + ' حركة و' + accountCount + ' حساب.' + warning, false);
+    const warning = result.data.warning ? ' ' + result.data.warning :
+      result.data.auth_account_deleted === false ? ' بقي حساب الدخول فعالاً لأنه ما زال عضواً في أسرة أخرى.' : '';
+    setMessage('تم حذف بيانات العضو نهائياً من هذه الأسرة: ' + transactionCount + ' حركة و' + accountCount + ' حساب.' + warning, false);
   }
 
   function initialize() {
