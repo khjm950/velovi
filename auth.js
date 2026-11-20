@@ -1173,33 +1173,50 @@
     await refreshAccountSecurityStatus();
   }
 
+  function updatePasswordRules() {
+    const value = $('newPassword')?.value || '';
+    const checks = {
+      length: value.length >= 8,
+      upper: /[A-Z]/.test(value),
+      lower: /[a-z]/.test(value),
+      number: /[0-9]/.test(value),
+      special: /[^A-Za-z0-9]/.test(value)
+    };
+    Object.entries(checks).forEach(([name, valid]) => {
+      const item = document.querySelector(`#passwordRules [data-rule="${name}"]`);
+      if (!item) return;
+      item.classList.toggle('is-valid', valid);
+      item.classList.toggle('is-invalid', !valid);
+      item.setAttribute('aria-label', item.textContent + (valid ? ' — مستوفى' : ' — غير مستوفى'));
+    });
+    return checks;
+  }
+
   async function changePassword(event) {
     event.preventDefault();
     const current = $('currentPassword').value;
     const next = $('newPassword').value;
-    const passwordRules = [
-      { test: /.{8,}/, message: '8 أحرف على الأقل' },
-      { test: /[A-Z]/, message: 'حرف كبير واحد على الأقل (A-Z)' },
-      { test: /[a-z]/, message: 'حرف صغير واحد على الأقل (a-z)' },
-      { test: /[0-9]/, message: 'رقم واحد على الأقل (0-9)' },
-      { test: /[^A-Za-z0-9]/, message: 'رمز خاص واحد على الأقل (!@#$…)' }
-    ];
-    const missingRules = passwordRules.filter(rule => !rule.test.test(next));
-    if (missingRules.length) {
-      $('passwordStatus').textContent = 'كلمة المرور ضعيفة. يجب أن تحتوي على: ' + missingRules.map(rule => rule.message).join('، ') + '.';
+    const checks = updatePasswordRules();
+    if (Object.values(checks).some(valid => !valid)) {
+      $('passwordStatus').textContent = 'لم تستوفِ كلمة المرور جميع الشروط الموضحة أعلاه.';
+      $('passwordStatus').className = 'password-status small error';
       return;
     }
     if (next !== $('confirmNewPassword').value) {
       $('passwordStatus').textContent = 'كلمتا المرور غير متطابقتين.';
+      $('passwordStatus').className = 'password-status small error';
       return;
     }
     const result = await client.auth.updateUser({ password: next, current_password: current });
     if (result.error) {
       $('passwordStatus').textContent = 'تعذر تحديث كلمة المرور: ' + result.error.message;
+      $('passwordStatus').className = 'password-status small error';
       return;
     }
     $('changePasswordForm').reset();
-    $('passwordStatus').textContent = 'تم تحديث كلمة المرور.';
+    updatePasswordRules();
+    $('passwordStatus').textContent = '✓ تم تغيير كلمة المرور بنجاح. أصبحت كلمة المرور الجديدة فعّالة لحسابك.';
+    $('passwordStatus').className = 'password-status success';
   }
 
   async function changeEmail(event) {
@@ -1318,6 +1335,15 @@
     $('signOutButton').addEventListener('click', signOut);
     $('mfaLoginForm')?.addEventListener('submit', verifyMfaLogin);
     $('changePasswordForm')?.addEventListener('submit', changePassword);
+    $('newPassword')?.addEventListener('input', () => {
+      updatePasswordRules();
+      $('passwordStatus').textContent = '';
+      $('passwordStatus').className = 'password-status small';
+    });
+    $('confirmNewPassword')?.addEventListener('input', () => {
+      $('passwordStatus').textContent = '';
+      $('passwordStatus').className = 'password-status small';
+    });
     $('changeEmailForm')?.addEventListener('submit', changeEmail);
     $('enableMfa')?.addEventListener('click', beginMfaEnrollment);
     $('verifyMfaEnrollment')?.addEventListener('click', verifyMfaEnrollment);
