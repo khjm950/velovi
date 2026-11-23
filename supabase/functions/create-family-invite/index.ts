@@ -82,13 +82,17 @@ Deno.serve(async (req: Request) => {
       p_user_id: linkData.user.id,
       p_display_name: displayName
     });
-    if (addError) return json({ error: "Invitation link created, but membership could not be added: " + addError.message }, 400);
+    const alreadyActive = !!addError?.message?.includes("User is already an active member");
+    if (addError && !alreadyActive) {
+      return json({ error: "Invitation link created, but membership could not be added: " + addError.message }, 400);
+    }
 
     return json({
       action_link: linkData.properties.action_link,
       email,
       display_name: displayName,
-      existing_account: !!existing
+      existing_account: !!existing,
+      membership_status: alreadyActive ? "already_active" : "added_or_reactivated"
     });
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : "Unexpected error" }, 500);
