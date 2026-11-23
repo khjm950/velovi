@@ -21,8 +21,9 @@
   let mfaEnrollmentFactorId = null;
   let inviteSetupCompleted = false;
 
-  function isInviteSetupFlow() {
-    return new URLSearchParams(window.location.search).get('flow') === 'invite-setup';
+  function isInviteSetupFlow(user = currentUser) {
+    return !!user?.invited_at &&
+      user?.user_metadata?.velovi_password_setup_complete !== true;
   }
 
   function withRequestTimeout(promise, operation, timeoutMs = 20000) {
