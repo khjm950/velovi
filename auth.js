@@ -1243,7 +1243,10 @@
     $('invitePasswordStatus').className = 'password-status small';
     let result;
     try {
-      result = await client.auth.updateUser({ password });
+      result = await client.auth.updateUser({
+        password,
+        data: { velovi_password_setup_complete: true }
+      });
     } catch (error) {
       button.disabled = false;
       $('invitePasswordStatus').textContent = 'تعذر الاتصال لحفظ كلمة المرور: ' + (error.message || 'خطأ غير معروف');
