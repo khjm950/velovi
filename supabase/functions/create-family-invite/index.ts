@@ -64,7 +64,8 @@ Deno.serve(async (req: Request) => {
     if (existing?.id === authData.user.id) return json({ error: "You cannot invite your own email address" }, 400);
 
     const inviteRedirect = new URL(redirect.toString());
-    const needsPasswordSetup = !existing || (!!existing.invited_at && !existing.last_sign_in_at);
+    const needsPasswordSetup = !existing ||
+      (!!existing.invited_at && existing.user_metadata?.velovi_password_setup_complete !== true);
     if (needsPasswordSetup) inviteRedirect.searchParams.set("flow", "invite-setup");
 
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
