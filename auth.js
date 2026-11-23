@@ -174,7 +174,7 @@
             const remove = document.createElement('button');
             remove.type = 'button';
             remove.className = 'text-btn danger-text';
-            remove.textContent = 'إزالة العضو';
+            remove.textContent = 'إلغاء عضوية العضو';
             remove.addEventListener('click', () => removeMember(member));
             actions.appendChild(remove);
           } else if (member.user_id) {
@@ -193,7 +193,7 @@
             const permanentDelete = document.createElement('button');
             permanentDelete.type = 'button';
             permanentDelete.className = 'text-btn danger-text';
-            permanentDelete.textContent = 'حذف نهائي وبياناته';
+            permanentDelete.textContent = 'حذف العضو وبياناته نهائياً';
             permanentDelete.addEventListener('click', () => permanentlyDeleteMember(member));
             actions.appendChild(permanentDelete);
           }
@@ -1040,7 +1040,9 @@
   }
 
   async function removeMember(member) {
-    if (!window.confirm('هل تريد إزالة هذا العضو من الأسرة؟ سيبقى سجله محفوظاً ويمكن إعادة تفعيله لاحقاً.')) return;
+    const memberName = member.display_name || 'هذا العضو';
+    const confirmText = 'تأكيد إلغاء عضوية ' + memberName + '؟\n\nسيُمنع العضو من الدخول إلى هذه الأسرة، لكن ستبقى حساباته وحركاته المالية محفوظة. ويمكن للمدير إعادة تفعيل عضويته لاحقاً.\n\nهل تريد المتابعة؟';
+    if (!window.confirm(confirmText)) return;
     const result = await client.rpc('remove_household_member', {
       p_household_id: currentHousehold.id,
       p_member_id: member.id
@@ -1298,7 +1300,7 @@
     if (accounts.error || transactions.error) return setMessage('تعذر قراءة عدد الحسابات والحركات قبل الحذف.', true);
     const accountCount = accounts.count || 0;
     const transactionCount = transactions.count || 0;
-    const confirmText = 'حذف نهائي للعضو ' + (member.display_name || '') + '؟\nسيتم حذف ' + accountCount + ' حساب مالي و' + transactionCount + ' حركة مالية من هذه الأسرة. لا يمكن التراجع عن ذلك.';
+    const confirmText = 'تحذير: حذف العضو ' + (member.display_name || '') + ' وبياناته نهائياً\n\nسيتم حذف ' + accountCount + ' حساب مالي و' + transactionCount + ' حركة مالية مرتبطة به من هذه الأسرة. هذا الإجراء نهائي ولا يمكن التراجع عنه، ولن يمكن استعادة هذه البيانات.\n\nإذا كنت تريد إيقاف عضويته فقط مع الاحتفاظ ببياناته، استخدم «إلغاء عضوية العضو» بدلاً من ذلك.\n\nهل أنت متأكد من الحذف النهائي؟';
     if (!window.confirm(confirmText)) return;
     const result = await client.functions.invoke('account-security', {
       body: { operation: 'delete_member', household_id: currentHousehold.id, member_id: member.id }
