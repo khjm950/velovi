@@ -51,6 +51,27 @@
         </form>
         <p id="mfaLoginStatus" class="auth-message" role="status"></p>
       </div>
+      <div id="inviteSetupPanel" class="auth-panel" hidden>
+        <h1>إنشاء كلمة المرور</h1>
+        <p class="muted">أهلاً بك في Velovi. أنشئ كلمة مرور لحسابك لإكمال قبول الدعوة والانضمام إلى الأسرة.</p>
+        <form id="inviteSetupForm" class="auth-form">
+          <label for="inviteNewPassword">كلمة المرور الجديدة
+            <input id="inviteNewPassword" type="password" autocomplete="new-password" minlength="8" required>
+          </label>
+          <ul id="invitePasswordRules" class="password-rules" aria-live="polite">
+            <li data-rule="length" class="is-invalid">8 أحرف على الأقل</li>
+            <li data-rule="upper" class="is-invalid">حرف إنجليزي كبير واحد على الأقل (A-Z)</li>
+            <li data-rule="lower" class="is-invalid">حرف إنجليزي صغير واحد على الأقل (a-z)</li>
+            <li data-rule="number" class="is-invalid">رقم واحد على الأقل (0-9)</li>
+            <li data-rule="special" class="is-invalid">رمز خاص واحد على الأقل</li>
+          </ul>
+          <label for="inviteConfirmPassword">تأكيد كلمة المرور
+            <input id="inviteConfirmPassword" type="password" autocomplete="new-password" minlength="8" required>
+          </label>
+          <button class="primary full" id="inviteSetupSubmit" type="submit">حفظ كلمة المرور والانضمام</button>
+        </form>
+        <p id="invitePasswordStatus" class="password-status small" role="status"></p>
+      </div>
       <div id="createHouseholdPanel" class="auth-panel" hidden>
         <h1>إنشاء أسرتك</h1>
         <p class="muted">لا توجد أسرة مرتبطة بهذا الحساب. أنشئ أسرتك للبدء.</p>
