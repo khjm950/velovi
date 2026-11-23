@@ -379,19 +379,71 @@ function parseStatementNumber(raw) {
   else if ((value.match(/\./g)||[]).length > 1) { const parts=value.split('.'); const decimal=parts.pop(); value=parts.join('')+'.'+decimal; }
   const number=Number(value); return Number.isFinite(number) ? (negative ? -number : number) : null;
 }
+const VELOVI_CATEGORY_CATALOG = {
+  expense: [
+    'السكن والإيجار','الكهرباء','الماء','الغاز والتدفئة','الإنترنت والاتصالات','البقالة والمواد الغذائية',
+    'المطاعم والوجبات','القهوة والمقاهي','المواصلات العامة','الوقود','صيانة السيارة','التأمين على السيارة',
+    'الصحة والأدوية','الأطباء والعلاج','الملابس والأحذية','العناية الشخصية','المنزل والأثاث','التنظيف والمنظفات',
+    'الأطفال والحضانة','التعليم والكتب','التأمين','الضرائب والرسوم','الاشتراكات والخدمات الرقمية',
+    'الترفيه والهوايات','الرياضة','السفر والإقامة','الهدايا والتبرعات','رسوم بنكية','أقساط وديون',
+    'صيانة وإصلاحات','الحيوانات الأليفة','مصاريف أخرى'
+  ],
+  income: [
+    'الراتب','العمل الإضافي','العمل الحر','مكافآت وعمولات','إعانات ومزايا','دخل الإيجار',
+    'فوائد وأرباح','استرداد مبالغ','هدايا مستلمة','بيع مقتنيات','دخل استثماري','إيرادات أخرى'
+  ]
+};
+function getVeloviCategoryOptions(type) {
+  const base = VELOVI_CATEGORY_CATALOG[type] || [];
+  return [...new Set(base)].sort((a,b)=>a.localeCompare(b,'ar'));
+}
+function populateVeloviCategoryList(list, type) {
+  if (!list) return;
+  list.replaceChildren(...getVeloviCategoryOptions(type).map(value => {
+    const option=document.createElement('option'); option.value=value; return option;
+  }));
+}
+function normalizeVeloviCategory(value, type) {
+  const text=String(value||'').trim();
+  if(!text) return type==='income'?'إيرادات أخرى':'مصاريف أخرى';
+  const match=getVeloviCategoryOptions(type).find(item=>item.localeCompare(text,'ar',{sensitivity:'base'})===0);
+  return match || text;
+}
+window.VELOVI_CATEGORIES = { catalog: VELOVI_CATEGORY_CATALOG, options: getVeloviCategoryOptions, populate: populateVeloviCategoryList, normalize: normalizeVeloviCategory };
 function inferStatementCategory(description, type) {
-  const value=String(description||'').toLowerCase();
-  const rules=[
-    [/miete|rent|wohnung|hausgeld|housing|landlord/,'السكن'],
-    [/supermarkt|lebensmittel|rewe|aldi|lidl|edeka|food|grocery|market/,'الطعام'],
-    [/tankstelle|shell|aral|fuel|benzin|diesel|bus|bahn|db |transport|uber/,'المواصلات'],
-    [/strom|energie|wasser|gas|internet|telekom|vodafone|utility|electric/,'فواتير المنزل'],
+  const value=String(description||'').normalize('NFKC').toLowerCase();
+  const rules=type==='income'?[
+    [/gehalt|lohn|salary|wage|arbeitgeber|payroll|salary payment/,'الراتب'],
+    [/bonus|prämie|commission|provision/,'مكافآت وعمولات'],
+    [/kindergeld|elterngeld|arbeitslosengeld|benefit|allowance|sozialleistung/,'إعانات ومزايا'],
+    [/mieteinnahme|rent received|rental income/,'دخل الإيجار'],
+    [/zins|interest|dividend|ertrag/,'فوائد وأرباح'],
+    [/refund|erstattung|rückerstattung|gutschrift/,'استرداد مبالغ'],
+    [/freelance|honorar|selbstständig/,'العمل الحر']
+  ]:[
+    [/miete|rent|wohnung|hausgeld|housing|landlord/,'السكن والإيجار'],
+    [/strom|energie|electric|electricity/,'الكهرباء'],
+    [/wasser|water/,'الماء'],
+    [/gas|heizung|heating/,'الغاز والتدفئة'],
+    [/internet|telekom|vodafone|telefon|mobile|o2|telefonica/,'الإنترنت والاتصالات'],
+    [/supermarkt|lebensmittel|rewe|aldi|lidl|edeka|kaufland|food|grocery|market/,'البقالة والمواد الغذائية'],
+    [/restaurant|imbiss|lieferando|mcdonald|burger|pizza|cafe|café/,'المطاعم والوجبات'],
+    [/tankstelle|shell|aral|fuel|benzin|diesel/,'الوقود'],
+    [/bus|bahn|db |transport|uber|bolt|ticket/,'المواصلات العامة'],
     [/versicherung|insurance|krankenkasse/,'التأمين'],
-    [/gehalt|lohn|salary|wage|arbeitgeber/,'الراتب'],
-    [/amazon|online|shop|kauf|bestellung/,'التسوق']
+    [/apotheke|pharmacy|arzt|doctor|klinik|hospital|medizin/,'الصحة والأدوية'],
+    [/kleidung|fashion|schuhe|clothes|zara|h&m/,'الملابس والأحذية'],
+    [/dm |rossmann|drogerie|cosmetic|friseur/,'العناية الشخصية'],
+    [/amazon|online|shop|kauf|bestellung|ikea/,'المنزل والأثاث'],
+    [/schule|school|kita|kindergarten|university|studium|buchhandlung/,'التعليم والكتب'],
+    [/steuer|tax|gebühr|fee|rundfunk/,'الضرائب والرسوم'],
+    [/netflix|spotify|subscription|abo|disney\+/,'الاشتراكات والخدمات الرقمية'],
+    [/kino|cinema|theater|museum|freizeit/,'الترفيه والهوايات'],
+    [/bankgebühr|kontoführung|bank fee/,'رسوم بنكية'],
+    [/kreditrate|loan|installment|ratenzahlung/,'أقساط وديون']
   ];
   for(const [pattern,category] of rules)if(pattern.test(value))return category;
-  return type==='income'?'دخل آخر':'مصروفات أخرى';
+  return type==='income'?'إيرادات أخرى':'مصاريف أخرى';
 }
 function parseStatementLines(text) {
   const amountPattern=/[+\-−]?\s*(?:\d{1,3}(?:[.,\s]\d{3})+|\d+)[,.]\d{2}(?!\d)/g;
@@ -422,8 +474,13 @@ function renderImportRows(){
     selected.type='checkbox';selected.checked=item.selected;selected.setAttribute('aria-label','اعتماد هذه الحركة');selected.addEventListener('change',()=>{item.selected=selected.checked;updateImportCount();});selectedCell.appendChild(selected);
     const dateCell=document.createElement('td'),date=document.createElement('input');dateCell.dataset.label='التاريخ';date.type='date';date.dir='ltr';date.lang='en-GB';date.style.textAlign='center';date.value=item.date;date.addEventListener('change',()=>{item.date=date.value;});dateCell.appendChild(date);
     const descCell=document.createElement('td'),desc=document.createElement('input');descCell.dataset.label='الوصف';desc.type='text';desc.value=item.description;desc.maxLength=180;desc.addEventListener('input',()=>{item.description=desc.value;});descCell.appendChild(desc);
-    const categoryCell=document.createElement('td'),category=document.createElement('input');categoryCell.dataset.label='التصنيف';category.type='text';category.value=item.category||inferStatementCategory(item.description,item.type);category.maxLength=80;category.addEventListener('input',()=>{item.category=category.value;});categoryCell.appendChild(category);
-    const typeCell=document.createElement('td'),type=document.createElement('select');typeCell.dataset.label='النوع';[['income','إيراد'],['expense','مصروف']].forEach(pair=>{const option=document.createElement('option');option.value=pair[0];option.textContent=pair[1];type.appendChild(option);});type.value=item.type;type.addEventListener('change',()=>{item.type=type.value;});typeCell.appendChild(type);
+    const categoryCell=document.createElement('td'),category=document.createElement('input'),categoryList=document.createElement('datalist');
+    categoryCell.dataset.label='التصنيف';category.type='text';category.autocomplete='off';category.maxLength=80;
+    categoryList.id='importCategoryOptions'+extractedImportRows.indexOf(item);populateVeloviCategoryList(categoryList,item.type);
+    category.setAttribute('list',categoryList.id);category.value=item.category||inferStatementCategory(item.description,item.type);
+    category.addEventListener('input',()=>{item.category=category.value;});categoryCell.append(category,categoryList);
+    const typeCell=document.createElement('td'),type=document.createElement('select');typeCell.dataset.label='النوع';[['income','إيراد'],['expense','مصروف']].forEach(pair=>{const option=document.createElement('option');option.value=pair[0];option.textContent=pair[1];type.appendChild(option);});type.value=item.type;
+    type.addEventListener('change',()=>{const previous=inferStatementCategory(item.description,item.type);item.type=type.value;if(!item.category||item.category===previous)item.category=inferStatementCategory(item.description,item.type);populateVeloviCategoryList(categoryList,item.type);category.value=item.category;});typeCell.appendChild(type);
     const amountCell=document.createElement('td'),amount=document.createElement('input');amountCell.dataset.label='المبلغ';amount.type='number';amount.min='0.01';amount.step='0.01';amount.value=item.amount.toFixed(2);amount.inputMode='decimal';amount.addEventListener('change',()=>{item.amount=Number(amount.value)||0;});amountCell.appendChild(amount);
     tr.append(selectedCell,dateCell,descCell,categoryCell,typeCell,amountCell);importRowsBody.appendChild(tr);
   });
