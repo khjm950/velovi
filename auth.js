@@ -19,6 +19,11 @@
   let mfaLoginFactorId = null;
   let mfaLoginChallengeId = null;
   let mfaEnrollmentFactorId = null;
+  let inviteSetupCompleted = false;
+
+  function isInviteSetupFlow() {
+    return new URLSearchParams(window.location.search).get('flow') === 'invite-setup';
+  }
 
   function withRequestTimeout(promise, operation, timeoutMs = 20000) {
     let timer;
@@ -51,6 +56,7 @@
     if (loginPanel) loginPanel.hidden = panel !== 'login';
     if (createPanel) createPanel.hidden = panel !== 'create';
     if ($('mfaLoginPanel')) $('mfaLoginPanel').hidden = panel !== 'mfa';
+    if ($('inviteSetupPanel')) $('inviteSetupPanel').hidden = panel !== 'invite-setup';
   }
 
   function showApp() {
@@ -899,6 +905,11 @@
     }
     if (workspaceLoadPromise) return workspaceLoadPromise;
     currentUser = session.user;
+    if (isInviteSetupFlow() && !inviteSetupCompleted) {
+      showGate('invite-setup');
+      if ($('invitePasswordStatus')) $('invitePasswordStatus').textContent = 'أنشئ كلمة مرور جديدة لإكمال تفعيل حسابك.';
+      return;
+    }
     const signOut = $('signOutButton');
     if (signOut) signOut.hidden = false;
     const sync = document.querySelector('.sync');
@@ -1194,6 +1205,75 @@
     return checks;
   }
 
+  function updateInvitePasswordRules() {
+    const value = $('inviteNewPassword')?.value || '';
+    const checks = {
+      length: value.length >= 8,
+      upper: /[A-Z]/.test(value),
+      lower: /[a-z]/.test(value),
+      number: /[0-9]/.test(value),
+      special: /[^A-Za-z0-9]/.test(value)
+    };
+    Object.entries(checks).forEach(([name, valid]) => {
+      const item = document.querySelector('#invitePasswordRules [data-rule="' + name + '"]');
+      if (!item) return;
+      item.classList.toggle('is-valid', valid);
+      item.classList.toggle('is-invalid', !valid);
+    });
+    return checks;
+  }
+
+  async function setInvitedMemberPassword(event) {
+    event.preventDefault();
+    const checks = updateInvitePasswordRules();
+    const password = $('inviteNewPassword').value;
+    if (Object.values(checks).some(valid => !valid)) {
+      $('invitePasswordStatus').textContent = 'أكمل شروط كلمة المرور الموضحة أعلاه.';
+      $('invitePasswordStatus').className = 'password-status small error';
+      return;
+    }
+    if (password !== $('inviteConfirmPassword').value) {
+      $('invitePasswordStatus').textContent = 'كلمتا المرور غير متطابقتين.';
+      $('invitePasswordStatus').className = 'password-status small error';
+      return;
+    }
+    const button = $('inviteSetupSubmit');
+    button.disabled = true;
+    $('invitePasswordStatus').textContent = 'جارٍ حفظ كلمة المرور…';
+    $('invitePasswordStatus').className = 'password-status small';
+    let result;
+    try {
+      result = await client.auth.updateUser({ password });
+    } catch (error) {
+      button.disabled = false;
+      $('invitePasswordStatus').textContent = 'تعذر الاتصال لحفظ كلمة المرور: ' + (error.message || 'خطأ غير معروف');
+      $('invitePasswordStatus').className = 'password-status small error';
+      return;
+    }
+    if (result.error) {
+      button.disabled = false;
+      $('invitePasswordStatus').textContent = 'تعذر حفظ كلمة المرور: ' + result.error.message;
+      $('invitePasswordStatus').className = 'password-status small error';
+      return;
+    }
+    inviteSetupCompleted = true;
+    const url = new URL(window.location.href);
+    url.searchParams.delete('flow');
+    window.history.replaceState({}, document.title, url.pathname + url.search + url.hash);
+    $('inviteSetupForm').reset();
+    const refreshed = await client.auth.getSession();
+    if (refreshed.error || !refreshed.data.session) {
+      button.disabled = false;
+      $('invitePasswordStatus').textContent = 'تم حفظ كلمة المرور، لكن تعذر تحديث الجلسة. أعد تحميل الصفحة لتسجيل الدخول.';
+      $('invitePasswordStatus').className = 'password-status small error';
+      return;
+    }
+    await handleSession(refreshed.data.session);
+    if (shell?.classList.contains('is-authenticated')) {
+      setMessage('تم إنشاء كلمة المرور وتفعيل حسابك بنجاح. أهلاً بك في الأسرة.', false);
+    }
+  }
+
   async function changePassword(event) {
     event.preventDefault();
     const current = $('currentPassword').value;
@@ -1336,6 +1416,16 @@
     });
     $('signOutButton').addEventListener('click', signOut);
     $('mfaLoginForm')?.addEventListener('submit', verifyMfaLogin);
+    $('inviteSetupForm')?.addEventListener('submit', setInvitedMemberPassword);
+    $('inviteNewPassword')?.addEventListener('input', () => {
+      updateInvitePasswordRules();
+      $('invitePasswordStatus').textContent = '';
+      $('invitePasswordStatus').className = 'password-status small';
+    });
+    $('inviteConfirmPassword')?.addEventListener('input', () => {
+      $('invitePasswordStatus').textContent = '';
+      $('invitePasswordStatus').className = 'password-status small';
+    });
     $('changePasswordForm')?.addEventListener('submit', changePassword);
     $('newPassword')?.addEventListener('input', () => {
       updatePasswordRules();
