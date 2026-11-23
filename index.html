@@ -618,8 +618,10 @@
 
       <label>
         التصنيف
-        <input id="txCategory" list="txCategoryOptions" autocomplete="off" placeholder="اكتب للبحث عن تصنيف..." maxlength="80">
-        <datalist id="txCategoryOptions"></datalist>
+        <div class="category-select" id="txCategorySelect">
+          <input id="txCategory" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="txCategoryOptions" autocomplete="off" placeholder="اختر أو اكتب للبحث عن تصنيف..." maxlength="80">
+          <div id="txCategoryOptions" class="category-dropdown" role="listbox" hidden></div>
+        </div>
       </label>
 
       <label>
