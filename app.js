@@ -419,14 +419,15 @@ function populateVeloviCategoryList(list, type) {
     });
     return option;
   }));
-  list.hidden = options.length === 0;
-  if (input) input.setAttribute('aria-expanded', String(!list.hidden));
+  list.hidden = true;
+  if (input) input.setAttribute('aria-expanded', 'false');
 }
 function refreshVeloviCategoryDropdown() {
   const input = document.getElementById('txCategory');
   const list = document.getElementById('txCategoryOptions');
   const type = document.getElementById('txType')?.value || 'expense';
   populateVeloviCategoryList(list, type);
+  if (list) list.hidden = list.children.length === 0;
   if (input) input.setAttribute('aria-expanded', String(Boolean(list && !list.hidden)));
 }
 function normalizeVeloviCategory(value, type) {
