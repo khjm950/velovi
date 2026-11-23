@@ -399,9 +399,35 @@ function getVeloviCategoryOptions(type) {
 }
 function populateVeloviCategoryList(list, type) {
   if (!list) return;
-  list.replaceChildren(...getVeloviCategoryOptions(type).map(value => {
-    const option=document.createElement('option'); option.value=value; return option;
+  const input = document.getElementById('txCategory');
+  const query = String(input?.value || '').trim().toLocaleLowerCase('ar');
+  const options = getVeloviCategoryOptions(type).filter(value => !query || value.toLocaleLowerCase('ar').includes(query));
+  list.replaceChildren(...options.map(value => {
+    const option = document.createElement('button');
+    option.type = 'button';
+    option.className = 'category-option';
+    option.role = 'option';
+    option.textContent = value;
+    option.addEventListener('pointerdown', event => event.preventDefault());
+    option.addEventListener('click', () => {
+      if (input) {
+        input.value = value;
+        input.setAttribute('aria-expanded', 'false');
+        list.hidden = true;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+    return option;
   }));
+  list.hidden = options.length === 0;
+  if (input) input.setAttribute('aria-expanded', String(!list.hidden));
+}
+function refreshVeloviCategoryDropdown() {
+  const input = document.getElementById('txCategory');
+  const list = document.getElementById('txCategoryOptions');
+  const type = document.getElementById('txType')?.value || 'expense';
+  populateVeloviCategoryList(list, type);
+  if (input) input.setAttribute('aria-expanded', String(Boolean(list && !list.hidden)));
 }
 function normalizeVeloviCategory(value, type) {
   const text=String(value||'').trim();
@@ -410,6 +436,36 @@ function normalizeVeloviCategory(value, type) {
   return match || text;
 }
 window.VELOVI_CATEGORIES = { catalog: VELOVI_CATEGORY_CATALOG, options: getVeloviCategoryOptions, populate: populateVeloviCategoryList, normalize: normalizeVeloviCategory };
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('txCategory');
+  const list = document.getElementById('txCategoryOptions');
+  if (!input || !list) return;
+  input.addEventListener('focus', refreshVeloviCategoryDropdown);
+  input.addEventListener('click', refreshVeloviCategoryDropdown);
+  input.addEventListener('input', refreshVeloviCategoryDropdown);
+  input.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      list.hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+    } else if (event.key === 'ArrowDown' && !list.hidden) {
+      event.preventDefault();
+      list.querySelector('.category-option')?.focus();
+    }
+  });
+  list.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      list.hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+      input.focus();
+    }
+  });
+  document.addEventListener('click', event => {
+    if (!event.target.closest('#txCategorySelect')) {
+      list.hidden = true;
+      input.setAttribute('aria-expanded', 'false');
+    }
+  });
+});
 function inferStatementCategory(description, type) {
   const value=String(description||'').normalize('NFKC').toLowerCase();
   const rules=type==='income'?[
