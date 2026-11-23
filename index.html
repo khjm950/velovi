@@ -617,6 +617,12 @@
       </label>
 
       <label>
+        التصنيف
+        <input id="txCategory" list="txCategoryOptions" autocomplete="off" placeholder="اكتب للبحث عن تصنيف..." maxlength="80">
+        <datalist id="txCategoryOptions"></datalist>
+      </label>
+
+      <label>
         الوصف
         <input id="txDesc" required placeholder="مثلاً: راتب أو مشتريات">
       </label>
@@ -631,11 +637,6 @@
           <input id="txDate" type="date" required>
         </label>
       </div>
-
-      <label>
-        التصنيف
-        <input id="txCategory" placeholder="مثلاً: السكن، الطعام، الراتب">
-      </label>
 
       <button class="primary full" id="saveTx" type="submit">حفظ الحركة</button>
       <p class="small muted">تُحفظ الحركة في حسابك وتظهر على الأجهزة الأخرى بعد تسجيل الدخول.</p>

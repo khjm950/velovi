@@ -676,6 +676,7 @@
     $('txAmount').value=transaction?.amount??'';
     $('txDate').value=transaction?.transaction_date||new Date().toISOString().slice(0,10);
     $('txCategory').value=transaction?.category||'';
+    window.VELOVI_CATEGORIES?.populate($('txCategoryOptions'),$('txType').value);
     $('txAccount').value=transaction?.account_id||visibleAccountsForWriting()[0]?.id||'';
     const heading=dialog.querySelector('h2');if(heading)heading.textContent=transaction?'تعديل حركة مالية':'إضافة حركة مالية';
     const save=$('saveTx');if(save)save.textContent=transaction?'حفظ التعديلات':'حفظ الحركة';
@@ -700,7 +701,7 @@
     const payload={
       household_id:currentHousehold.id,owner_member_id:account.owner_member_id,account_id:account.id,
       transaction_type:type,amount,currency:account.currency,description,
-      category:$('txCategory').value.trim()||'غير مصنف',transaction_date:date
+      category:window.VELOVI_CATEGORIES?.normalize($('txCategory').value,type)||$('txCategory').value.trim()||'غير مصنف',transaction_date:date
     };
     const button=$('saveTx');button.disabled=true;
     const result=transactionId
@@ -737,7 +738,7 @@
     }).map(row=>({
       household_id:currentHousehold.id,owner_member_id:account.owner_member_id,account_id:account.id,
       transaction_type:row.type,amount:Number(row.amount),currency:account.currency,
-      description:row.description.trim(),category:(row.category||'غير مصنف').trim(),transaction_date:row.date
+      description:row.description.trim(),category:window.VELOVI_CATEGORIES?.normalize(row.category,row.type)||(row.category||'غير مصنف').trim(),transaction_date:row.date
     }));
     if(!rows.length){
       window.VELOVI_IMPORT?.setStatus?.('لم تُحفظ حركات جديدة؛ قد تكون جميع الحركات المحددة مكررة أو غير مكتملة.');
@@ -824,7 +825,7 @@
       if(active.length>=3&&cv<=0.30){const sorted=[...active].sort((x,y)=>x-y);estimate=sorted[Math.floor(sorted.length/2)];pattern='متكرر';}
       else {const weights=values.map((_,index)=>index+1);estimate=values.reduce((s,value,index)=>s+value*weights[index],0)/weights.reduce((s,w)=>s+w,0);}
       estimates[type]+=estimate;
-      patterns.push({category,type,estimate,pattern,months:active.length});
+      patterns.push({category,type,estimate,pattern,months:active.length,frequency:active.length/monthKeys.length});
     }
     const net=estimates.income-estimates.expense;
     const monthlyNet=monthKeys.map(month=>{
@@ -844,7 +845,7 @@
     const details=document.createElement('p');details.textContent='الرصيد الحالي المحسوب: '+formatMoney(accountBalance,currency)+' · دخل شهري مقدّر: '+formatMoney(estimates.income,currency)+' · مصروف شهري مقدّر: '+formatMoney(estimates.expense,currency)+' · صافي شهري متوقع: '+formatMoney(net,currency);
     const confidenceLine=document.createElement('p');confidenceLine.className='small muted';confidenceLine.textContent='مستوى الثقة: '+confidence+' · تذبذب صافي الأشهر الستة: '+formatMoney(volatility,currency)+'. التوقع يستخدم الوسيط للبنود المنتظمة والمتوسط المرجح للبنود المتغيرة.';
     const breakdown=document.createElement('ul');breakdown.className='forecast-patterns';
-    patterns.forEach(item=>{const li=document.createElement('li');li.textContent=item.category+' — '+(item.type==='income'?'إيراد':'مصروف')+' · '+item.pattern+' · '+formatMoney(item.estimate,currency)+' شهرياً';breakdown.appendChild(li);});
+    patterns.forEach(item=>{const li=document.createElement('li');li.textContent=item.category+' — '+(item.type==='income'?'إيراد':'مصروف')+' · '+item.pattern+' · ظهر في '+item.months+' من 6 أشهر · '+formatMoney(item.estimate,currency)+' شهرياً';breakdown.appendChild(li);});
     result.append(title,details,confidenceLine,breakdown);
     result.classList.toggle('negative',projected<0);result.classList.toggle('positive',projected>=0);
   }
@@ -1457,6 +1458,7 @@
     $('addAccount').addEventListener('click', () => openAccountDialog());
     $('closeAccountDialog').addEventListener('click', () => $('accountDialog').close());
     $('transactionForm').addEventListener('submit', saveTransaction);
+    $('txType').addEventListener('change', () => window.VELOVI_CATEGORIES?.populate($('txCategoryOptions'),$('txType').value));
     $('closeTransactionDialog').addEventListener('click', () => $('transactionDialog').close());
     $('selectAllTransactions')?.addEventListener('change', event => {
       document.querySelectorAll('#txRows .tx-select').forEach(box => {
