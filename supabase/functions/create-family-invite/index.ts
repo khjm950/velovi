@@ -63,15 +63,12 @@ Deno.serve(async (req: Request) => {
     const existing = usersData.users.find((user) => (user.email || "").toLowerCase() === email);
     if (existing?.id === authData.user.id) return json({ error: "You cannot invite your own email address" }, 400);
 
-    const inviteRedirect = new URL(redirect.toString());
-    const needsPasswordSetup = !existing ||
-      (!!existing.invited_at && existing.user_metadata?.velovi_password_setup_complete !== true);
-    if (needsPasswordSetup) inviteRedirect.searchParams.set("flow", "invite-setup");
-
+    // Keep the exact previously working redirect URL. The client detects
+    // first-time invited users from their Auth user metadata after callback.
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: existing ? "magiclink" : "invite",
       email,
-      options: { redirectTo: inviteRedirect.toString() }
+      options: { redirectTo: redirect.toString() }
     });
     if (linkError || !linkData?.properties?.action_link || !linkData.user?.id) {
       return json({ error: linkError?.message || "Could not generate invitation link" }, 400);
