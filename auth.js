@@ -1241,7 +1241,15 @@
     button.disabled = true;
     $('invitePasswordStatus').textContent = 'جارٍ حفظ كلمة المرور…';
     $('invitePasswordStatus').className = 'password-status small';
-    const result = await client.auth.updateUser({ password });
+    let result;
+    try {
+      result = await client.auth.updateUser({ password });
+    } catch (error) {
+      button.disabled = false;
+      $('invitePasswordStatus').textContent = 'تعذر الاتصال لحفظ كلمة المرور: ' + (error.message || 'خطأ غير معروف');
+      $('invitePasswordStatus').className = 'password-status small error';
+      return;
+    }
     if (result.error) {
       button.disabled = false;
       $('invitePasswordStatus').textContent = 'تعذر حفظ كلمة المرور: ' + result.error.message;
@@ -1261,7 +1269,9 @@
       return;
     }
     await handleSession(refreshed.data.session);
-    setMessage('تم إنشاء كلمة المرور وتفعيل حسابك بنجاح. أهلاً بك في الأسرة.', false);
+    if (shell?.classList.contains('is-authenticated')) {
+      setMessage('تم إنشاء كلمة المرور وتفعيل حسابك بنجاح. أهلاً بك في الأسرة.', false);
+    }
   }
 
   async function changePassword(event) {
