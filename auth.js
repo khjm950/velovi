@@ -105,16 +105,17 @@
   function setHeader(householdName, displayName) {
     const sync = document.querySelector('.sync');
     if (sync) {
-      sync.textContent = 'متصل · ' + householdName;
-      const dot = document.createElement('i');
-      dot.style.background = '#23815c';
-      sync.prepend(dot);
+      sync.replaceChildren();
+      const dot = document.createElement('i'); dot.style.background = '#23815c';
+      const status = document.createElement('span'); status.textContent = 'متصل · ';
+      const family = document.createElement('span'); family.textContent = householdName; family.setAttribute('translate', 'no');
+      sync.append(dot, status, family);
     }
     const signOut = $('signOutButton');
     if (signOut) signOut.hidden = false;
     const familyName = document.querySelector('.family-card b');
     const familySub = document.querySelector('.family-card small');
-    if (familyName) familyName.textContent = householdName;
+    if (familyName) { familyName.textContent = householdName; familyName.setAttribute('translate', 'no'); }
     if (familySub) familySub.textContent = 'المساحة العائلية';
     const securityTitle = document.querySelector('.security b');
     const securityText = document.querySelector('.security small');
