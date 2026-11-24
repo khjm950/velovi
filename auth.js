@@ -1062,7 +1062,7 @@
   async function removeMember(member) {
     const memberName = member.display_name || 'هذا العضو';
     const confirmText = 'تأكيد إلغاء عضوية ' + memberName + '؟\n\nسيُمنع العضو من الدخول إلى هذه الأسرة، لكن ستبقى حساباته وحركاته المالية محفوظة. ويمكن للمدير إعادة تفعيل عضويته لاحقاً.\n\nهل تريد المتابعة؟';
-    if (!window.confirm(confirmText)) return;
+    if (!window.confirm(window.VELOVI_I18N?.t?.(confirmText) || confirmText)) return;
     const result = await client.rpc('remove_household_member', {
       p_household_id: currentHousehold.id,
       p_member_id: member.id
@@ -1393,7 +1393,7 @@
     const accountCount = accounts.count || 0;
     const transactionCount = transactions.count || 0;
     const confirmText = 'تحذير: حذف العضو ' + (member.display_name || '') + ' وبياناته نهائياً\n\nسيتم حذف ' + accountCount + ' حساب مالي و' + transactionCount + ' حركة مالية مرتبطة به من هذه الأسرة. هذا الإجراء نهائي ولا يمكن التراجع عنه، ولن يمكن استعادة هذه البيانات.\n\nإذا كنت تريد إيقاف عضويته فقط مع الاحتفاظ ببياناته، استخدم «إلغاء عضوية العضو» بدلاً من ذلك.\n\nهل أنت متأكد من الحذف النهائي؟';
-    if (!window.confirm(confirmText)) return;
+    if (!window.confirm(window.VELOVI_I18N?.t?.(confirmText) || confirmText)) return;
     const result = await client.functions.invoke('account-security', {
       body: { operation: 'delete_member', household_id: currentHousehold.id, member_id: member.id }
     });
