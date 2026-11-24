@@ -464,6 +464,7 @@
     document.title = translateComposite('Velovi - إدارة مالية الأسرة', lang);
     const description = document.querySelector('meta[name="description"]');
     if (description) description.content = translateComposite('Velovi - إدارة مالية الأسرة', lang);
+    document.dispatchEvent(new CustomEvent('velovi:language-changed', { detail: { language: lang } }));
   }
   languageSelect?.addEventListener('change', () => {
     localStorage.setItem('velovi-language',languageSelect.value);
@@ -480,5 +481,5 @@
   });
   applyLanguage();
   observer.observe(document.body,{subtree:true,childList:true,characterData:true});
-  window.VELOVI_I18N={apply:applyLanguage};
+  window.VELOVI_I18N={apply:applyLanguage,t:(value)=>translateComposite(String(value ?? ''),language()),language};
 })();
