@@ -257,7 +257,9 @@
   function formatMoney(value, currency) {
     const amount = Number(value) || 0;
     try {
-      return new Intl.NumberFormat(navigator.language || 'de-DE', {
+      const selectedLanguage = document.documentElement.lang || 'ar';
+      const locale = selectedLanguage === 'ar' ? 'ar-EG' : selectedLanguage === 'en' ? 'en-GB' : 'de-DE';
+      return new Intl.NumberFormat(locale, {
         style: 'currency', currency: currency || 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2
       }).format(amount);
     } catch {
@@ -769,7 +771,7 @@
     select.replaceChildren();
     currencies.forEach(currency=>{const option=document.createElement('option');option.value=currency;option.textContent=currency;select.appendChild(option);});
     if(currencies.includes(previous))select.value=previous;
-    const categories=[...new Set(currentTransactions.filter(tx=>tx.transaction_type==='income'||tx.transaction_type==='expense').map(tx=>tx.category||'غير مصنف'))].sort((a,b)=>a.localeCompare(b,'ar'));
+    const categories=[...new Set(currentTransactions.filter(tx=>tx.transaction_type==='income'||tx.transaction_type==='expense').map(tx=>tx.category||'غير مصنف'))].sort((a,b)=>a.localeCompare(b,document.documentElement.lang||'ar'));
     wrap.replaceChildren();
     if(!categories.length){wrap.appendChild(emptyState('لا توجد تصنيفات في سجل الحركات بعد.'));return;}
     let savedExcluded=[];try{savedExcluded=JSON.parse(localStorage.getItem('velovi-forecast-excluded')||'[]');}catch{}
