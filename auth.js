@@ -105,16 +105,17 @@
   function setHeader(householdName, displayName) {
     const sync = document.querySelector('.sync');
     if (sync) {
-      sync.textContent = 'متصل · ' + householdName;
-      const dot = document.createElement('i');
-      dot.style.background = '#23815c';
-      sync.prepend(dot);
+      sync.replaceChildren();
+      const dot = document.createElement('i'); dot.style.background = '#23815c';
+      const status = document.createElement('span'); status.textContent = 'متصل · ';
+      const family = document.createElement('span'); family.textContent = householdName; family.setAttribute('translate', 'no');
+      sync.append(dot, status, family);
     }
     const signOut = $('signOutButton');
     if (signOut) signOut.hidden = false;
     const familyName = document.querySelector('.family-card b');
     const familySub = document.querySelector('.family-card small');
-    if (familyName) familyName.textContent = householdName;
+    if (familyName) { familyName.textContent = householdName; familyName.setAttribute('translate', 'no'); }
     if (familySub) familySub.textContent = 'المساحة العائلية';
     const securityTitle = document.querySelector('.security b');
     const securityText = document.querySelector('.security small');
@@ -144,6 +145,7 @@
       const details = document.createElement('div');
       const name = document.createElement('b');
       name.textContent = member.display_name || 'عضو';
+      name.setAttribute('translate', 'no');
       const sub = document.createElement('small');
       sub.textContent = !member.user_id
         ? 'حساب محذوف · السجل المالي محفوظ'
@@ -255,7 +257,9 @@
   function formatMoney(value, currency) {
     const amount = Number(value) || 0;
     try {
-      return new Intl.NumberFormat(navigator.language || 'de-DE', {
+      const selectedLanguage = document.documentElement.lang || 'ar';
+      const locale = selectedLanguage === 'ar' ? 'ar-EG' : selectedLanguage === 'en' ? 'en-GB' : 'de-DE';
+      return new Intl.NumberFormat(locale, {
         style: 'currency', currency: currency || 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2
       }).format(amount);
     } catch {
@@ -355,9 +359,10 @@
       card.className = 'account-card';
       const header = document.createElement('div'); header.className = 'account-card-head';
       const identity = document.createElement('div');
-      const title = document.createElement('h3'); title.textContent = account.name;
-      const sub = document.createElement('p'); sub.className = 'muted small';
-      sub.textContent = accountTypeLabel(account.account_type) + ' · ' + account.currency + ' · ' + memberName(account.owner_member_id);
+      const title = document.createElement('h3'); title.textContent = account.name; title.setAttribute('translate', 'no');
+      const sub = document.createElement('p'); sub.className = 'muted small'; sub.setAttribute('translate', 'no');
+      const accountTypeText = accountTypeLabel(account.account_type);
+      sub.textContent = (window.VELOVI_I18N?.t?.(accountTypeText) || accountTypeText) + ' · ' + account.currency + ' · ' + memberName(account.owner_member_id);
       identity.append(title,sub);
       const value = document.createElement('strong'); value.className = balance < 0 ? 'negative' : 'positive';
       value.textContent = formatMoney(balance,account.currency);
@@ -390,10 +395,7 @@
       stat.append(label,amount,note); stats.appendChild(stat);
     }
   }
-  function bulkText(ar, de, en) {
-    const language = document.documentElement.lang || 'ar';
-    return language === 'de' ? de : language === 'en' ? en : ar;
-  }
+  function bulkText(ar) { return ar; }
   function updateBulkSelectionUi() {
     const all = [...document.querySelectorAll('#txRows .tx-select')];
     const visible = all.filter(box => !box.closest('tr')?.hidden);
@@ -424,7 +426,7 @@
       'Möchten Sie ' + permitted.length + ' ausgewählte Buchungen endgültig löschen? Dies kann nicht rückgängig gemacht werden.',
       'Permanently delete ' + permitted.length + ' selected transactions? This cannot be undone.'
     );
-    if (!window.confirm(confirmText)) return;
+    if (!window.confirm(window.VELOVI_I18N?.t?.(confirmText) || confirmText)) return;
     const result = await client.from('financial_transactions')
       .delete().in('id', permitted).select('id');
     if (result.error) return setMessage(bulkText('تعذر حذف الحركات المحددة: ', 'Ausgewählte Buchungen konnten nicht gelöscht werden: ', 'Could not delete selected transactions: ') + result.error.message, true);
@@ -461,10 +463,10 @@
       badge.textContent=tx.transaction_type==='income'?'إيراد':tx.transaction_type==='expense'?'مصروف':'تحويل';
       typeCell.appendChild(badge);
       const categoryCell=document.createElement('td'); categoryCell.textContent=tx.category || 'غير مصنف';
-      const descCell=document.createElement('td'); descCell.textContent=tx.description || '—';
+      const descCell=document.createElement('td'); descCell.textContent=tx.description || '—'; descCell.setAttribute('translate', 'no');
       const dateCell=document.createElement('td');
       const date=new Date(String(tx.transaction_date)+'T12:00:00');
-      dateCell.textContent=Number.isNaN(date.getTime())?tx.transaction_date:date.toLocaleDateString('de-DE');
+      dateCell.textContent=Number.isNaN(date.getTime())?tx.transaction_date:date.toLocaleDateString(document.documentElement.lang==='ar'?'ar-EG':document.documentElement.lang==='en'?'en-GB':'de-DE');
       const amountCell=document.createElement('td'); amountCell.className=tx.transaction_type==='income'?'positive':tx.transaction_type==='expense'?'negative':'';
       const amount=document.createElement('span');
       amount.textContent=(tx.transaction_type==='income'?'+':tx.transaction_type==='expense'?'−':'')+formatMoney(Number(tx.amount),tx.currency);
@@ -524,7 +526,7 @@
       recent.replaceChildren();
       currentTransactions.slice(0,5).forEach(tx=>{
         const item=document.createElement('div');item.className='transaction-item';
-        const desc=document.createElement('span');desc.textContent=(tx.description||tx.category||'حركة')+' · '+tx.transaction_date;
+        const desc=document.createElement('span');desc.textContent=(tx.description||tx.category||'حركة')+' · '+tx.transaction_date;if(tx.description)desc.setAttribute('translate','no');
         const amount=document.createElement('strong');amount.textContent=(tx.transaction_type==='expense'?'−':'+')+formatMoney(Number(tx.amount),tx.currency);
         item.append(desc,amount);recent.appendChild(item);
       });
@@ -661,7 +663,7 @@
     setMessage(accountId?'تم تحديث الحساب.':'تم إنشاء الحساب وحفظه في الأسرة.',false);
   }
   async function archiveAccount(account) {
-    if(!window.confirm('سيُحذف الحساب من قائمة الحسابات النشطة مع الاحتفاظ بسجل الحركات والتدقيق. هل تريد المتابعة؟'))return;
+    if(!window.confirm(window.VELOVI_I18N?.t?.('سيُحذف الحساب من قائمة الحسابات النشطة مع الاحتفاظ بسجل الحركات والتدقيق. هل تريد المتابعة؟') || 'سيُحذف الحساب من قائمة الحسابات النشطة مع الاحتفاظ بسجل الحركات والتدقيق. هل تريد المتابعة؟'))return;
     const result=await client.from('financial_accounts').update({is_active:false}).eq('id',account.id).select('id').maybeSingle();
     if(result.error)return setMessage('تعذر حذف الحساب: '+result.error.message,true);
     if(!result.data)return setMessage('لم يتم حذف الحساب؛ تحقق من صلاحيات الوصول إليه.',true);
@@ -679,7 +681,9 @@
     $('txDesc').value=transaction?.description||'';
     $('txAmount').value=transaction?.amount??'';
     $('txDate').value=transaction?.transaction_date||new Date().toISOString().slice(0,10);
-    $('txCategory').value=transaction?.category||'';
+    const category = transaction?.category || '';
+    $('txCategory').dataset.categoryCanonical = category;
+    $('txCategory').value = category ? (window.VELOVI_I18N?.t?.(category) || category) : '';
     window.VELOVI_CATEGORIES?.populate($('txCategoryOptions'),$('txType').value);
     $('txAccount').value=transaction?.account_id||visibleAccountsForWriting()[0]?.id||'';
     const heading=dialog.querySelector('h2');if(heading)heading.textContent=transaction?'تعديل حركة مالية':'إضافة حركة مالية';
@@ -720,7 +724,7 @@
   }
   async function deleteTransaction(transaction) {
     if(!canDeleteTransactions(transaction))return setMessage('ليست لديك صلاحية حذف هذه الحركة.',true);
-    if(!window.confirm('هل تريد حذف هذه الحركة نهائياً؟'))return;
+    if(!window.confirm(window.VELOVI_I18N?.t?.('هل تريد حذف هذه الحركة نهائياً؟') || 'هل تريد حذف هذه الحركة نهائياً؟'))return;
     const result=await client.from('financial_transactions').delete().eq('id',transaction.id).select('id').maybeSingle();
     if(result.error)return setMessage('تعذر حذف الحركة: '+result.error.message,true);
     if(!result.data)return setMessage('لم يتم حذف الحركة؛ تحقق من صلاحيات الوصول إليها.',true);
@@ -767,7 +771,7 @@
     select.replaceChildren();
     currencies.forEach(currency=>{const option=document.createElement('option');option.value=currency;option.textContent=currency;select.appendChild(option);});
     if(currencies.includes(previous))select.value=previous;
-    const categories=[...new Set(currentTransactions.filter(tx=>tx.transaction_type==='income'||tx.transaction_type==='expense').map(tx=>tx.category||'غير مصنف'))].sort((a,b)=>a.localeCompare(b,'ar'));
+    const categories=[...new Set(currentTransactions.filter(tx=>tx.transaction_type==='income'||tx.transaction_type==='expense').map(tx=>tx.category||'غير مصنف'))].sort((a,b)=>a.localeCompare(b,document.documentElement.lang||'ar'));
     wrap.replaceChildren();
     if(!categories.length){wrap.appendChild(emptyState('لا توجد تصنيفات في سجل الحركات بعد.'));return;}
     let savedExcluded=[];try{savedExcluded=JSON.parse(localStorage.getItem('velovi-forecast-excluded')||'[]');}catch{}
@@ -1005,15 +1009,16 @@
   }
   async function sendMemberInviteEmail() {
     const invite=await createMemberInvite(); if(!invite)return;
-    const subject=encodeURIComponent('دعوة للانضمام إلى أسرة Velovi');
-    const body=encodeURIComponent('مرحباً '+invite.displayName+'،\n\nتمت دعوتك للانضمام إلى الأسرة في Velovi لإدارة الشؤون المالية. افتح الرابط التالي لتفعيل حسابك والانضمام:\n'+invite.action_link+'\n\nإذا لم تكن تتوقع هذه الدعوة فتجاهل الرسالة.');
+    const subject=encodeURIComponent(window.VELOVI_I18N?.t?.('دعوة للانضمام إلى أسرة Velovi') || 'دعوة للانضمام إلى أسرة Velovi');
+    const bodyText='مرحباً '+invite.displayName+'،\n\nتمت دعوتك للانضمام إلى الأسرة في Velovi لإدارة الشؤون المالية. افتح الرابط التالي لتفعيل حسابك والانضمام:\n'+invite.action_link+'\n\nإذا لم تكن تتوقع هذه الدعوة فتجاهل الرسالة.';
+    const body=encodeURIComponent(window.VELOVI_I18N?.t?.(bodyText) || bodyText);
     window.location.href='mailto:'+encodeURIComponent(invite.email)+'?subject='+subject+'&body='+body;
     const status=$('inviteStatus');if(status)status.textContent='تم تجهيز رسالة الدعوة في تطبيق البريد. أرسلها لإكمال الدعوة.';
   }
   async function copyMemberInviteLink() {
     const invite=await createMemberInvite(); if(!invite)return;
     try { await navigator.clipboard.writeText(invite.action_link); }
-    catch { window.prompt('انسخ رابط الدعوة:',invite.action_link); }
+    catch { window.prompt(window.VELOVI_I18N?.t?.('انسخ رابط الدعوة:') || 'انسخ رابط الدعوة:',invite.action_link); }
     const status=$('inviteStatus');if(status)status.textContent='تم نسخ رابط الدعوة. أرسله للعضو ليكمل تسجيل الدخول.';
   }
 
@@ -1059,7 +1064,7 @@
   async function removeMember(member) {
     const memberName = member.display_name || 'هذا العضو';
     const confirmText = 'تأكيد إلغاء عضوية ' + memberName + '؟\n\nسيُمنع العضو من الدخول إلى هذه الأسرة، لكن ستبقى حساباته وحركاته المالية محفوظة. ويمكن للمدير إعادة تفعيل عضويته لاحقاً.\n\nهل تريد المتابعة؟';
-    if (!window.confirm(confirmText)) return;
+    if (!window.confirm(window.VELOVI_I18N?.t?.(confirmText) || confirmText)) return;
     const result = await client.rpc('remove_household_member', {
       p_household_id: currentHousehold.id,
       p_member_id: member.id
@@ -1182,7 +1187,7 @@
     if (error) return $('mfaManageStatus').textContent = error.message;
     const factor = (data.totp || []).find(item => item.status === 'verified');
     if (!factor) return refreshAccountSecurityStatus();
-    if (!window.confirm('هل تريد إلغاء المصادقة الثنائية لهذا الحساب؟')) return;
+    if (!window.confirm(window.VELOVI_I18N?.t?.('هل تريد إلغاء المصادقة الثنائية لهذا الحساب؟') || 'هل تريد إلغاء المصادقة الثنائية لهذا الحساب؟')) return;
     const result = await client.auth.mfa.unenroll({ factorId: factor.id });
     if (result.error) {
       $('mfaManageStatus').textContent = 'تعذر إلغاء المصادقة الثنائية: ' + result.error.message;
@@ -1336,7 +1341,7 @@
   }
 
   async function signOutOtherSessions() {
-    if (!window.confirm('سيتم إنهاء جلسات Velovi على جميع الأجهزة الأخرى. هل تريد المتابعة؟')) return;
+    if (!window.confirm(window.VELOVI_I18N?.t?.('سيتم إنهاء جلسات Velovi على جميع الأجهزة الأخرى. هل تريد المتابعة؟') || 'سيتم إنهاء جلسات Velovi على جميع الأجهزة الأخرى. هل تريد المتابعة؟')) return;
     const result = await client.auth.signOut({ scope: 'others' });
     $('sessionsStatus').textContent = result.error
       ? 'تعذر إنهاء الجلسات الأخرى: ' + result.error.message
@@ -1349,7 +1354,7 @@
       $('deleteAccountStatus').textContent = 'اكتب «حذف حسابي» كما هو للتأكيد.';
       return;
     }
-    if (!window.confirm('هذا الإجراء نهائي. سيُحذف حساب الدخول وتُعطّل عضوياتك، مع الاحتفاظ بالسجل المالي للأسرة. هل أنت متأكد؟')) return;
+    if (!window.confirm(window.VELOVI_I18N?.t?.('هذا الإجراء نهائي. سيُحذف حساب الدخول وتُعطّل عضوياتك، مع الاحتفاظ بالسجل المالي للأسرة. هل أنت متأكد؟') || 'هذا الإجراء نهائي. سيُحذف حساب الدخول وتُعطّل عضوياتك، مع الاحتفاظ بالسجل المالي للأسرة. هل أنت متأكد؟')) return;
     const factors = await client.auth.mfa.listFactors();
     const hasMfa = !factors.error && (factors.data.totp || []).some(item => item.status === 'verified');
     if (hasMfa) {
@@ -1390,7 +1395,7 @@
     const accountCount = accounts.count || 0;
     const transactionCount = transactions.count || 0;
     const confirmText = 'تحذير: حذف العضو ' + (member.display_name || '') + ' وبياناته نهائياً\n\nسيتم حذف ' + accountCount + ' حساب مالي و' + transactionCount + ' حركة مالية مرتبطة به من هذه الأسرة. هذا الإجراء نهائي ولا يمكن التراجع عنه، ولن يمكن استعادة هذه البيانات.\n\nإذا كنت تريد إيقاف عضويته فقط مع الاحتفاظ ببياناته، استخدم «إلغاء عضوية العضو» بدلاً من ذلك.\n\nهل أنت متأكد من الحذف النهائي؟';
-    if (!window.confirm(confirmText)) return;
+    if (!window.confirm(window.VELOVI_I18N?.t?.(confirmText) || confirmText)) return;
     const result = await client.functions.invoke('account-security', {
       body: { operation: 'delete_member', household_id: currentHousehold.id, member_id: member.id }
     });
@@ -1492,6 +1497,23 @@
       handleSession(data.session);
     });
   }
+
+  document.addEventListener('velovi:language-changed', () => {
+    if (!currentHousehold) return;
+    renderAccounts();
+    updateDashboard();
+    renderExpenseChart();
+    renderForecastControls();
+    calculateSmartForecast();
+    document.querySelectorAll('#txRows tr[data-transaction-id]').forEach(row => {
+      const transaction = currentTransactions.find(item => item.id === row.dataset.transactionId);
+      if (!transaction) return;
+      const date = new Date(String(transaction.transaction_date) + 'T12:00:00');
+      if (row.children[3]) row.children[3].textContent = Number.isNaN(date.getTime()) ? transaction.transaction_date : date.toLocaleDateString(document.documentElement.lang === 'ar' ? 'ar-EG' : document.documentElement.lang === 'en' ? 'en-GB' : 'de-DE');
+      const amount = row.children[4]?.querySelector('span');
+      if (amount) amount.textContent = (transaction.transaction_type === 'income' ? '+' : transaction.transaction_type === 'expense' ? '−' : '') + formatMoney(Number(transaction.amount), transaction.currency);
+    });
+  });
 
   initialize();
 })();

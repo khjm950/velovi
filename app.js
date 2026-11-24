@@ -68,16 +68,21 @@ function formatCurrencyOptionLabels() {
   currencySetting.style.textAlign = 'left';
   [...currencySetting.options].forEach(option => {
     const code = option.value;
-    const separator = option.textContent.indexOf(' · ');
-    if (!code || separator < 0) return;
-    const name = option.textContent.slice(separator + 3).replace(/\s*\([^)]*\)\s*$/, '').trim();
+    if (!code) return;
+    if (!option.dataset.currencyNameOriginal) {
+      const separator = option.textContent.indexOf(' · ');
+      if (separator < 0) return;
+      option.dataset.currencyNameOriginal = option.textContent.slice(separator + 3).replace(/\s*\([^)]*\)\s*$/, '').trim();
+    }
+    const name = option.dataset.currencyNameOriginal;
+    const localizedName = window.VELOVI_I18N?.t?.(name) || name;
     let symbol = code;
     try {
       symbol = new Intl.NumberFormat('en', { style: 'currency', currency: code, currencyDisplay: 'narrowSymbol' })
         .formatToParts(0).find(part => part.type === 'currency')?.value || code;
     } catch {}
     // Keep option labels plain: native Android select controls may expose bidi escape marks as text.
-    option.textContent = `${code} · ${name} (${symbol})`;
+    option.textContent = `${code} · ${localizedName} (${symbol})`;
     option.dir = 'ltr';
   });
 }
@@ -335,9 +340,9 @@ addListener(forecastButton, 'click', () => {
   const months = Number(getElement('forecastMonths')?.value);
   const annual = Number(getElement('annualReturn')?.value);
   if (![balance, monthly, months, annual].every(Number.isFinite) || !Number.isInteger(months) || months < 1 || months > 1200) {
-    return alert('أدخل قيماً صحيحة، واجعل مدة التوقع بين شهر واحد و1200 شهر.');
+    return alert(window.VELOVI_I18N?.t?.('أدخل قيماً صحيحة، واجعل مدة التوقع بين شهر واحد و1200 شهر.') || 'أدخل قيماً صحيحة، واجعل مدة التوقع بين شهر واحد و1200 شهر.');
   }
-  if (annual <= -100 || annual > 100) return alert('العائد السنوي يجب أن يكون أكبر من -100% ولا يتجاوز 100%.');
+  if (annual <= -100 || annual > 100) return alert(window.VELOVI_I18N?.t?.('العائد السنوي يجب أن يكون أكبر من -100% ولا يتجاوز 100%.') || 'العائد السنوي يجب أن يكون أكبر من -100% ولا يتجاوز 100%.');
   const rate = Math.pow(1 + annual / 100, 1 / 12) - 1;
   let future = balance;
   for (let month = 0; month < months; month++) future = future * (1 + rate) + monthly;
@@ -400,8 +405,9 @@ function getVeloviCategoryOptions(type) {
 function populateVeloviCategoryList(list, type) {
   if (!list) return;
   const input = document.getElementById('txCategory');
-  const query = String(input?.value || '').trim().toLocaleLowerCase('ar');
-  const options = getVeloviCategoryOptions(type).filter(value => !query || value.toLocaleLowerCase('ar').includes(query));
+  const query = String(input?.value || '').trim().toLocaleLowerCase();
+  const translate = value => window.VELOVI_I18N?.t?.(value) || value;
+  const options = getVeloviCategoryOptions(type).filter(value => !query || value.toLocaleLowerCase().includes(query) || translate(value).toLocaleLowerCase().includes(query));
   list.replaceChildren(...options.map(value => {
     const option = document.createElement('button');
     option.type = 'button';
@@ -411,7 +417,8 @@ function populateVeloviCategoryList(list, type) {
     option.addEventListener('pointerdown', event => event.preventDefault());
     option.addEventListener('click', () => {
       if (input) {
-        input.value = value;
+        input.dataset.categoryCanonical = value;
+        input.value = window.VELOVI_I18N?.t?.(value) || value;
         input.setAttribute('aria-expanded', 'false');
         list.hidden = true;
         input.dispatchEvent(new Event('change', { bubbles: true }));
@@ -433,7 +440,7 @@ function refreshVeloviCategoryDropdown() {
 function normalizeVeloviCategory(value, type) {
   const text=String(value||'').trim();
   if(!text) return type==='income'?'إيرادات أخرى':'مصاريف أخرى';
-  const match=getVeloviCategoryOptions(type).find(item=>item.localeCompare(text,'ar',{sensitivity:'base'})===0);
+  const match=getVeloviCategoryOptions(type).find(item=>item.localeCompare(text,'ar',{sensitivity:'base'})===0 || (window.VELOVI_I18N?.t?.(item)||item).localeCompare(text,window.VELOVI_I18N?.language?.()==='de'?'de':window.VELOVI_I18N?.language?.()==='en'?'en':'ar',{sensitivity:'base'})===0);
   return match || text;
 }
 window.VELOVI_CATEGORIES = { catalog: VELOVI_CATEGORY_CATALOG, options: getVeloviCategoryOptions, populate: populateVeloviCategoryList, normalize: normalizeVeloviCategory };
@@ -443,7 +450,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!input || !list) return;
   input.addEventListener('focus', refreshVeloviCategoryDropdown);
   input.addEventListener('click', refreshVeloviCategoryDropdown);
-  input.addEventListener('input', refreshVeloviCategoryDropdown);
+  input.addEventListener('input', () => { delete input.dataset.categoryCanonical; refreshVeloviCategoryDropdown(); });
   input.addEventListener('keydown', event => {
     if (event.key === 'Escape') {
       list.hidden = true;
@@ -460,6 +467,19 @@ document.addEventListener('DOMContentLoaded', () => {
       input.focus();
     }
   });
+  document.addEventListener('velovi:language-changed', () => {
+    const categoryInput = document.getElementById('txCategory');
+    if (categoryInput?.dataset.categoryCanonical) categoryInput.value = window.VELOVI_I18N?.t?.(categoryInput.dataset.categoryCanonical) || categoryInput.dataset.categoryCanonical;
+    document.querySelectorAll('[data-velovi-category-original]').forEach(field => { field.value = window.VELOVI_I18N?.t?.(field.dataset.veloviCategoryOriginal) || field.dataset.veloviCategoryOriginal; });
+    document.querySelectorAll('datalist[id^="importCategoryOptions"]').forEach(list => populateImportCategoryDatalist(list, list.closest('tr')?.querySelector('select')?.value || 'expense'));
+    formatCurrencyOptionLabels();
+    refreshCurrencyDisplay();
+    const manualForecast = getElement('forecastResult');
+    const manualValue = Number(manualForecast?.dataset.numericValue);
+    const manualAmount = manualForecast?.querySelector('b');
+    if (manualAmount && Number.isFinite(manualValue)) manualAmount.textContent = formatPreferredCurrency(manualValue);
+    refreshVeloviCategoryDropdown();
+  });
   document.addEventListener('click', event => {
     if (!event.target.closest('#txCategorySelect')) {
       list.hidden = true;
@@ -467,6 +487,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+function populateImportCategoryDatalist(list, type) {
+  if (!list) return;
+  list.replaceChildren(...getVeloviCategoryOptions(type).map(value => {
+    const option = document.createElement('option');
+    const translated = window.VELOVI_I18N?.t?.(value) || value;
+    option.value = translated;
+    option.label = translated;
+    option.textContent = value;
+    return option;
+  }));
+}
 function inferStatementCategory(description, type) {
   const value=String(description||'').normalize('NFKC').toLowerCase();
   const rules=type==='income'?[
@@ -529,15 +560,15 @@ function renderImportRows(){
     const tr=document.createElement('tr'),selectedCell=document.createElement('td'),selected=document.createElement('input');
     selectedCell.dataset.label='اعتماد';
     selected.type='checkbox';selected.checked=item.selected;selected.setAttribute('aria-label','اعتماد هذه الحركة');selected.addEventListener('change',()=>{item.selected=selected.checked;updateImportCount();});selectedCell.appendChild(selected);
-    const dateCell=document.createElement('td'),date=document.createElement('input');dateCell.dataset.label='التاريخ';date.type='date';date.dir='ltr';date.lang='en-GB';date.style.textAlign='center';date.value=item.date;date.addEventListener('change',()=>{item.date=date.value;});dateCell.appendChild(date);
+    const dateCell=document.createElement('td'),date=document.createElement('input');dateCell.dataset.label='التاريخ';date.type='date';date.dir='ltr';date.lang=window.VELOVI_I18N?.language?.()==='ar'?'ar-EG':window.VELOVI_I18N?.language?.()==='de'?'de-DE':'en-GB';date.style.textAlign='center';date.value=item.date;date.addEventListener('change',()=>{item.date=date.value;});dateCell.appendChild(date);
     const descCell=document.createElement('td'),desc=document.createElement('input');descCell.dataset.label='الوصف';desc.type='text';desc.value=item.description;desc.maxLength=180;desc.addEventListener('input',()=>{item.description=desc.value;});descCell.appendChild(desc);
     const categoryCell=document.createElement('td'),category=document.createElement('input'),categoryList=document.createElement('datalist');
     categoryCell.dataset.label='التصنيف';category.type='text';category.autocomplete='off';category.maxLength=80;
-    categoryList.id='importCategoryOptions'+extractedImportRows.indexOf(item);populateVeloviCategoryList(categoryList,item.type);
-    category.setAttribute('list',categoryList.id);category.value=item.category||inferStatementCategory(item.description,item.type);
-    category.addEventListener('input',()=>{item.category=category.value;});categoryCell.append(category,categoryList);
+    categoryList.id='importCategoryOptions'+extractedImportRows.indexOf(item);populateImportCategoryDatalist(categoryList,item.type);
+    category.setAttribute('list',categoryList.id);item.category=item.category||inferStatementCategory(item.description,item.type);category.dataset.veloviCategoryOriginal=item.category;category.value=window.VELOVI_I18N?.t?.(item.category)||item.category;
+    category.addEventListener('input',()=>{item.category=normalizeVeloviCategory(category.value,item.type);category.dataset.veloviCategoryOriginal=item.category;});categoryCell.append(category,categoryList);
     const typeCell=document.createElement('td'),type=document.createElement('select');typeCell.dataset.label='النوع';[['income','إيراد'],['expense','مصروف']].forEach(pair=>{const option=document.createElement('option');option.value=pair[0];option.textContent=pair[1];type.appendChild(option);});type.value=item.type;
-    type.addEventListener('change',()=>{const previous=inferStatementCategory(item.description,item.type);item.type=type.value;if(!item.category||item.category===previous)item.category=inferStatementCategory(item.description,item.type);populateVeloviCategoryList(categoryList,item.type);category.value=item.category;});typeCell.appendChild(type);
+    type.addEventListener('change',()=>{const previous=inferStatementCategory(item.description,item.type);item.type=type.value;if(!item.category||item.category===previous)item.category=inferStatementCategory(item.description,item.type);populateImportCategoryDatalist(categoryList,item.type);category.dataset.veloviCategoryOriginal=item.category;category.value=window.VELOVI_I18N?.t?.(item.category)||item.category;});typeCell.appendChild(type);
     const amountCell=document.createElement('td'),amount=document.createElement('input');amountCell.dataset.label='المبلغ';amount.type='number';amount.min='0.01';amount.step='0.01';amount.value=item.amount.toFixed(2);amount.inputMode='decimal';amount.addEventListener('change',()=>{item.amount=Number(amount.value)||0;});amountCell.appendChild(amount);
     tr.append(selectedCell,dateCell,descCell,categoryCell,typeCell,amountCell);importRowsBody.appendChild(tr);
   });
@@ -556,7 +587,7 @@ async function recognizePdf(file){
 }
 async function processImportFile(file){
   if(!file)return;if(file.size>20*1024*1024){setImportProgress('حجم الملف أكبر من 20 ميغابايت. اختر ملفاً أصغر.',0);return;}
-  extractedImportRows=[];renderImportRows();if(fileName)fileName.textContent=file.name+' · '+(file.size/1024/1024).toFixed(2)+' MB';if(importRawText)importRawText.textContent='';setImportProgress('جارٍ تجهيز الملف...',2);
+  extractedImportRows=[];renderImportRows();if(fileName){fileName.setAttribute('translate','no');fileName.textContent=file.name+' · '+(file.size/1024/1024).toFixed(2)+' MB';}if(importRawText){importRawText.setAttribute('translate','no');importRawText.textContent='';}setImportProgress('جارٍ تجهيز الملف...',2);
   try{let text='';if(file.type==='application/pdf'||/\.pdf$/i.test(file.name))text=await recognizePdf(file);else if(/image\/(jpeg|png)/i.test(file.type)||/\.(jpe?g|png)$/i.test(file.name))text=await recognizeImage(file);else throw new Error('الصيغ المدعومة حالياً: PDF وJPG وPNG.');
     if(importRawText)importRawText.textContent=text||'لم يتم استخراج نص من الملف.';extractedImportRows=parseStatementLines(text);renderImportRows();
     if(extractedImportRows.length)setImportProgress('تم استخراج '+extractedImportRows.length+' حركة محتملة. راجع البيانات قبل استخدامها.',100);else setImportProgress('تمت قراءة الملف، لكن لم تُكتشف حركات واضحة. راجع النص المستخرج أو جرّب نسخة أوضح.',100);
@@ -568,7 +599,7 @@ addListener(getElement('cameraInput'),'change',event=>processImportFile(event.ta
 addListener(getElement('captureFile'),'click',()=>getElement('cameraInput')?.click());
 window.VELOVI_IMPORT = {
   getSelectedRows: () => extractedImportRows.filter(row => row.selected).map(row => ({...row})),
-  clear: () => { extractedImportRows = []; renderImportRows(); if (fileName) fileName.textContent = 'تم حفظ الحركات المستخرجة.'; },
+  clear: () => { extractedImportRows = []; renderImportRows(); if (fileName) { fileName.removeAttribute('translate'); fileName.textContent = 'تم حفظ الحركات المستخرجة.'; } },
   setStatus: (message, isError = false) => { const note = getElement('importSaveNote'); if (note) { note.textContent = message; note.classList.toggle('error', isError); } }};
 addListener(getElement('downloadImportCsv'),'click',()=>{const rows=extractedImportRows.filter(row=>row.selected&&row.date&&row.description&&row.amount>0);if(!rows.length)return;const esc=value=>'"'+String(value??'').replace(/"/g,'""')+'"';const csv=['date,type,description,category,amount',...rows.map(row=>[row.date,row.type,row.description,row.category||'',row.amount.toFixed(2)].map(esc).join(','))].join('\r\n');const blob=new Blob(['\uFEFF',csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='velovi-import-review.csv';link.click();URL.revokeObjectURL(url);});
 
@@ -589,13 +620,13 @@ addListener(getElement('closeBarcodeDialog'),'click',()=>{stopBarcodeScanner();b
 addListener(barcodeDialog,'close',stopBarcodeScanner);
 addListener(scanCodeButton,'click',async()=>{
   if (!('BarcodeDetector' in window) || !navigator.mediaDevices?.getUserMedia) {
-    alert('مسح QR والباركود المباشر غير مدعوم في هذا المتصفح. يمكنك استخدام التقاط صورة أو اختيار ملف.');
+    alert(window.VELOVI_I18N?.t?.('مسح QR والباركود المباشر غير مدعوم في هذا المتصفح. يمكنك استخدام التقاط صورة أو اختيار ملف.') || 'مسح QR والباركود المباشر غير مدعوم في هذا المتصفح. يمكنك استخدام التقاط صورة أو اختيار ملف.');
     return;
   }
   try {
     const supported = await BarcodeDetector.getSupportedFormats();
     const formats = ['qr_code','code_128','code_39','ean_13','ean_8','upc_a','upc_e','itf'].filter(format => supported.includes(format));
-    if (!formats.length) throw new Error('لا توجد صيغ QR أو باركود مدعومة في هذا المتصفح.');
+    if (!formats.length) throw new Error(window.VELOVI_I18N?.t?.('لا توجد صيغ QR أو باركود مدعومة في هذا المتصفح.') || 'لا توجد صيغ QR أو باركود مدعومة في هذا المتصفح.');
     barcodeDetector = new BarcodeDetector({formats});
     barcodeStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
     barcodeVideo.srcObject = barcodeStream;
@@ -608,7 +639,7 @@ addListener(scanCodeButton,'click',async()=>{
         if (codes.length) {
           const value = codes[0].rawValue || '';
           const result = getElement('barcodeResult');
-          if (result) result.textContent = 'تمت قراءة الرمز: ' + value;
+          if (result) result.textContent = (window.VELOVI_I18N?.t?.('تمت قراءة الرمز:') || 'تمت قراءة الرمز:') + ' ' + value;
           const description = getElement('txDesc');
           if (description && !description.value) description.value = value;
           stopBarcodeScanner();
@@ -620,7 +651,7 @@ addListener(scanCodeButton,'click',async()=>{
     barcodeFrame = requestAnimationFrame(scan);
   } catch (error) {
     stopBarcodeScanner();
-    alert('تعذر تشغيل الكاميرا. تحقق من إذن الكاميرا واستخدم اتصال HTTPS.');
+    alert(window.VELOVI_I18N?.t?.('تعذر تشغيل الكاميرا. تحقق من إذن الكاميرا واستخدم اتصال HTTPS.') || 'تعذر تشغيل الكاميرا. تحقق من إذن الكاميرا واستخدم اتصال HTTPS.');
   }
 });
 
