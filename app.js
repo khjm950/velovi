@@ -467,6 +467,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (categoryInput?.dataset.categoryCanonical) categoryInput.value = window.VELOVI_I18N?.t?.(categoryInput.dataset.categoryCanonical) || categoryInput.dataset.categoryCanonical;
     document.querySelectorAll('[data-velovi-category-original]').forEach(field => { field.value = window.VELOVI_I18N?.t?.(field.dataset.veloviCategoryOriginal) || field.dataset.veloviCategoryOriginal; });
     document.querySelectorAll('datalist[id^="importCategoryOptions"]').forEach(list => populateImportCategoryDatalist(list, list.closest('tr')?.querySelector('select')?.value || 'expense'));
+    const manualForecast = getElement('forecastResult');
+    const manualValue = Number(manualForecast?.dataset.numericValue);
+    const manualAmount = manualForecast?.querySelector('b');
+    if (manualAmount && Number.isFinite(manualValue)) manualAmount.textContent = formatPreferredCurrency(manualValue);
     refreshVeloviCategoryDropdown();
   });
   document.addEventListener('click', event => {
