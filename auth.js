@@ -1498,5 +1498,22 @@
     });
   }
 
+  document.addEventListener('velovi:language-changed', () => {
+    if (!currentHousehold) return;
+    renderAccounts();
+    updateDashboard();
+    renderExpenseChart();
+    renderForecastControls();
+    calculateSmartForecast();
+    document.querySelectorAll('#txRows tr[data-transaction-id]').forEach(row => {
+      const transaction = currentTransactions.find(item => item.id === row.dataset.transactionId);
+      if (!transaction) return;
+      const date = new Date(String(transaction.transaction_date) + 'T12:00:00');
+      if (row.children[3]) row.children[3].textContent = Number.isNaN(date.getTime()) ? transaction.transaction_date : date.toLocaleDateString(document.documentElement.lang === 'ar' ? 'ar-EG' : document.documentElement.lang === 'en' ? 'en-GB' : 'de-DE');
+      const amount = row.children[4]?.querySelector('span');
+      if (amount) amount.textContent = (transaction.transaction_type === 'income' ? '+' : transaction.transaction_type === 'expense' ? '−' : '') + formatMoney(Number(transaction.amount), transaction.currency);
+    });
+  });
+
   initialize();
 })();
