@@ -576,7 +576,7 @@ async function recognizePdf(file){
 }
 async function processImportFile(file){
   if(!file)return;if(file.size>20*1024*1024){setImportProgress('حجم الملف أكبر من 20 ميغابايت. اختر ملفاً أصغر.',0);return;}
-  extractedImportRows=[];renderImportRows();if(fileName)fileName.textContent=file.name+' · '+(file.size/1024/1024).toFixed(2)+' MB';if(importRawText)importRawText.textContent='';setImportProgress('جارٍ تجهيز الملف...',2);
+  extractedImportRows=[];renderImportRows();if(fileName){fileName.setAttribute('translate','no');fileName.textContent=file.name+' · '+(file.size/1024/1024).toFixed(2)+' MB';}if(importRawText){importRawText.setAttribute('translate','no');importRawText.textContent='';}setImportProgress('جارٍ تجهيز الملف...',2);
   try{let text='';if(file.type==='application/pdf'||/\.pdf$/i.test(file.name))text=await recognizePdf(file);else if(/image\/(jpeg|png)/i.test(file.type)||/\.(jpe?g|png)$/i.test(file.name))text=await recognizeImage(file);else throw new Error('الصيغ المدعومة حالياً: PDF وJPG وPNG.');
     if(importRawText)importRawText.textContent=text||'لم يتم استخراج نص من الملف.';extractedImportRows=parseStatementLines(text);renderImportRows();
     if(extractedImportRows.length)setImportProgress('تم استخراج '+extractedImportRows.length+' حركة محتملة. راجع البيانات قبل استخدامها.',100);else setImportProgress('تمت قراءة الملف، لكن لم تُكتشف حركات واضحة. راجع النص المستخرج أو جرّب نسخة أوضح.',100);
@@ -588,7 +588,7 @@ addListener(getElement('cameraInput'),'change',event=>processImportFile(event.ta
 addListener(getElement('captureFile'),'click',()=>getElement('cameraInput')?.click());
 window.VELOVI_IMPORT = {
   getSelectedRows: () => extractedImportRows.filter(row => row.selected).map(row => ({...row})),
-  clear: () => { extractedImportRows = []; renderImportRows(); if (fileName) fileName.textContent = 'تم حفظ الحركات المستخرجة.'; },
+  clear: () => { extractedImportRows = []; renderImportRows(); if (fileName) { fileName.removeAttribute('translate'); fileName.textContent = 'تم حفظ الحركات المستخرجة.'; } },
   setStatus: (message, isError = false) => { const note = getElement('importSaveNote'); if (note) { note.textContent = message; note.classList.toggle('error', isError); } }};
 addListener(getElement('downloadImportCsv'),'click',()=>{const rows=extractedImportRows.filter(row=>row.selected&&row.date&&row.description&&row.amount>0);if(!rows.length)return;const esc=value=>'"'+String(value??'').replace(/"/g,'""')+'"';const csv=['date,type,description,category,amount',...rows.map(row=>[row.date,row.type,row.description,row.category||'',row.amount.toFixed(2)].map(esc).join(','))].join('\r\n');const blob=new Blob(['\uFEFF',csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download='velovi-import-review.csv';link.click();URL.revokeObjectURL(url);});
 
