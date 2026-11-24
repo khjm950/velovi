@@ -663,3 +663,30 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
 :root[data-theme="dark"] .category-dropdown{background:var(--card,#202936);border-color:var(--border-color,#465264)}
 .import-preview-table input[list]{min-width:150px}
 .import-preview-table input[list]{min-width:150px}
+
+/* First-run guide and privacy policy */
+.guide-settings-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.privacy-policy-panel details>summary{cursor:pointer;display:flex;align-items:center;gap:8px;list-style:none}
+.privacy-policy-panel details>summary::-webkit-details-marker{display:none}
+.privacy-policy-panel details>summary:after{content:"＋";margin-right:auto;color:var(--green2);font-size:18px}
+.privacy-policy-panel details[open]>summary:after{content:"−"}
+.privacy-policy-content{padding-top:12px;line-height:1.85}
+.privacy-policy-content h3{font-size:14px;margin:18px 0 5px;color:var(--green)}
+.privacy-policy-content p{font-size:12px;color:var(--ink);margin:5px 0 10px}
+.privacy-policy-note{padding:10px;background:var(--bg);border-radius:8px;color:var(--muted)!important}
+.onboarding-guide-dialog{width:min(620px,calc(100% - 26px));max-width:620px;padding:24px}
+.guide-dialog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.guide-dialog-head h2{font-size:20px;margin:3px 0 0}
+.guide-progress{display:flex;align-items:center;gap:12px;margin:20px 0 14px;color:var(--muted);font-size:11px}
+.guide-progress-track{height:6px;background:var(--line);border-radius:10px;overflow:hidden;flex:1}
+.guide-progress-track i{display:block;height:100%;width:14.285%;background:var(--green2);border-radius:10px;transition:width .2s ease}
+.guide-step{min-height:235px;padding:12px 4px}
+.guide-step-icon{display:grid;place-items:center;width:48px;height:48px;border-radius:14px;background:var(--mint);color:var(--green);font-size:25px;margin-bottom:14px}
+.guide-step h3{font-size:18px;margin:0 0 12px}
+.guide-step p{font-size:13px;line-height:1.9;margin:8px 0}
+.guide-step .guide-tip{background:var(--bg);border-right:3px solid var(--green2);border-radius:7px;padding:9px 12px;color:var(--muted);font-size:12px}
+.guide-jump{margin-top:8px}
+.guide-dialog-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:16px}
+.guide-dialog-actions>div{display:flex;gap:8px}
+.guide-dialog-actions button{font-size:12px}
+@media(max-width:520px){.onboarding-guide-dialog{padding:18px}.guide-step{min-height:275px}.guide-dialog-actions{align-items:flex-start;flex-direction:column-reverse}.guide-dialog-actions>div{width:100%;justify-content:flex-end}.guide-dialog-actions>button{align-self:flex-start}}
