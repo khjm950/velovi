@@ -393,6 +393,8 @@
   Object.assign(dictionaries.en, {"تثبيت Velovi":"Install Velovi","تثبيت التطبيق":"Install app"});
   Object.assign(dictionaries.de, {"إجمالي الإيرادات":"Gesamteinnahmen","إجمالي المصروفات":"Gesamtausgaben","يمكن إدخال رصيد سالب. لا تغيّر العملة بعد تسجيل حركات على الحساب إلا بعد مراجعة السجل.":"Ein negativer Anfangssaldo ist möglich. Ändern Sie die Währung eines Kontos nach Buchungen erst nach Prüfung des Verlaufs."});
   Object.assign(dictionaries.en, {"إجمالي الإيرادات":"Total income","إجمالي المصروفات":"Total expenses","يمكن إدخال رصيد سالب. لا تغيّر العملة بعد تسجيل حركات على الحساب إلا بعد مراجعة السجل.":"A negative opening balance is allowed. Do not change an account’s currency after transactions have been recorded without reviewing its history."});
+  Object.assign(dictionaries.de, {"0 محددة":"0 ausgewählt","حذف المحدد":"Ausgewählte löschen","تحديد الكل":"Alle auswählen","إرجاع الإعدادات الافتراضية":"Standardeinstellungen wiederherstellen"});
+  Object.assign(dictionaries.en, {"0 محددة":"0 selected","حذف المحدد":"Delete selected","تحديد الكل":"Select all","إرجاع الإعدادات الافتراضية":"Restore default settings"});
   const originals = new WeakMap();
   const attrOriginals = new WeakMap();
   const languageSelect = document.getElementById('languageSetting');
