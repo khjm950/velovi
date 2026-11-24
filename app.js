@@ -466,6 +466,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoryInput = document.getElementById('txCategory');
     if (categoryInput?.dataset.categoryCanonical) categoryInput.value = window.VELOVI_I18N?.t?.(categoryInput.dataset.categoryCanonical) || categoryInput.dataset.categoryCanonical;
     document.querySelectorAll('[data-velovi-category-original]').forEach(field => { field.value = window.VELOVI_I18N?.t?.(field.dataset.veloviCategoryOriginal) || field.dataset.veloviCategoryOriginal; });
+    document.querySelectorAll('datalist[id^="importCategoryOptions"]').forEach(list => populateImportCategoryDatalist(list, list.closest('tr')?.querySelector('select')?.value || 'expense'));
     refreshVeloviCategoryDropdown();
   });
   document.addEventListener('click', event => {
@@ -479,7 +480,10 @@ function populateImportCategoryDatalist(list, type) {
   if (!list) return;
   list.replaceChildren(...getVeloviCategoryOptions(type).map(value => {
     const option = document.createElement('option');
-    option.value = value;
+    const translated = window.VELOVI_I18N?.t?.(value) || value;
+    option.value = translated;
+    option.label = translated;
+    option.textContent = value;
     return option;
   }));
 }
