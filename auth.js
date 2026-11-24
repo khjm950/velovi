@@ -52,7 +52,7 @@
   }
 
   function showGate(panel) {
-    if (shell) shell.classList.remove('is-authenticated');
+    if (shell) { shell.classList.remove('is-authenticated'); delete shell.dataset.userId; }
     if (gate) gate.hidden = false;
     if (loginPanel) loginPanel.hidden = panel !== 'login';
     if (createPanel) createPanel.hidden = panel !== 'create';
@@ -62,7 +62,11 @@
 
   function showApp() {
     if (gate) gate.hidden = true;
-    if (shell) shell.classList.add('is-authenticated');
+    if (shell) {
+      shell.classList.add('is-authenticated');
+      if (currentUser?.id) shell.dataset.userId = currentUser.id;
+    }
+    window.dispatchEvent(new Event('velovi:authenticated'));
   }
 
   function emptyState(text) {
