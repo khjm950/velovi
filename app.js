@@ -68,16 +68,21 @@ function formatCurrencyOptionLabels() {
   currencySetting.style.textAlign = 'left';
   [...currencySetting.options].forEach(option => {
     const code = option.value;
-    const separator = option.textContent.indexOf(' · ');
-    if (!code || separator < 0) return;
-    const name = option.textContent.slice(separator + 3).replace(/\s*\([^)]*\)\s*$/, '').trim();
+    if (!code) return;
+    if (!option.dataset.currencyNameOriginal) {
+      const separator = option.textContent.indexOf(' · ');
+      if (separator < 0) return;
+      option.dataset.currencyNameOriginal = option.textContent.slice(separator + 3).replace(/\s*\([^)]*\)\s*$/, '').trim();
+    }
+    const name = option.dataset.currencyNameOriginal;
+    const localizedName = window.VELOVI_I18N?.t?.(name) || name;
     let symbol = code;
     try {
       symbol = new Intl.NumberFormat('en', { style: 'currency', currency: code, currencyDisplay: 'narrowSymbol' })
         .formatToParts(0).find(part => part.type === 'currency')?.value || code;
     } catch {}
     // Keep option labels plain: native Android select controls may expose bidi escape marks as text.
-    option.textContent = `${code} · ${name} (${symbol})`;
+    option.textContent = `${code} · ${localizedName} (${symbol})`;
     option.dir = 'ltr';
   });
 }
@@ -467,6 +472,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (categoryInput?.dataset.categoryCanonical) categoryInput.value = window.VELOVI_I18N?.t?.(categoryInput.dataset.categoryCanonical) || categoryInput.dataset.categoryCanonical;
     document.querySelectorAll('[data-velovi-category-original]').forEach(field => { field.value = window.VELOVI_I18N?.t?.(field.dataset.veloviCategoryOriginal) || field.dataset.veloviCategoryOriginal; });
     document.querySelectorAll('datalist[id^="importCategoryOptions"]').forEach(list => populateImportCategoryDatalist(list, list.closest('tr')?.querySelector('select')?.value || 'expense'));
+    formatCurrencyOptionLabels();
+    refreshCurrencyDisplay();
     const manualForecast = getElement('forecastResult');
     const manualValue = Number(manualForecast?.dataset.numericValue);
     const manualAmount = manualForecast?.querySelector('b');
