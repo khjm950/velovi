@@ -395,19 +395,18 @@
     const keys = Object.keys(dictionary).filter(key => key.length >= 2).sort((a,b) => b.length-a.length);
     for (const key of keys) {
       if (!result.includes(key)) continue;
-      const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\  function translateTextNode(node, lang) {
-    if (!originals.has(node)) originals.set(node, node.nodeValue);
-    const source = originals.get(node);
-    const trimmed = source.trim();
-    if (!trimmed) return;
-    const translated = dictionaries[lang]?.[trimmed];
-    const nextValue = translated ? source.replace(trimmed, translated) : source;
-    // Avoid writing identical text: the MutationObserver watches characterData.
-    // Rewriting unchanged nodes would trigger itself indefinitely and freeze the UI.
-    if (node.nodeValue !== nextValue) node.nodeValue = nextValue;
-  }');
-      const pattern = new RegExp('(^|[^\\u0600-\\u06FF])' + escaped + '(?=$|[^\\u0600-\\u06FF])', 'g');
-      result = result.replace(pattern, (match, prefix) => prefix + dictionary[key]);
+      let index = 0;
+      while ((index = result.indexOf(key, index)) !== -1) {
+        const before = index > 0 ? result[index - 1] : '';
+        const afterIndex = index + key.length;
+        const after = afterIndex < result.length ? result[afterIndex] : '';
+        const isArabic = char => !!char && /[\\u0600-\\u06FF]/.test(char);
+        if (!isArabic(before) && !isArabic(after)) {
+          const translated = dictionary[key];
+          result = result.slice(0, index) + translated + result.slice(afterIndex);
+          index += translated.length;
+        } else index += key.length;
+      }
     }
     return result;
   }
