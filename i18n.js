@@ -397,6 +397,8 @@
   Object.assign(dictionaries.en, {"0 محددة":"0 selected","حذف المحدد":"Delete selected","تحديد الكل":"Select all","إرجاع الإعدادات الافتراضية":"Restore default settings"});
   Object.assign(dictionaries.de, {"الرصيد الحسابي الافتراضي بعد ":"Simulierter Kontostand nach "," شهراً: ":" Monaten: "});
   Object.assign(dictionaries.en, {"الرصيد الحسابي الافتراضي بعد ":"Simulated balance after "," شهراً: ":" months: "});
+  Object.assign(dictionaries.de, {"تم حفظ اللغة.":"Sprache gespeichert.","تم إرجاع الإعدادات الافتراضية. لم يتم حذف أي بيانات مالية.":"Standardeinstellungen wiederhergestellt. Es wurden keine Finanzdaten gelöscht.","لا توجد حركات محددة لديك صلاحية حذفها.":"Keine ausgewählten Buchungen dürfen gelöscht werden."});
+  Object.assign(dictionaries.en, {"تم حفظ اللغة.":"Language saved.","تم إرجاع الإعدادات الافتراضية. لم يتم حذف أي بيانات مالية.":"Default settings restored. No financial data was deleted.","لا توجد حركات محددة لديك صلاحية حذفها.":"No selected transactions are permitted for deletion."});
   const originals = new WeakMap();
   const attrOriginals = new WeakMap();
   const languageSelect = document.getElementById('languageSetting');
