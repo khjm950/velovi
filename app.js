@@ -400,8 +400,9 @@ function getVeloviCategoryOptions(type) {
 function populateVeloviCategoryList(list, type) {
   if (!list) return;
   const input = document.getElementById('txCategory');
-  const query = String(input?.value || '').trim().toLocaleLowerCase('ar');
-  const options = getVeloviCategoryOptions(type).filter(value => !query || value.toLocaleLowerCase('ar').includes(query));
+  const query = String(input?.value || '').trim().toLocaleLowerCase();
+  const translate = value => window.VELOVI_I18N?.t?.(value) || value;
+  const options = getVeloviCategoryOptions(type).filter(value => !query || value.toLocaleLowerCase().includes(query) || translate(value).toLocaleLowerCase().includes(query));
   list.replaceChildren(...options.map(value => {
     const option = document.createElement('button');
     option.type = 'button';
@@ -411,7 +412,8 @@ function populateVeloviCategoryList(list, type) {
     option.addEventListener('pointerdown', event => event.preventDefault());
     option.addEventListener('click', () => {
       if (input) {
-        input.value = value;
+        input.dataset.categoryCanonical = value;
+        input.value = window.VELOVI_I18N?.t?.(value) || value;
         input.setAttribute('aria-expanded', 'false');
         list.hidden = true;
         input.dispatchEvent(new Event('change', { bubbles: true }));
@@ -433,7 +435,7 @@ function refreshVeloviCategoryDropdown() {
 function normalizeVeloviCategory(value, type) {
   const text=String(value||'').trim();
   if(!text) return type==='income'?'إيرادات أخرى':'مصاريف أخرى';
-  const match=getVeloviCategoryOptions(type).find(item=>item.localeCompare(text,'ar',{sensitivity:'base'})===0);
+  const match=getVeloviCategoryOptions(type).find(item=>item.localeCompare(text,'ar',{sensitivity:'base'})===0 || (window.VELOVI_I18N?.t?.(item)||item).localeCompare(text,window.VELOVI_I18N?.language?.()==='de'?'de':window.VELOVI_I18N?.language?.()==='en'?'en':'ar',{sensitivity:'base'})===0);
   return match || text;
 }
 window.VELOVI_CATEGORIES = { catalog: VELOVI_CATEGORY_CATALOG, options: getVeloviCategoryOptions, populate: populateVeloviCategoryList, normalize: normalizeVeloviCategory };
@@ -443,7 +445,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!input || !list) return;
   input.addEventListener('focus', refreshVeloviCategoryDropdown);
   input.addEventListener('click', refreshVeloviCategoryDropdown);
-  input.addEventListener('input', refreshVeloviCategoryDropdown);
+  input.addEventListener('input', () => { delete input.dataset.categoryCanonical; refreshVeloviCategoryDropdown(); });
   input.addEventListener('keydown', event => {
     if (event.key === 'Escape') {
       list.hidden = true;
@@ -459,6 +461,12 @@ document.addEventListener('DOMContentLoaded', () => {
       input.setAttribute('aria-expanded', 'false');
       input.focus();
     }
+  });
+  document.addEventListener('velovi:language-changed', () => {
+    const categoryInput = document.getElementById('txCategory');
+    if (categoryInput?.dataset.categoryCanonical) categoryInput.value = window.VELOVI_I18N?.t?.(categoryInput.dataset.categoryCanonical) || categoryInput.dataset.categoryCanonical;
+    document.querySelectorAll('[data-velovi-category-original]').forEach(field => { field.value = window.VELOVI_I18N?.t?.(field.dataset.veloviCategoryOriginal) || field.dataset.veloviCategoryOriginal; });
+    refreshVeloviCategoryDropdown();
   });
   document.addEventListener('click', event => {
     if (!event.target.closest('#txCategorySelect')) {
@@ -534,10 +542,10 @@ function renderImportRows(){
     const categoryCell=document.createElement('td'),category=document.createElement('input'),categoryList=document.createElement('datalist');
     categoryCell.dataset.label='التصنيف';category.type='text';category.autocomplete='off';category.maxLength=80;
     categoryList.id='importCategoryOptions'+extractedImportRows.indexOf(item);populateVeloviCategoryList(categoryList,item.type);
-    category.setAttribute('list',categoryList.id);category.value=item.category||inferStatementCategory(item.description,item.type);
-    category.addEventListener('input',()=>{item.category=category.value;});categoryCell.append(category,categoryList);
+    category.setAttribute('list',categoryList.id);item.category=item.category||inferStatementCategory(item.description,item.type);category.dataset.veloviCategoryOriginal=item.category;category.value=window.VELOVI_I18N?.t?.(item.category)||item.category;
+    category.addEventListener('input',()=>{item.category=normalizeVeloviCategory(category.value,item.type);category.dataset.veloviCategoryOriginal=item.category;});categoryCell.append(category,categoryList);
     const typeCell=document.createElement('td'),type=document.createElement('select');typeCell.dataset.label='النوع';[['income','إيراد'],['expense','مصروف']].forEach(pair=>{const option=document.createElement('option');option.value=pair[0];option.textContent=pair[1];type.appendChild(option);});type.value=item.type;
-    type.addEventListener('change',()=>{const previous=inferStatementCategory(item.description,item.type);item.type=type.value;if(!item.category||item.category===previous)item.category=inferStatementCategory(item.description,item.type);populateVeloviCategoryList(categoryList,item.type);category.value=item.category;});typeCell.appendChild(type);
+    type.addEventListener('change',()=>{const previous=inferStatementCategory(item.description,item.type);item.type=type.value;if(!item.category||item.category===previous)item.category=inferStatementCategory(item.description,item.type);populateVeloviCategoryList(categoryList,item.type);category.dataset.veloviCategoryOriginal=item.category;category.value=window.VELOVI_I18N?.t?.(item.category)||item.category;});typeCell.appendChild(type);
     const amountCell=document.createElement('td'),amount=document.createElement('input');amountCell.dataset.label='المبلغ';amount.type='number';amount.min='0.01';amount.step='0.01';amount.value=item.amount.toFixed(2);amount.inputMode='decimal';amount.addEventListener('change',()=>{item.amount=Number(amount.value)||0;});amountCell.appendChild(amount);
     tr.append(selectedCell,dateCell,descCell,categoryCell,typeCell,amountCell);importRowsBody.appendChild(tr);
   });
@@ -589,13 +597,13 @@ addListener(getElement('closeBarcodeDialog'),'click',()=>{stopBarcodeScanner();b
 addListener(barcodeDialog,'close',stopBarcodeScanner);
 addListener(scanCodeButton,'click',async()=>{
   if (!('BarcodeDetector' in window) || !navigator.mediaDevices?.getUserMedia) {
-    alert('مسح QR والباركود المباشر غير مدعوم في هذا المتصفح. يمكنك استخدام التقاط صورة أو اختيار ملف.');
+    alert(window.VELOVI_I18N?.t?.('مسح QR والباركود المباشر غير مدعوم في هذا المتصفح. يمكنك استخدام التقاط صورة أو اختيار ملف.') || 'مسح QR والباركود المباشر غير مدعوم في هذا المتصفح. يمكنك استخدام التقاط صورة أو اختيار ملف.');
     return;
   }
   try {
     const supported = await BarcodeDetector.getSupportedFormats();
     const formats = ['qr_code','code_128','code_39','ean_13','ean_8','upc_a','upc_e','itf'].filter(format => supported.includes(format));
-    if (!formats.length) throw new Error('لا توجد صيغ QR أو باركود مدعومة في هذا المتصفح.');
+    if (!formats.length) throw new Error(window.VELOVI_I18N?.t?.('لا توجد صيغ QR أو باركود مدعومة في هذا المتصفح.') || 'لا توجد صيغ QR أو باركود مدعومة في هذا المتصفح.');
     barcodeDetector = new BarcodeDetector({formats});
     barcodeStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});
     barcodeVideo.srcObject = barcodeStream;
@@ -608,7 +616,7 @@ addListener(scanCodeButton,'click',async()=>{
         if (codes.length) {
           const value = codes[0].rawValue || '';
           const result = getElement('barcodeResult');
-          if (result) result.textContent = 'تمت قراءة الرمز: ' + value;
+          if (result) result.textContent = (window.VELOVI_I18N?.t?.('تمت قراءة الرمز:') || 'تمت قراءة الرمز:') + ' ' + value;
           const description = getElement('txDesc');
           if (description && !description.value) description.value = value;
           stopBarcodeScanner();
@@ -620,7 +628,7 @@ addListener(scanCodeButton,'click',async()=>{
     barcodeFrame = requestAnimationFrame(scan);
   } catch (error) {
     stopBarcodeScanner();
-    alert('تعذر تشغيل الكاميرا. تحقق من إذن الكاميرا واستخدم اتصال HTTPS.');
+    alert(window.VELOVI_I18N?.t?.('تعذر تشغيل الكاميرا. تحقق من إذن الكاميرا واستخدم اتصال HTTPS.') || 'تعذر تشغيل الكاميرا. تحقق من إذن الكاميرا واستخدم اتصال HTTPS.');
   }
 });
 
