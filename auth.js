@@ -144,6 +144,7 @@
       const details = document.createElement('div');
       const name = document.createElement('b');
       name.textContent = member.display_name || 'عضو';
+      name.setAttribute('translate', 'no');
       const sub = document.createElement('small');
       sub.textContent = !member.user_id
         ? 'حساب محذوف · السجل المالي محفوظ'
@@ -355,9 +356,10 @@
       card.className = 'account-card';
       const header = document.createElement('div'); header.className = 'account-card-head';
       const identity = document.createElement('div');
-      const title = document.createElement('h3'); title.textContent = account.name;
-      const sub = document.createElement('p'); sub.className = 'muted small';
-      sub.textContent = accountTypeLabel(account.account_type) + ' · ' + account.currency + ' · ' + memberName(account.owner_member_id);
+      const title = document.createElement('h3'); title.textContent = account.name; title.setAttribute('translate', 'no');
+      const sub = document.createElement('p'); sub.className = 'muted small'; sub.setAttribute('translate', 'no');
+      const accountTypeText = accountTypeLabel(account.account_type);
+      sub.textContent = (window.VELOVI_I18N?.t?.(accountTypeText) || accountTypeText) + ' · ' + account.currency + ' · ' + memberName(account.owner_member_id);
       identity.append(title,sub);
       const value = document.createElement('strong'); value.className = balance < 0 ? 'negative' : 'positive';
       value.textContent = formatMoney(balance,account.currency);
@@ -461,10 +463,10 @@
       badge.textContent=tx.transaction_type==='income'?'إيراد':tx.transaction_type==='expense'?'مصروف':'تحويل';
       typeCell.appendChild(badge);
       const categoryCell=document.createElement('td'); categoryCell.textContent=tx.category || 'غير مصنف';
-      const descCell=document.createElement('td'); descCell.textContent=tx.description || '—';
+      const descCell=document.createElement('td'); descCell.textContent=tx.description || '—'; descCell.setAttribute('translate', 'no');
       const dateCell=document.createElement('td');
       const date=new Date(String(tx.transaction_date)+'T12:00:00');
-      dateCell.textContent=Number.isNaN(date.getTime())?tx.transaction_date:date.toLocaleDateString('de-DE');
+      dateCell.textContent=Number.isNaN(date.getTime())?tx.transaction_date:date.toLocaleDateString(document.documentElement.lang==='ar'?'ar-EG':document.documentElement.lang==='en'?'en-GB':'de-DE');
       const amountCell=document.createElement('td'); amountCell.className=tx.transaction_type==='income'?'positive':tx.transaction_type==='expense'?'negative':'';
       const amount=document.createElement('span');
       amount.textContent=(tx.transaction_type==='income'?'+':tx.transaction_type==='expense'?'−':'')+formatMoney(Number(tx.amount),tx.currency);
@@ -524,7 +526,7 @@
       recent.replaceChildren();
       currentTransactions.slice(0,5).forEach(tx=>{
         const item=document.createElement('div');item.className='transaction-item';
-        const desc=document.createElement('span');desc.textContent=(tx.description||tx.category||'حركة')+' · '+tx.transaction_date;
+        const desc=document.createElement('span');desc.textContent=(tx.description||tx.category||'حركة')+' · '+tx.transaction_date;if(tx.description)desc.setAttribute('translate','no');
         const amount=document.createElement('strong');amount.textContent=(tx.transaction_type==='expense'?'−':'+')+formatMoney(Number(tx.amount),tx.currency);
         item.append(desc,amount);recent.appendChild(item);
       });
