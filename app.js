@@ -335,9 +335,9 @@ addListener(forecastButton, 'click', () => {
   const months = Number(getElement('forecastMonths')?.value);
   const annual = Number(getElement('annualReturn')?.value);
   if (![balance, monthly, months, annual].every(Number.isFinite) || !Number.isInteger(months) || months < 1 || months > 1200) {
-    return alert('أدخل قيماً صحيحة، واجعل مدة التوقع بين شهر واحد و1200 شهر.');
+    return alert(window.VELOVI_I18N?.t?.('أدخل قيماً صحيحة، واجعل مدة التوقع بين شهر واحد و1200 شهر.') || 'أدخل قيماً صحيحة، واجعل مدة التوقع بين شهر واحد و1200 شهر.');
   }
-  if (annual <= -100 || annual > 100) return alert('العائد السنوي يجب أن يكون أكبر من -100% ولا يتجاوز 100%.');
+  if (annual <= -100 || annual > 100) return alert(window.VELOVI_I18N?.t?.('العائد السنوي يجب أن يكون أكبر من -100% ولا يتجاوز 100%.') || 'العائد السنوي يجب أن يكون أكبر من -100% ولا يتجاوز 100%.');
   const rate = Math.pow(1 + annual / 100, 1 / 12) - 1;
   let future = balance;
   for (let month = 0; month < months; month++) future = future * (1 + rate) + monthly;
