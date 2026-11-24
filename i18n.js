@@ -455,14 +455,15 @@
     }
   }
   function translateTree(root) {
+    if (root.nodeType === 1 && root.closest?.('[translate="no"]')) return;
     const lang=language();
     document.documentElement.lang=lang;
     document.documentElement.dir=lang==='ar'?'rtl':'ltr';
     const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
     const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
-    nodes.forEach(node=>translateTextNode(node,lang));
-    if(root.nodeType===1)translateElement(root,lang);
-    root.querySelectorAll?.('*').forEach(el=>translateElement(el,lang));
+    nodes.forEach(node=>{ if (!node.parentElement?.closest('[translate="no"]')) translateTextNode(node,lang); });
+    if(root.nodeType===1 && !root.closest?.('[translate="no"]'))translateElement(root,lang);
+    root.querySelectorAll?.('*').forEach(el=>{ if (!el.closest('[translate="no"]')) translateElement(el,lang); });
   }
   function applyLanguage() {
     translateTree(document.body);
