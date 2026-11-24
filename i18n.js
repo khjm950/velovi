@@ -484,9 +484,9 @@
   const observer=new MutationObserver(records=>{
     const lang=language();
     for(const record of records){
-      if(record.type==='childList')record.addedNodes.forEach(node=>{if(node.nodeType===1)translateTree(node);else if(node.nodeType===3)translateTextNode(node,lang);});
+      if(record.type==='childList')record.addedNodes.forEach(node=>{if(node.nodeType===1)translateTree(node);else if(node.nodeType===3 && !node.parentElement?.closest('[translate="no"]'))translateTextNode(node,lang);});
       else if(record.type==='characterData')translateTextNode(record.target,lang);
-      else if(record.type==='attributes')translateElement(record.target,lang);
+      else if(record.type==='attributes' && !record.target.closest('[translate="no"]'))translateElement(record.target,lang);
     }
   });
   applyLanguage();
