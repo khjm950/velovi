@@ -399,6 +399,8 @@
   Object.assign(dictionaries.en, {"الرصيد الحسابي الافتراضي بعد ":"Simulated balance after "," شهراً: ":" months: "});
   Object.assign(dictionaries.de, {"تم حفظ اللغة.":"Sprache gespeichert.","تم إرجاع الإعدادات الافتراضية. لم يتم حذف أي بيانات مالية.":"Standardeinstellungen wiederhergestellt. Es wurden keine Finanzdaten gelöscht.","لا توجد حركات محددة لديك صلاحية حذفها.":"Keine ausgewählten Buchungen dürfen gelöscht werden."});
   Object.assign(dictionaries.en, {"تم حفظ اللغة.":"Language saved.","تم إرجاع الإعدادات الافتراضية. لم يتم حذف أي بيانات مالية.":"Default settings restored. No financial data was deleted.","لا توجد حركات محددة لديك صلاحية حذفها.":"No selected transactions are permitted for deletion."});
+  Object.assign(dictionaries.de, {"الخطوة":"Schritt","تعذر إكمال تثبيت Velovi:":"Velovi konnte nicht installiert werden:","تعذر إكمال تثبيت Velovi":"Velovi konnte nicht installiert werden"});
+  Object.assign(dictionaries.en, {"الخطوة":"Step","تعذر إكمال تثبيت Velovi:":"Could not complete Velovi installation:","تعذر إكمال تثبيت Velovi":"Could not complete Velovi installation"});
   const originals = new WeakMap();
   const attrOriginals = new WeakMap();
   const languageSelect = document.getElementById('languageSetting');
@@ -467,6 +469,7 @@
     const lang=language();
     document.documentElement.lang=lang;
     document.documentElement.dir=lang==='ar'?'rtl':'ltr';
+    document.querySelectorAll('input[type="date"]').forEach(input => { input.lang = lang === 'ar' ? 'ar-EG' : lang === 'de' ? 'de-DE' : 'en-GB'; });
     const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
     const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
     nodes.forEach(node=>{ if (!node.parentElement?.closest('[translate="no"]')) translateTextNode(node,lang); });
