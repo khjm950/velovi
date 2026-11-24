@@ -65,6 +65,7 @@
     const details = document.getElementById('privacyPolicyDetails');
     if (details) { details.open = true; details.scrollIntoView({behavior:'smooth', block:'start'}); }
   });
+  document.addEventListener('velovi:language-changed', renderStep);
   window.addEventListener('velovi:authenticated', () => openTour(false));
   if (shell?.classList.contains('is-authenticated')) openTour(false);
 })();
