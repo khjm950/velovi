@@ -424,7 +424,7 @@
       'Möchten Sie ' + permitted.length + ' ausgewählte Buchungen endgültig löschen? Dies kann nicht rückgängig gemacht werden.',
       'Permanently delete ' + permitted.length + ' selected transactions? This cannot be undone.'
     );
-    if (!window.confirm(confirmText)) return;
+    if (!window.confirm(window.VELOVI_I18N?.t?.(confirmText) || confirmText)) return;
     const result = await client.from('financial_transactions')
       .delete().in('id', permitted).select('id');
     if (result.error) return setMessage(bulkText('تعذر حذف الحركات المحددة: ', 'Ausgewählte Buchungen konnten nicht gelöscht werden: ', 'Could not delete selected transactions: ') + result.error.message, true);
@@ -661,7 +661,7 @@
     setMessage(accountId?'تم تحديث الحساب.':'تم إنشاء الحساب وحفظه في الأسرة.',false);
   }
   async function archiveAccount(account) {
-    if(!window.confirm('سيُحذف الحساب من قائمة الحسابات النشطة مع الاحتفاظ بسجل الحركات والتدقيق. هل تريد المتابعة؟'))return;
+    if(!window.confirm(window.VELOVI_I18N?.t?.('سيُحذف الحساب من قائمة الحسابات النشطة مع الاحتفاظ بسجل الحركات والتدقيق. هل تريد المتابعة؟') || 'سيُحذف الحساب من قائمة الحسابات النشطة مع الاحتفاظ بسجل الحركات والتدقيق. هل تريد المتابعة؟'))return;
     const result=await client.from('financial_accounts').update({is_active:false}).eq('id',account.id).select('id').maybeSingle();
     if(result.error)return setMessage('تعذر حذف الحساب: '+result.error.message,true);
     if(!result.data)return setMessage('لم يتم حذف الحساب؛ تحقق من صلاحيات الوصول إليه.',true);
@@ -679,7 +679,9 @@
     $('txDesc').value=transaction?.description||'';
     $('txAmount').value=transaction?.amount??'';
     $('txDate').value=transaction?.transaction_date||new Date().toISOString().slice(0,10);
-    $('txCategory').value=transaction?.category||'';
+    const category = transaction?.category || '';
+    $('txCategory').dataset.categoryCanonical = category;
+    $('txCategory').value = category ? (window.VELOVI_I18N?.t?.(category) || category) : '';
     window.VELOVI_CATEGORIES?.populate($('txCategoryOptions'),$('txType').value);
     $('txAccount').value=transaction?.account_id||visibleAccountsForWriting()[0]?.id||'';
     const heading=dialog.querySelector('h2');if(heading)heading.textContent=transaction?'تعديل حركة مالية':'إضافة حركة مالية';
@@ -720,7 +722,7 @@
   }
   async function deleteTransaction(transaction) {
     if(!canDeleteTransactions(transaction))return setMessage('ليست لديك صلاحية حذف هذه الحركة.',true);
-    if(!window.confirm('هل تريد حذف هذه الحركة نهائياً؟'))return;
+    if(!window.confirm(window.VELOVI_I18N?.t?.('هل تريد حذف هذه الحركة نهائياً؟') || 'هل تريد حذف هذه الحركة نهائياً؟'))return;
     const result=await client.from('financial_transactions').delete().eq('id',transaction.id).select('id').maybeSingle();
     if(result.error)return setMessage('تعذر حذف الحركة: '+result.error.message,true);
     if(!result.data)return setMessage('لم يتم حذف الحركة؛ تحقق من صلاحيات الوصول إليها.',true);
@@ -1005,15 +1007,16 @@
   }
   async function sendMemberInviteEmail() {
     const invite=await createMemberInvite(); if(!invite)return;
-    const subject=encodeURIComponent('دعوة للانضمام إلى أسرة Velovi');
-    const body=encodeURIComponent('مرحباً '+invite.displayName+'،\n\nتمت دعوتك للانضمام إلى الأسرة في Velovi لإدارة الشؤون المالية. افتح الرابط التالي لتفعيل حسابك والانضمام:\n'+invite.action_link+'\n\nإذا لم تكن تتوقع هذه الدعوة فتجاهل الرسالة.');
+    const subject=encodeURIComponent(window.VELOVI_I18N?.t?.('دعوة للانضمام إلى أسرة Velovi') || 'دعوة للانضمام إلى أسرة Velovi');
+    const bodyText='مرحباً '+invite.displayName+'،\n\nتمت دعوتك للانضمام إلى الأسرة في Velovi لإدارة الشؤون المالية. افتح الرابط التالي لتفعيل حسابك والانضمام:\n'+invite.action_link+'\n\nإذا لم تكن تتوقع هذه الدعوة فتجاهل الرسالة.';
+    const body=encodeURIComponent(window.VELOVI_I18N?.t?.(bodyText) || bodyText);
     window.location.href='mailto:'+encodeURIComponent(invite.email)+'?subject='+subject+'&body='+body;
     const status=$('inviteStatus');if(status)status.textContent='تم تجهيز رسالة الدعوة في تطبيق البريد. أرسلها لإكمال الدعوة.';
   }
   async function copyMemberInviteLink() {
     const invite=await createMemberInvite(); if(!invite)return;
     try { await navigator.clipboard.writeText(invite.action_link); }
-    catch { window.prompt('انسخ رابط الدعوة:',invite.action_link); }
+    catch { window.prompt(window.VELOVI_I18N?.t?.('انسخ رابط الدعوة:') || 'انسخ رابط الدعوة:',invite.action_link); }
     const status=$('inviteStatus');if(status)status.textContent='تم نسخ رابط الدعوة. أرسله للعضو ليكمل تسجيل الدخول.';
   }
 
@@ -1182,7 +1185,7 @@
     if (error) return $('mfaManageStatus').textContent = error.message;
     const factor = (data.totp || []).find(item => item.status === 'verified');
     if (!factor) return refreshAccountSecurityStatus();
-    if (!window.confirm('هل تريد إلغاء المصادقة الثنائية لهذا الحساب؟')) return;
+    if (!window.confirm(window.VELOVI_I18N?.t?.('هل تريد إلغاء المصادقة الثنائية لهذا الحساب؟') || 'هل تريد إلغاء المصادقة الثنائية لهذا الحساب؟')) return;
     const result = await client.auth.mfa.unenroll({ factorId: factor.id });
     if (result.error) {
       $('mfaManageStatus').textContent = 'تعذر إلغاء المصادقة الثنائية: ' + result.error.message;
@@ -1336,7 +1339,7 @@
   }
 
   async function signOutOtherSessions() {
-    if (!window.confirm('سيتم إنهاء جلسات Velovi على جميع الأجهزة الأخرى. هل تريد المتابعة؟')) return;
+    if (!window.confirm(window.VELOVI_I18N?.t?.('سيتم إنهاء جلسات Velovi على جميع الأجهزة الأخرى. هل تريد المتابعة؟') || 'سيتم إنهاء جلسات Velovi على جميع الأجهزة الأخرى. هل تريد المتابعة؟')) return;
     const result = await client.auth.signOut({ scope: 'others' });
     $('sessionsStatus').textContent = result.error
       ? 'تعذر إنهاء الجلسات الأخرى: ' + result.error.message
@@ -1349,7 +1352,7 @@
       $('deleteAccountStatus').textContent = 'اكتب «حذف حسابي» كما هو للتأكيد.';
       return;
     }
-    if (!window.confirm('هذا الإجراء نهائي. سيُحذف حساب الدخول وتُعطّل عضوياتك، مع الاحتفاظ بالسجل المالي للأسرة. هل أنت متأكد؟')) return;
+    if (!window.confirm(window.VELOVI_I18N?.t?.('هذا الإجراء نهائي. سيُحذف حساب الدخول وتُعطّل عضوياتك، مع الاحتفاظ بالسجل المالي للأسرة. هل أنت متأكد؟') || 'هذا الإجراء نهائي. سيُحذف حساب الدخول وتُعطّل عضوياتك، مع الاحتفاظ بالسجل المالي للأسرة. هل أنت متأكد؟')) return;
     const factors = await client.auth.mfa.listFactors();
     const hasMfa = !factors.error && (factors.data.totp || []).some(item => item.status === 'verified');
     if (hasMfa) {
