@@ -486,6 +486,42 @@
           <p class="small muted" id="settingsStatus" aria-live="polite">تُحفظ التفضيلات على هذا الجهاز.</p>
         </article>
 
+        <article class="panel settings-panel guide-settings-panel">
+          <h2>دليل الاستخدام والخصوصية</h2>
+          <p class="muted">تعرّف على الخطوات الأساسية لاستخدام Velovi وكيفية التعامل مع بياناتك المالية.</p>
+          <div class="guide-settings-actions">
+            <button class="primary" id="replayOnboardingGuide" type="button">بدء الجولة التوضيحية</button>
+            <button class="secondary" id="openPrivacyPolicy" type="button">قراءة سياسة الخصوصية</button>
+          </div>
+        </article>
+
+        <article class="panel settings-panel privacy-policy-panel" id="privacyPolicyPanel">
+          <details id="privacyPolicyDetails">
+            <summary><strong>سياسة الخصوصية وحماية البيانات</strong><span class="muted small"> اضغط لقراءة التفاصيل</span></summary>
+            <div class="privacy-policy-content">
+              <h3>1. ما البيانات التي يحفظها Velovi؟</h3>
+              <p>يحفظ التطبيق بيانات الحساب اللازمة لتسجيل الدخول مثل البريد الإلكتروني، واسم العرض وعضوية الأسرة وصلاحياتها، إضافة إلى الحسابات المالية والحركات التي تدخلها أو تعتمد استيرادها.</p>
+              <h3>2. من يستطيع الاطلاع على بياناتك؟</h3>
+              <p>القاعدة الافتراضية أن العضو يرى حساباته وحركاته المالية فقط. يستطيع مدير الأسرة الاطلاع على بيانات جميع أعضاء أسرته وإدارة العضويات والصلاحيات. ويمكن للمدير منح عضو صلاحية رؤية حسابات الأعضاء الآخرين للقراءة فقط؛ ولا تعني هذه الصلاحية منحه حق تعديل حركاتهم أو حذفها.</p>
+              <p>تُحدد صلاحيات إضافة الحركات وتعديلها وحذفها بشكل منفصل. وتُطبّق صلاحيات الوصول على مستوى قاعدة البيانات، وليس على إخفاء العناصر من الواجهة فقط.</p>
+              <h3>3. أين وكيف تُحفظ البيانات؟</h3>
+              <p>تُحفظ بيانات الأسرة والحسابات والحركات في قاعدة بيانات Velovi المستضافة لدى Supabase في منطقة فرانكفورت بألمانيا. يستخدم التطبيق اتصال HTTPS، وتُستخدم سياسات أمان قاعدة البيانات (RLS) للتحقق من هوية المستخدم وعضويته وصلاحياته عند الوصول إلى البيانات.</p>
+              <p>كلمات المرور تُدار عبر خدمة المصادقة Supabase Auth، ولا يعرضها التطبيق أو يخزنها كنص مقروء. يمكنك تفعيل المصادقة الثنائية (2FA) من إعدادات الحساب والأمان. هذه الإجراءات تقلل مخاطر الوصول غير المصرح به، لكنها لا تعني أن التطبيق يستخدم تشفيراً شاملاً من طرف إلى طرف أو أن أي نظام محمي من جميع المخاطر.</p>
+              <h3>4. استيراد الكشوف واستخدام الكاميرا</h3>
+              <p>تتم قراءة ملفات PDF والصور المختارة داخل جهازك في المتصفح، ولا يُرفع ملف الكشف نفسه إلى خادم Velovi. بعد مراجعتك واعتمادك، تُرسل الحركات التي اخترت حفظها إلى قاعدة بيانات الأسرة. لا تعتمد الحركات المستخرجة تلقائياً؛ راجع التاريخ والوصف والتصنيف والنوع والمبلغ قبل الحفظ.</p>
+              <p>لا يفعّل Velovi حالياً مزامنة بنكية تلقائية، ولا يطلب منك كلمة مرور البنك. وعند استخدام ماسح QR أو الباركود، يطلب المتصفح إذن الكاميرا، وقد يُدرج النص المقروء في وصف الحركة بعد ذلك.</p>
+              <h3>5. الإعدادات والبيانات المحلية</h3>
+              <p>تُحفظ تفضيلات اللغة والعملة والمظهر وبعض خيارات التوقع على جهازك في مساحة التخزين المحلية للمتصفح. لا يؤدي تغيير العملة المفضلة إلى تحويل أرصدة الحسابات أو مبالغ الحركات المسجلة.</p>
+              <h3>6. مشاركة البيانات وحذفها</h3>
+              <p>تُتاح البيانات لأعضاء الأسرة وفق الأدوار والصلاحيات الموضحة أعلاه، ويعالج مزود الاستضافة Supabase البيانات اللازمة لتشغيل قاعدة البيانات والمصادقة. لا يبيع Velovi بياناتك ولا يستخدمها لعرض الإعلانات.</p>
+              <p>إلغاء عضوية عضو يوقف وصوله إلى الأسرة مع الاحتفاظ بسجله المالي. أما الحذف النهائي للعضو فيحذف حساباته وحركاته المرتبطة بتلك الأسرة ولا يمكن التراجع عنه. وحذف حساب الدخول الشخصي يعطّل عضويات صاحبه، مع بقاء السجل المالي للأسرة محفوظاً.</p>
+              <h3>7. مسؤوليتك في حماية حسابك</h3>
+              <p>استخدم كلمة مرور قوية وفريدة، ولا تشارك بيانات الدخول أو رموز المصادقة، وسجّل الخروج من الأجهزة المشتركة. راجع صلاحيات أفراد الأسرة دورياً، ولا تدخل كلمات مرور البنك أو بيانات البطاقات السرية في وصف الحركات.</p>
+              <p class="privacy-policy-note">آخر مراجعة: 24 نوفمبر 2026. هذه الصفحة تشرح ممارسات التطبيق الحالية للمستخدمين، ولا تغني عن استكمال بيانات الجهة المسؤولة ووسيلة التواصل وفترات الاحتفاظ والأسس القانونية المطلوبة في بيان خصوصية قانوني قبل الإطلاق التجاري.</p>
+            </div>
+          </details>
+        </article>
+
         <article class="panel settings-panel account-security-panel">
           <h2>الحساب والأمان</h2>
           <p class="muted">إدارة بيانات الدخول وحماية حساب Velovi.</p>
@@ -686,12 +722,67 @@
 
 
 
+  <dialog id="onboardingGuideDialog" class="onboarding-guide-dialog" aria-labelledby="guideDialogTitle">
+    <div class="guide-dialog-head">
+      <div><p class="eyebrow">مرحباً بك في Velovi</p><h2 id="guideDialogTitle">جولة سريعة للتعرّف على التطبيق</h2></div>
+      <button class="close" id="closeOnboardingGuide" type="button" aria-label="إغلاق الجولة">×</button>
+    </div>
+    <div class="guide-progress"><span id="guideProgressLabel">الخطوة 1 من 7</span><span class="guide-progress-track"><i id="guideProgressBar"></i></span></div>
+    <section class="guide-step" data-guide-step="0">
+      <span class="guide-step-icon">⌂</span><h3>أهلاً بك في إدارة مالية الأسرة</h3>
+      <p>يساعدك Velovi على تنظيم الحسابات وتسجيل الإيرادات والمصروفات ومتابعة الوضع المالي للأسرة. ابدأ بإعداد حساباتك، ثم سجّل الحركات بانتظام.</p>
+      <p class="guide-tip">يمكنك العودة إلى هذه الجولة لاحقاً من الإعدادات.</p>
+    </section>
+    <section class="guide-step" data-guide-step="1" hidden>
+      <span class="guide-step-icon">▤</span><h3>الخطوة 1: أضف حساباتك المالية</h3>
+      <p>افتح صفحة «الحسابات» وأضف حسابك البنكي أو المدخرات أو النقد. اختر العملة الصحيحة، وحدد صاحب الحساب، وأدخل الرصيد الافتتاحي كما هو في تاريخ بدء استخدامك للتطبيق.</p>
+      <p class="guide-tip">لا تكرر إدخال الرصيد الافتتاحي عند استيراد كشف قديم يغطي الفترة نفسها.</p>
+      <button class="text-btn guide-jump" type="button" data-guide-goto="accounts">الانتقال إلى الحسابات ←</button>
+    </section>
+    <section class="guide-step" data-guide-step="2" hidden>
+      <span class="guide-step-icon">＋</span><h3>الخطوة 2: سجّل كل حركة في حسابها</h3>
+      <p>من «إضافة حركة» اختر الحساب، ثم نوع الحركة: إيراد أو مصروف. اختر التصنيف من القائمة أو اكتب للبحث عنه، ثم أدخل وصفاً واضحاً والمبلغ والتاريخ الصحيحين.</p>
+      <p class="guide-tip">حافظ على استخدام التصنيف نفسه للمصروفات المتشابهة؛ فهذا يحسن دقة التحليلات والتوقعات المستقبلية.</p>
+      <button class="text-btn guide-jump" type="button" data-guide-goto="transactions">الانتقال إلى الحركات ←</button>
+    </section>
+    <section class="guide-step" data-guide-step="3" hidden>
+      <span class="guide-step-icon">⇧</span><h3>الخطوة 3: استورد كشف الحساب عند الحاجة</h3>
+      <p>يمكنك اختيار ملف PDF أو صورة أو التقاط صورة للكشف. يقرأ Velovi الملف داخل جهازك، ثم يعرض الحركات المكتشفة لتراجعها وتصححها وتحدد الحساب قبل حفظها.</p>
+      <p class="guide-tip">الاستيراد ليس مزامنة بنكية تلقائية. راجع كل مبلغ وتاريخ وتصنيف، وانتبه إلى عدم تكرار الحركات التي أدخلتها يدوياً.</p>
+      <button class="text-btn guide-jump" type="button" data-guide-goto="ing">الانتقال إلى الاستيراد ←</button>
+    </section>
+    <section class="guide-step" data-guide-step="4" hidden>
+      <span class="guide-step-icon">◷</span><h3>الخطوة 4: تابع التقارير والتوقعات</h3>
+      <p>تعرض التقارير ملخصات وتحليلات مبنية على الحركات المسجلة. كلما كان السجل منتظماً والتصنيفات دقيقة، أصبحت قراءة الأنماط والتوقعات أكثر فائدة.</p>
+      <p class="guide-tip">التوقعات تقديرية وليست ضماناً للمستقبل. يمكنك استثناء تصنيفات لا تريد إدخالها في التوقع.</p>
+      <button class="text-btn guide-jump" type="button" data-guide-goto="reports">الانتقال إلى التقارير ←</button>
+    </section>
+    <section class="guide-step" data-guide-step="5" hidden>
+      <span class="guide-step-icon">♧</span><h3>الخطوة 5: أدر أفراد الأسرة والصلاحيات</h3>
+      <p>يدعو المدير أفراد الأسرة من صفحة «أفراد الأسرة والصلاحيات»، ثم يحدد لكل عضو ما إذا كان يستطيع إضافة الحركات أو تعديلها أو حذفها. يستطيع المدير الاطلاع على بيانات الأسرة وإدارة أعضائها.</p>
+      <p class="guide-tip">افتراضياً يرى العضو بياناته المالية فقط. منح صلاحية رؤية حسابات الآخرين يتيح الاطلاع عليها للقراءة فقط.</p>
+      <button class="text-btn guide-jump" type="button" data-guide-goto="members">الانتقال إلى أفراد الأسرة ←</button>
+    </section>
+    <section class="guide-step" data-guide-step="6" hidden>
+      <span class="guide-step-icon">▣</span><h3>حسابك وخصوصيتك</h3>
+      <p>استخدم كلمة مرور قوية وفريدة، وفعّل المصادقة الثنائية من «الإعدادات ← الحساب والأمان». لا تشارك رمز التحقق أو كلمة مرورك مع أي شخص.</p>
+      <p>تُحفظ بيانات الأسرة لدى Supabase في منطقة فرانكفورت، وتُطبّق سياسات RLS للتحكم في الوصول. ملفات الكشوف تُقرأ محلياً، ولا يُرفع الملف نفسه إلى خادم Velovi.</p>
+      <p class="guide-tip">اقرأ سياسة الخصوصية الكاملة من الإعدادات، خصوصاً ما يتعلق بصلاحيات المدير وإلغاء العضوية والحذف النهائي.</p>
+      <button class="text-btn guide-jump" type="button" data-guide-action="privacy">فتح سياسة الخصوصية ←</button>
+    </section>
+    <div class="guide-dialog-actions">
+      <button class="text-btn" id="skipOnboardingGuide" type="button">تخطي الجولة</button>
+      <div><button class="secondary" id="previousGuideStep" type="button" disabled>السابق</button><button class="primary" id="nextGuideStep" type="button">التالي</button><button class="primary" id="finishOnboardingGuide" type="button" hidden>إنهاء الجولة</button></div>
+    </div>
+  </dialog>
+
   <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script defer src="./supabase-config.js"></script>
   <script defer src="./app.js"></script>
   <script defer src="./auth.js"></script>
+  <script defer src="./guide.js"></script>
   <script defer src="./install.js"></script>
   <script defer src="./i18n.js"></script>
 </body>
