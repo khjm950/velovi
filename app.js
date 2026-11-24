@@ -475,6 +475,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+function populateImportCategoryDatalist(list, type) {
+  if (!list) return;
+  list.replaceChildren(...getVeloviCategoryOptions(type).map(value => {
+    const option = document.createElement('option');
+    option.value = value;
+    return option;
+  }));
+}
 function inferStatementCategory(description, type) {
   const value=String(description||'').normalize('NFKC').toLowerCase();
   const rules=type==='income'?[
@@ -541,11 +549,11 @@ function renderImportRows(){
     const descCell=document.createElement('td'),desc=document.createElement('input');descCell.dataset.label='الوصف';desc.type='text';desc.value=item.description;desc.maxLength=180;desc.addEventListener('input',()=>{item.description=desc.value;});descCell.appendChild(desc);
     const categoryCell=document.createElement('td'),category=document.createElement('input'),categoryList=document.createElement('datalist');
     categoryCell.dataset.label='التصنيف';category.type='text';category.autocomplete='off';category.maxLength=80;
-    categoryList.id='importCategoryOptions'+extractedImportRows.indexOf(item);populateVeloviCategoryList(categoryList,item.type);
+    categoryList.id='importCategoryOptions'+extractedImportRows.indexOf(item);populateImportCategoryDatalist(categoryList,item.type);
     category.setAttribute('list',categoryList.id);item.category=item.category||inferStatementCategory(item.description,item.type);category.dataset.veloviCategoryOriginal=item.category;category.value=window.VELOVI_I18N?.t?.(item.category)||item.category;
     category.addEventListener('input',()=>{item.category=normalizeVeloviCategory(category.value,item.type);category.dataset.veloviCategoryOriginal=item.category;});categoryCell.append(category,categoryList);
     const typeCell=document.createElement('td'),type=document.createElement('select');typeCell.dataset.label='النوع';[['income','إيراد'],['expense','مصروف']].forEach(pair=>{const option=document.createElement('option');option.value=pair[0];option.textContent=pair[1];type.appendChild(option);});type.value=item.type;
-    type.addEventListener('change',()=>{const previous=inferStatementCategory(item.description,item.type);item.type=type.value;if(!item.category||item.category===previous)item.category=inferStatementCategory(item.description,item.type);populateVeloviCategoryList(categoryList,item.type);category.dataset.veloviCategoryOriginal=item.category;category.value=window.VELOVI_I18N?.t?.(item.category)||item.category;});typeCell.appendChild(type);
+    type.addEventListener('change',()=>{const previous=inferStatementCategory(item.description,item.type);item.type=type.value;if(!item.category||item.category===previous)item.category=inferStatementCategory(item.description,item.type);populateImportCategoryDatalist(categoryList,item.type);category.dataset.veloviCategoryOriginal=item.category;category.value=window.VELOVI_I18N?.t?.(item.category)||item.category;});typeCell.appendChild(type);
     const amountCell=document.createElement('td'),amount=document.createElement('input');amountCell.dataset.label='المبلغ';amount.type='number';amount.min='0.01';amount.step='0.01';amount.value=item.amount.toFixed(2);amount.inputMode='decimal';amount.addEventListener('change',()=>{item.amount=Number(amount.value)||0;});amountCell.appendChild(amount);
     tr.append(selectedCell,dateCell,descCell,categoryCell,typeCell,amountCell);importRowsBody.appendChild(tr);
   });
