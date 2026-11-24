@@ -1350,8 +1350,9 @@
 
   async function deleteOwnAccount(event) {
     event.preventDefault();
-    if ($('deleteAccountConfirmation').value.trim() !== 'حذف حسابي') {
-      $('deleteAccountStatus').textContent = 'اكتب «حذف حسابي» كما هو للتأكيد.';
+    const expectedConfirmation = window.VELOVI_I18N?.t?.('حذف حسابي') || 'حذف حسابي';
+    if ($('deleteAccountConfirmation').value.trim() !== expectedConfirmation) {
+      $('deleteAccountStatus').textContent = window.VELOVI_I18N?.t?.('اكتب حذف حسابي للتأكيد') || 'اكتب «حذف حسابي» كما هو للتأكيد.';
       return;
     }
     if (!window.confirm(window.VELOVI_I18N?.t?.('هذا الإجراء نهائي. سيُحذف حساب الدخول وتُعطّل عضوياتك، مع الاحتفاظ بالسجل المالي للأسرة. هل أنت متأكد؟') || 'هذا الإجراء نهائي. سيُحذف حساب الدخول وتُعطّل عضوياتك، مع الاحتفاظ بالسجل المالي للأسرة. هل أنت متأكد؟')) return;
