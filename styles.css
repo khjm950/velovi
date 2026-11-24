@@ -690,3 +690,28 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
 .guide-dialog-actions>div{display:flex;gap:8px}
 .guide-dialog-actions button{font-size:12px}
 @media(max-width:520px){.onboarding-guide-dialog{padding:18px}.guide-step{min-height:275px}.guide-dialog-actions{align-items:flex-start;flex-direction:column-reverse}.guide-dialog-actions>div{width:100%;justify-content:flex-end}.guide-dialog-actions>button{align-self:flex-start}}
+
+
+/* Mobile transaction heading and action buttons: prevent clipping and horizontal overflow. */
+@media(max-width:700px){
+  .page-heading{flex-direction:column;align-items:stretch;min-width:0}
+  .page-heading>div:first-child{min-width:0;width:100%}
+  .page-heading h1{overflow-wrap:anywhere;line-height:1.25}
+  .transaction-heading-actions{display:grid;grid-template-columns:minmax(0,1fr);width:100%;min-width:0;gap:8px}
+  .transaction-heading-actions button{width:100%;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;line-height:1.35;text-align:center;padding:10px 12px;font-size:13px}
+  .page-heading .primary{white-space:normal}
+  .topbar{min-width:0;gap:8px}
+  .brand{min-width:0;flex:1;gap:8px}
+  .brand>div{min-width:0}
+  .brand strong{font-size:17px}
+  .brand small{font-size:10px;overflow-wrap:anywhere}
+  .top-actions{flex:0 0 auto;gap:6px}
+  #signOutButton{max-width:38vw;white-space:normal;line-height:1.2;padding:8px 10px;font-size:12px}
+}
+@media(max-width:380px){
+  .main{padding-inline:11px}
+  .page-heading h1{font-size:21px}
+  .transaction-heading-actions button{font-size:12px;padding-inline:9px}
+  .brand-mark{width:34px;height:34px;flex:0 0 34px}
+  .brand strong{font-size:15px}
+}

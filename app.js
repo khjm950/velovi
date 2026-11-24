@@ -413,7 +413,7 @@ function populateVeloviCategoryList(list, type) {
     option.type = 'button';
     option.className = 'category-option';
     option.role = 'option';
-    option.textContent = value;
+    option.textContent = translate(value);
     option.addEventListener('pointerdown', event => event.preventDefault());
     option.addEventListener('click', () => {
       if (input) {
