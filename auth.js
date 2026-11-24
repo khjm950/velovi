@@ -393,10 +393,7 @@
       stat.append(label,amount,note); stats.appendChild(stat);
     }
   }
-  function bulkText(ar, de, en) {
-    const language = document.documentElement.lang || 'ar';
-    return language === 'de' ? de : language === 'en' ? en : ar;
-  }
+  function bulkText(ar) { return ar; }
   function updateBulkSelectionUi() {
     const all = [...document.querySelectorAll('#txRows .tx-select')];
     const visible = all.filter(box => !box.closest('tr')?.hidden);
