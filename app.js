@@ -553,7 +553,7 @@ function renderImportRows(){
     const tr=document.createElement('tr'),selectedCell=document.createElement('td'),selected=document.createElement('input');
     selectedCell.dataset.label='اعتماد';
     selected.type='checkbox';selected.checked=item.selected;selected.setAttribute('aria-label','اعتماد هذه الحركة');selected.addEventListener('change',()=>{item.selected=selected.checked;updateImportCount();});selectedCell.appendChild(selected);
-    const dateCell=document.createElement('td'),date=document.createElement('input');dateCell.dataset.label='التاريخ';date.type='date';date.dir='ltr';date.lang='en-GB';date.style.textAlign='center';date.value=item.date;date.addEventListener('change',()=>{item.date=date.value;});dateCell.appendChild(date);
+    const dateCell=document.createElement('td'),date=document.createElement('input');dateCell.dataset.label='التاريخ';date.type='date';date.dir='ltr';date.lang=window.VELOVI_I18N?.language?.()==='ar'?'ar-EG':window.VELOVI_I18N?.language?.()==='de'?'de-DE':'en-GB';date.style.textAlign='center';date.value=item.date;date.addEventListener('change',()=>{item.date=date.value;});dateCell.appendChild(date);
     const descCell=document.createElement('td'),desc=document.createElement('input');descCell.dataset.label='الوصف';desc.type='text';desc.value=item.description;desc.maxLength=180;desc.addEventListener('input',()=>{item.description=desc.value;});descCell.appendChild(desc);
     const categoryCell=document.createElement('td'),category=document.createElement('input'),categoryList=document.createElement('datalist');
     categoryCell.dataset.label='التصنيف';category.type='text';category.autocomplete='off';category.maxLength=80;
