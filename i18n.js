@@ -477,9 +477,10 @@
     for(const record of records){
       if(record.type==='childList')record.addedNodes.forEach(node=>{if(node.nodeType===1)translateTree(node);else if(node.nodeType===3)translateTextNode(node,lang);});
       else if(record.type==='characterData')translateTextNode(record.target,lang);
+      else if(record.type==='attributes')translateElement(record.target,lang);
     }
   });
   applyLanguage();
-  observer.observe(document.body,{subtree:true,childList:true,characterData:true});
+  observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label','alt','data-label']});
   window.VELOVI_I18N={apply:applyLanguage,t:(value)=>translateComposite(String(value ?? ''),language()),language};
 })();
