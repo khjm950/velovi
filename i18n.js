@@ -405,7 +405,9 @@
         const afterIndex = index + key.length;
         const after = afterIndex < result.length ? result[afterIndex] : '';
         const isArabic = char => !!char && /[\\u0600-\\u06FF]/.test(char);
-        if (!isArabic(before) && !isArabic(after)) {
+        const startsWithArabic = isArabic(key[0]);
+        const endsWithArabic = isArabic(key[key.length - 1]);
+        if ((!startsWithArabic || !isArabic(before)) && (!endsWithArabic || !isArabic(after))) {
           const translated = dictionary[key];
           result = result.slice(0, index) + translated + result.slice(afterIndex);
           index += translated.length;
