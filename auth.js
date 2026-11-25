@@ -15,6 +15,7 @@
   let currentMembers = [];
   let currentAccounts = [];
   let currentTransactions = [];
+  let currentRecurring = [];
   let workspaceLoadPromise = null;
   let mfaLoginFactorId = null;
   let mfaLoginChallengeId = null;
@@ -602,7 +603,7 @@
   }
 
   async function loadFinancialData() {
-    const [accountsResult,transactionsResult]=await Promise.all([
+    const [accountsResult,transactionsResult,recurringResult]=await Promise.all([
       client.from('financial_accounts')
         .select('id,household_id,owner_member_id,name,account_type,currency,opening_balance,is_active,created_at')
         .eq('household_id',currentHousehold.id)
@@ -610,12 +611,18 @@
       client.from('financial_transactions')
         .select('id,household_id,owner_member_id,account_id,transaction_type,amount,currency,description,category,transaction_date,transfer_group_id,created_by,created_at,updated_at')
         .eq('household_id',currentHousehold.id)
-        .order('transaction_date',{ascending:false})
+        .order('transaction_date',{ascending:false}),
+      client.from('recurring_entries')
+        .select('id,owner_member_id,account_id,transaction_type,amount,currency,category,frequency,next_due_date,end_date,is_active')
+        .eq('household_id',currentHousehold.id)
+        .eq('is_active',true)
     ]);
     if(accountsResult.error)throw accountsResult.error;
     if(transactionsResult.error)throw transactionsResult.error;
+    if(recurringResult.error)throw recurringResult.error;
     currentAccounts=accountsResult.data||[];
     currentTransactions=transactionsResult.data||[];
+    currentRecurring=recurringResult.data||[];
     populateAccountSelects();
     renderAccounts();
     renderTransactions();
@@ -626,7 +633,7 @@
     window.VELOVI_REFRESH_FINANCIAL_DATA = loadFinancialData;
     window.dispatchEvent(new CustomEvent('velovi:financial-data-loaded', { detail: {
       client, user: currentUser, household: currentHousehold, membership: currentMembership,
-      members: currentMembers, accounts: currentAccounts, transactions: currentTransactions
+      members: currentMembers, accounts: currentAccounts, transactions: currentTransactions, recurring: currentRecurring
     }}));
   }
   function openAccountDialog(account=null) {
@@ -840,6 +847,47 @@
       estimates[type]+=estimate;
       patterns.push({category,type,estimate,pattern,months:active.length,frequency:active.length/monthKeys.length});
     }
+    // Replace historical category estimates with actual recurring schedules where configured.
+    const adjustments=new Map(), recurringKeys=new Set(), recurringTotals={income:0,expense:0};
+    const firstMonth=new Date(now.getFullYear(),now.getMonth(),1);
+    const horizon=new Date(now.getFullYear(),now.getMonth()+monthsCount,1);
+    const addAdjustment=(month,type,amount)=>{
+      const key=month.getFullYear()+'-'+String(month.getMonth()+1).padStart(2,'0');
+      const signed=type==='income'?amount:-amount;
+      adjustments.set(key,(adjustments.get(key)||0)+signed);
+      recurringTotals[type]+=type==='income'?amount:0;
+      if(type==='expense')recurringTotals.expense+=amount;
+    };
+    const advanceDueDate=(date,frequency)=>{
+      const d=new Date(date.getFullYear(),date.getMonth(),date.getDate(),12);
+      if(frequency==='weekly')d.setDate(d.getDate()+7);
+      else {
+        const months=frequency==='quarterly'?3:frequency==='yearly'?12:1;
+        const day=d.getDate(),target=new Date(d.getFullYear(),d.getMonth()+months,1,12);
+        const last=new Date(target.getFullYear(),target.getMonth()+1,0).getDate();
+        target.setDate(Math.min(day,last));
+        return target;
+      }
+      return d;
+    };
+    for(const entry of currentRecurring.filter(item=>item.currency===currency&&['income','expense'].includes(item.transaction_type))){
+      const key=entry.transaction_type+'|'+(entry.category||'غير مصنف');
+      if(!recurringKeys.has(key)){
+        const historical=patterns.find(item=>item.type+'|'+item.category===key);
+        if(historical){estimates[entry.transaction_type]-=historical.estimate;historical.pattern='مجدول';historical.estimate=0;}
+        recurringKeys.add(key);
+      }
+      let due=new Date(String(entry.next_due_date)+'T12:00:00'),guard=0;
+      while(due<firstMonth&&guard++<1200)due=advanceDueDate(due,entry.frequency);
+      guard=0;
+      while(due<horizon&&guard++<1200&&(!entry.end_date||due.toISOString().slice(0,10)<=entry.end_date)){
+        addAdjustment(due,entry.transaction_type,Number(entry.amount));
+        due=advanceDueDate(due,entry.frequency);
+      }
+    }
+    // Future-dated one-off transactions are included in the month they are scheduled for.
+    currentTransactions.filter(tx=>tx.currency===currency&&tx.transaction_date>now.toISOString().slice(0,10)&&['income','expense'].includes(tx.transaction_type))
+      .forEach(tx=>{const d=new Date(String(tx.transaction_date)+'T12:00:00');if(d<horizon)addAdjustment(d,tx.transaction_type,Number(tx.amount));});
     const net=estimates.income-estimates.expense;
     const monthlyNet=monthKeys.map(month=>{
       const rows=transactions.filter(tx=>String(tx.transaction_date).startsWith(month));
@@ -851,11 +899,18 @@
     const annual=Number($('annualReturn')?.value||0);
     const rate=Math.pow(1+annual/100,1/12)-1;
     let projected=accountBalance;
-    for(let i=0;i<monthsCount;i++)projected=projected*(1+rate)+net;
+    for(let i=0;i<monthsCount;i++){
+      const projectionMonth=new Date(now.getFullYear(),now.getMonth()+i,1);
+      const monthKey=projectionMonth.getFullYear()+'-'+String(projectionMonth.getMonth()+1).padStart(2,'0');
+      projected=projected*(1+rate)+net+(adjustments.get(monthKey)||0);
+    }
+    const displayIncome=estimates.income+recurringTotals.income/monthsCount;
+    const displayExpense=estimates.expense+recurringTotals.expense/monthsCount;
+    const displayNet=displayIncome-displayExpense;
     const confidence=transactions.length>=18&&monthKeys.filter(month=>transactions.some(tx=>String(tx.transaction_date).startsWith(month))).length>=5?'متوسطة إلى جيدة':transactions.length>=6?'متوسطة':'منخفضة';
     const result=$('smartForecastResult');result.replaceChildren();
     const title=document.createElement('b');title.textContent='التوقع بعد '+monthsCount+' شهراً: '+formatMoney(projected,currency);
-    const details=document.createElement('p');details.textContent='الرصيد الحالي المحسوب: '+formatMoney(accountBalance,currency)+' · دخل شهري مقدّر: '+formatMoney(estimates.income,currency)+' · مصروف شهري مقدّر: '+formatMoney(estimates.expense,currency)+' · صافي شهري متوقع: '+formatMoney(net,currency);
+    const details=document.createElement('p');details.textContent='الرصيد الحالي المحسوب: '+formatMoney(accountBalance,currency)+' · دخل شهري مقدّر: '+formatMoney(displayIncome,currency)+' · مصروف شهري مقدّر: '+formatMoney(displayExpense,currency)+' · صافي شهري متوقع: '+formatMoney(displayNet,currency);
     const confidenceLine=document.createElement('p');confidenceLine.className='small muted';confidenceLine.textContent='مستوى الثقة: '+confidence+' · تذبذب صافي الأشهر الستة: '+formatMoney(volatility,currency)+'. التوقع يستخدم الوسيط للبنود المنتظمة والمتوسط المرجح للبنود المتغيرة.';
     const breakdown=document.createElement('ul');breakdown.className='forecast-patterns';
     patterns.forEach(item=>{const li=document.createElement('li');li.textContent=item.category+' — '+(item.type==='income'?'إيراد':'مصروف')+' · '+item.pattern+' · ظهر في '+item.months+' من 6 أشهر · '+formatMoney(item.estimate,currency)+' شهرياً';breakdown.appendChild(li);});
