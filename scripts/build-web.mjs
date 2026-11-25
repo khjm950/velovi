@@ -11,6 +11,7 @@ const files = [
   'styles.css',
   'app.js',
   'auth.js',
+  'planning.js',
   'guide.js',
   'i18n.js',
   'install.js',
