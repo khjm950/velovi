@@ -7,7 +7,7 @@
  const msg=(s,e=false)=>{const n=$('appMessage');if(n){n.textContent=s;n.hidden=false;n.classList.toggle('error',e);n.classList.toggle('success',!e);}};
  const money=(v,c)=>{try{return new Intl.NumberFormat(document.documentElement.lang==='ar'?'ar-EG':document.documentElement.lang==='en'?'en-GB':'de-DE',{style:'currency',currency:c}).format(+v||0)}catch{return (+v||0).toFixed(2)+' '+c}};
  const canAdd=()=>admin()||ctx?.membership?.can_add_transactions;
- const accounts=()=> (ctx?.accounts||[]).filter(a=>a.is_active&&(admin()||a.owner_member_id===own()));
+ const accounts=()=> (ctx?.accounts||[]).filter(a=>a.is_active&&a.owner_member_id===own());
  const options=(id,vals)=>{const s=$(id);if(!s)return;s.replaceChildren(...vals.map(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;return o}))};
  async function load(){
   if(!ctx?.client||!ctx.household||!ctx.membership)return;
@@ -25,7 +25,7 @@
   const period=($('budgetPeriod')?.value||today().slice(0,7))+'-01',bn=$('budgetList');
   if(bn){bn.replaceChildren();const rows=budgets.filter(b=>b.period_start===period);
    if(!rows.length)bn.textContent=t('لا توجد ميزانيات لهذه الفترة.');
-   rows.forEach(b=>{const start=new Date(b.period_start+'T00:00:00'),end=new Date(start.getFullYear(),start.getMonth()+1,1).toISOString().slice(0,10);
+   rows.forEach(b=>{const monthKey=b.period_start.slice(0,7);
     const actual=(ctx.transactions||[]).filter(x=>x.owner_member_id===b.owner_member_id&&x.transaction_type==='expense'&&x.currency===b.currency&&x.category===b.category&&x.transaction_date>=b.period_start&&x.transaction_date<end).reduce((s,x)=>s+Number(x.amount),0);
     const pct=Math.min(100,actual/Number(b.limit_amount)*100),card=document.createElement('article');card.className='planning-item';
     const h=document.createElement('div');h.className='planning-item-head';const title=document.createElement('strong');title.textContent=b.category+' · '+money(b.limit_amount,b.currency);const owner=document.createElement('small');owner.textContent=admin()?name(b.owner_member_id):'';h.append(title,owner);
