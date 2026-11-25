@@ -49,13 +49,16 @@ Family planning features added in this branch
 - Personal savings goals and explicitly family-shared savings goals.
 - Individual contribution records for shared goals.
 - Recurring income/expense templates with weekly, monthly, quarterly, and
-  yearly schedules, optional end dates, and a manual "record due" action.
+  yearly schedules, optional end dates, seven-day in-app reminders, and a manual
+  "record due" action. Overdue occurrences advance one at a time, so missed
+  periods are not silently skipped.
 - Recording a due recurring item and advancing its next due date are performed
   by one database RPC transaction, preventing duplicate creation on retry.
 - The four new tables are monthly_budgets, savings_goals,
   savings_goal_contributions, and recurring_entries.
-- Two additive migrations have been applied to the live Supabase project:
-  family_planning_features and optimize_planning_rls_and_indexes.
+- Three additive migrations have been applied to the live Supabase project:
+  family_planning_features, optimize_planning_rls_and_indexes, and
+  record_recurring_one_period_at_a_time.
 - New planning data is owner/admin scoped by RLS. Only goals explicitly marked
   as family-visible can be read and contributed to by other active members.
 - A rollback-only database test passed for budget, goal, contribution, recurring
