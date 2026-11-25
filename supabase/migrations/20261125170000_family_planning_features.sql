@@ -196,10 +196,7 @@ drop policy if exists "Members manage own recurring entries" on public.recurring
 create policy "Members manage own recurring entries"
 on public.recurring_entries for all to authenticated
 using (private.can_view_member_data(household_id, owner_member_id))
-with check (
-  private.can_view_member_data(household_id, owner_member_id)
-  and created_by = (select auth.uid())
-);
+with check (private.can_view_member_data(household_id, owner_member_id));
 
 -- Atomic "record now" action: inserts the real transaction and advances its schedule together.
 create or replace function public.record_due_recurring_transaction(p_recurring_id uuid)
