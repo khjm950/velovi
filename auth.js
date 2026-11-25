@@ -855,8 +855,6 @@
       const key=month.getFullYear()+'-'+String(month.getMonth()+1).padStart(2,'0');
       const signed=type==='income'?amount:-amount;
       adjustments.set(key,(adjustments.get(key)||0)+signed);
-      recurringTotals[type]+=type==='income'?amount:0;
-      if(type==='expense')recurringTotals.expense+=amount;
     };
     const advanceDueDate=(date,frequency)=>{
       const d=new Date(date.getFullYear(),date.getMonth(),date.getDate(),12);
@@ -882,6 +880,7 @@
       guard=0;
       while(due<horizon&&guard++<1200&&(!entry.end_date||due.toISOString().slice(0,10)<=entry.end_date)){
         addAdjustment(due,entry.transaction_type,Number(entry.amount));
+        recurringTotals[entry.transaction_type]+=Number(entry.amount);
         due=advanceDueDate(due,entry.frequency);
       }
     }
