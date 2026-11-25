@@ -104,7 +104,7 @@ on public.monthly_budgets for all to authenticated
 using (private.can_view_member_data(household_id, owner_member_id))
 with check (
   private.can_view_member_data(household_id, owner_member_id)
-  and created_by = (select auth.uid())
+
 );
 
 drop policy if exists "Members view permitted savings goals" on public.savings_goals;
@@ -129,7 +129,7 @@ on public.savings_goals for all to authenticated
 using (private.can_view_member_data(household_id, owner_member_id))
 with check (
   private.can_view_member_data(household_id, owner_member_id)
-  and created_by = (select auth.uid())
+
 );
 
 drop policy if exists "Members view permitted goal contributions" on public.savings_goal_contributions;
@@ -267,7 +267,7 @@ begin
   end loop;
 
   update public.recurring_entries
-  set next_due_date = v_next,
+  set next_due_date = case when end_date is not null and v_next > end_date then v_entry.next_due_date else v_next end,
       is_active = case when end_date is not null and v_next > end_date then false else true end,
       updated_at = now()
   where id = p_recurring_id;
