@@ -152,18 +152,25 @@ addListener(getElement('resetSettings'), 'click', () => {
 });
 const chartType = getElement('chartType'), chartPeriod = getElement('chartPeriod');
 function renderDemoChart() {
-  if (typeof window.VELOVI_FINANCE_CHART === 'function') { window.VELOVI_FINANCE_CHART(); return; }
-  const chart = getElement('expenseChart'); if (!chart) return;
-  const isBars = chartType?.value === 'bars'; chart.classList.toggle('bars', isBars);
-  if (isBars) {
-    // Inline important background prevents the base donut gradient from showing behind bars.
-    chart.style.setProperty('background', 'repeating-linear-gradient(to top, var(--chart-grid) 0 1px, transparent 1px 42px), var(--surface)', 'important');
-    if (!chart.querySelector('.chart-bar')) chart.insertAdjacentHTML('beforeend','<span class="chart-bar" style="height:80%"></span><span class="chart-bar" style="height:12%"></span><span class="chart-bar" style="height:7%"></span><span class="chart-bar" style="height:1%"></span>');
-  } else {
-    chart.style.removeProperty('background');
+  if (typeof window.VELOVI_FINANCE_CHART === 'function') {
+    window.VELOVI_FINANCE_CHART();
+    return;
   }
-  const labels={month:'نموذج توضيحي للشهر الحالي',quarter:'عرض تجريبي لآخر 3 أشهر',year:'عرض تجريبي لهذا العام'};
-  const label=getElement('chartPeriodLabel'); if(label) label.textContent=labels[chartPeriod?.value||'month'];
+  const chart = getElement('expenseChart');
+  if (!chart) return;
+  chart.classList.remove('bars');
+  chart.style.removeProperty('background');
+  chart.replaceChildren();
+  const legend = document.querySelector('#home .legend');
+  if (legend) legend.replaceChildren();
+  const labels = {
+    month: 'مصروفات الشهر الحالي',
+    quarter: 'مصروفات آخر 3 أشهر',
+    year: 'مصروفات هذا العام'
+  };
+  const key = labels[chartPeriod?.value || 'month'];
+  const label = getElement('chartPeriodLabel');
+  if (label) label.textContent = window.VELOVI_I18N?.t?.(key) || key;
 }
 addListener(chartType,'change',renderDemoChart); addListener(chartPeriod,'change',renderDemoChart); renderDemoChart();
 
