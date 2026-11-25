@@ -133,13 +133,16 @@ GRANT USAGE ON SCHEMA private TO authenticated;
 GRANT EXECUTE ON FUNCTION private.admin_delete_velovi_member(uuid, uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION private.self_delete_velovi_account() TO authenticated;
 
-CREATE OR REPLACE FUNCTION public.admin_delete_velovi_member(uuid, uuid)
+CREATE OR REPLACE FUNCTION public.admin_delete_velovi_member(
+  p_household_id uuid,
+  p_member_id uuid
+)
 RETURNS jsonb
 LANGUAGE sql
 SECURITY INVOKER
 SET search_path TO ''
 AS $function$
-  SELECT private.admin_delete_velovi_member($1, $2);
+  SELECT private.admin_delete_velovi_member(p_household_id, p_member_id);
 $function$;
 
 CREATE OR REPLACE FUNCTION public.self_delete_velovi_account()
