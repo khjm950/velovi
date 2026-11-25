@@ -5,7 +5,7 @@
   "description": "Velovi family finance application",
   "type": "module",
   "scripts": {
-    "check": "node --check app.js && node --check auth.js && node --check planning.js && node --check guide.js && node --check i18n.js && node --check install.js && node --check sw.js && node --check capacitor-bridge.js && node --check scripts/build-web.mjs && node --check scripts/capacitor-native.js && node --check scripts/patch-android-manifest.mjs && node --check scripts/patch-android-theme.mjs && node --check scripts/patch-android-gradle.mjs",
+    "check": "node --check app.js && node --check auth.js && node --check planning.js && node --check guide.js && node --check i18n.js && node --check install.js && node --check sw.js && node --check capacitor-bridge.js && node --check scripts/build-web.mjs && node --check scripts/capacitor-native.js && node --check scripts/patch-android-manifest.mjs && node --check scripts/patch-android-theme.mjs && node --check scripts/patch-android-gradle.mjs && node --check scripts/configure-android-release-signing.mjs",
     "build:web": "node scripts/build-web.mjs"
   },
   "dependencies": {
