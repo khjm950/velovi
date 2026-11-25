@@ -10,7 +10,7 @@ let gradle = readFileSync(path, 'utf8');
 
 gradle = gradle.replace(/namespace\s*=\s*["'][^"']+["']/, 'namespace = "' + config.appId + '"');
 gradle = gradle.replace(/applicationId\s+["'][^"']+["']/, 'applicationId "' + config.appId + '"');
-gradle = gradle.replace(/versionCode\s+\d+/, 'versionCode 1');
+gradle = gradle.replace(/versionCode\s+\d+/, 'versionCode ' + versionCode);
 gradle = gradle.replace(/versionName\s+["'][^"']+["']/, 'versionName "' + packageJson.version + '"');
 
 if (!gradle.includes('namespace = "' + config.appId + '"') ||
