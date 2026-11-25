@@ -123,3 +123,18 @@ Family planning launch work (branch feat/velovi-launch-suite)
   be applied and tested before these screens are deployed.
 - French and Spanish translations cover the new planning screens; full app
   localization remains a release requirement.
+
+
+Google Play release bundle
+--------------------------
+A manual workflow is provided at .github/workflows/android-release-aab.yml.
+Before running it, create a private upload keystore on a trusted local computer
+and add these GitHub Actions repository secrets:
+- ANDROID_UPLOAD_KEYSTORE_BASE64
+- ANDROID_UPLOAD_KEYSTORE_PASSWORD
+- ANDROID_UPLOAD_KEY_ALIAS
+- ANDROID_UPLOAD_KEY_PASSWORD
+
+Never commit the keystore or its passwords to the repository. The workflow
+creates a signed release AAB only when all four secrets are configured.
+The upload key should be backed up securely outside GitHub as well.
