@@ -109,3 +109,17 @@ PWA
 - The service worker caches the app shell and falls back to it when offline.
 - Offline shell availability does not mean financial-data writes or sync are
   available offline.
+
+
+Family planning launch work (branch feat/velovi-launch-suite)
+-------------------------------------------------------------
+- Added an additive schema migration for monthly budgets, personal/shared
+  savings goals, member contributions, and recurring transaction templates.
+- Added an atomic RPC to record a due recurring transaction and advance its
+  schedule in one database transaction.
+- Added planning screens and a client module. Members manage their own data;
+  explicitly family-visible goals allow active household members to contribute.
+- The migration does not delete or rewrite existing financial records. It must
+  be applied and tested before these screens are deployed.
+- French and Spanish translations cover the new planning screens; full app
+  localization remains a release requirement.
