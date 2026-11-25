@@ -1,3 +1,4 @@
+
 alter table public.household_members
   alter column user_id drop not null;
 alter table public.household_members
@@ -35,6 +36,7 @@ begin
     raise exception 'Authentication required';
   end if;
 
+  -- Preserve financial history, while ensuring every membership is disabled.
   for v_household in
     select m.id, m.household_id, m.role
     from public.household_members m
