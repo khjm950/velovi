@@ -46,6 +46,8 @@
    })
   }
   const rn=$('recurringList');if(rn){rn.replaceChildren();const rows=recurring.filter(r=>r.is_active);if(!rows.length)rn.textContent=t('لا توجد حركات متكررة بعد.');
+   const soon=new Date(Date.now()+7*86400000).toISOString().slice(0,10),upcoming=rows.filter(r=>r.next_due_date>=today()&&r.next_due_date<=soon);
+   if(upcoming.length){const notice=document.createElement('p');notice.className='notice';notice.textContent=t('تذكير: لديك')+' '+upcoming.length+' '+t('استحقاق خلال الأيام السبعة القادمة.');rn.append(notice);}
    rows.forEach(r=>{const card=document.createElement('article');card.className='planning-item';const h=document.createElement('div');h.className='planning-item-head';const title=document.createElement('strong');title.textContent=r.description+' · '+money(r.amount,r.currency);const due=document.createElement('strong');due.textContent=r.next_due_date;h.append(title,due);const meta=document.createElement('p');meta.className='small muted';meta.textContent=t(r.transaction_type==='income'?'إيراد':'مصروف')+' · '+r.category+' · '+t(r.frequency);card.append(h,meta);
     if(admin()||r.owner_member_id===own()){if(r.next_due_date<=today()){const b=document.createElement('button');b.type='button';b.className='primary';b.textContent=t('تسجيل الحركة المستحقة');b.onclick=()=>record(r);card.append(b)}const stop=document.createElement('button');stop.type='button';stop.className='text-btn danger-text';stop.textContent=t('إيقاف');stop.onclick=()=>ctx.client.from('recurring_entries').update({is_active:false}).eq('id',r.id).then(x=>x.error?msg(x.error.message,true):load());card.append(stop)}rn.append(card)
    })
