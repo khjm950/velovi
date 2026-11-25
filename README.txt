@@ -56,9 +56,9 @@ Family planning features added in this branch
   by one database RPC transaction, preventing duplicate creation on retry.
 - The four new tables are monthly_budgets, savings_goals,
   savings_goal_contributions, and recurring_entries.
-- Three additive migrations have been applied to the live Supabase project:
-  family_planning_features, optimize_planning_rls_and_indexes, and
-  record_recurring_one_period_at_a_time.
+- Four additive migrations have been applied to the live Supabase project:
+  family_planning_features, optimize_planning_rls_and_indexes,
+  record_recurring_one_period_at_a_time, and enforce_planning_creator_identity.
 - New planning data is owner/admin scoped by RLS. Only goals explicitly marked
   as family-visible can be read and contributed to by other active members.
 - A rollback-only database test passed for budget, goal, contribution, recurring
