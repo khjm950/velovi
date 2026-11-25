@@ -1,0 +1,6 @@
+-- One-time cleanup of experimental Velovi data was executed on the hosted project
+-- on 2026-11-25 after explicit owner authorization.
+-- This migration is intentionally a no-op so future deployments do not delete
+-- production or developer data. The hosted project retains only its owner/admin
+-- login and household; all other test users, accounts, transactions, and audit
+-- rows were removed.
