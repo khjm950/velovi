@@ -5,10 +5,17 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
+const ALLOWED_ORIGINS = new Set([
+  "https://khjm950.github.io",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000"
+]);
+
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin") || "";
+  const allowed = ALLOWED_ORIGINS.has(origin);
   const cors = {
-    "Access-Control-Allow-Origin": origin || "*",
+    "Access-Control-Allow-Origin": allowed ? origin : "https://khjm950.github.io",
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
     "Vary": "Origin"
@@ -17,6 +24,7 @@ Deno.serve(async (req: Request) => {
   const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
     status, headers: { ...cors, "Content-Type": "application/json" }
   });
+  if (!allowed) return json({ error: "Origin not allowed" }, 403);
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   try {
     const authorization = req.headers.get("Authorization") || "";
