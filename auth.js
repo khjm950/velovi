@@ -623,6 +623,11 @@
     renderExpenseChart();
     window.VELOVI_FINANCE_CHART = renderExpenseChart;
     renderForecastControls();
+    window.VELOVI_REFRESH_FINANCIAL_DATA = loadFinancialData;
+    window.dispatchEvent(new CustomEvent('velovi:financial-data-loaded', { detail: {
+      client, user: currentUser, household: currentHousehold, membership: currentMembership,
+      members: currentMembers, accounts: currentAccounts, transactions: currentTransactions
+    }}));
   }
   function openAccountDialog(account=null) {
     const dialog=$('accountDialog'), form=$('accountForm');
