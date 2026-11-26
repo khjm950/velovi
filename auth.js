@@ -650,6 +650,15 @@
     const save=$('saveAccount');if(save)save.textContent=account?'حفظ التعديلات':'حفظ الحساب';
     dialog.showModal();
   }
+  $('toggleAccountOpeningBalanceSign')?.addEventListener('click', () => {
+    const input = $('accountOpeningBalance');
+    if (!input) return;
+    const value = parseMoney(input.value);
+    if (!Number.isFinite(value)) { input.focus(); return; }
+    input.value = value < 0 ? String(Math.abs(value)) : String(-Math.abs(value));
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.focus();
+  });
   async function saveAccount(event) {
     event.preventDefault();
     const accountId=$('accountDialog').dataset.accountId||'';
