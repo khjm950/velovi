@@ -13,6 +13,24 @@ gradle = gradle.replace(/applicationId\s+["'][^"']+["']/, 'applicationId "' + co
 gradle = gradle.replace(/versionCode\s+\d+/, 'versionCode ' + versionCode);
 gradle = gradle.replace(/versionName\s+["'][^"']+["']/, 'versionName "' + packageJson.version + '"');
 
+const signingKeys = ['VELOVI_SIGNING_STORE_FILE','VELOVI_SIGNING_STORE_PASSWORD','VELOVI_SIGNING_KEY_ALIAS','VELOVI_SIGNING_KEY_PASSWORD'];
+const hasReleaseSigning = signingKeys.every(key => Boolean(process.env[key]));
+if (hasReleaseSigning) {
+  if (!gradle.includes('signingConfigs {')) {
+    gradle = gradle.replace(/android\\s*\\{/, `android {
+    signingConfigs {
+        release {
+            storeFile file(System.getenv('VELOVI_SIGNING_STORE_FILE'))
+            storePassword System.getenv('VELOVI_SIGNING_STORE_PASSWORD')
+            keyAlias System.getenv('VELOVI_SIGNING_KEY_ALIAS')
+            keyPassword System.getenv('VELOVI_SIGNING_KEY_PASSWORD')
+        }
+    }`);
+  }
+  if (!/buildTypes\\s*\\{\\s*release\\s*\\{/.test(gradle)) throw new Error('Could not find Android release build type for signing.');
+  gradle = gradle.replace(/(buildTypes\\s*\\{\\s*release\\s*\\{)/, '$1\\n            signingConfig signingConfigs.release');
+}
+
 if (!gradle.includes('namespace = "' + config.appId + '"') ||
     !gradle.includes('applicationId "' + config.appId + '"') ||
     !gradle.includes('versionName "' + packageJson.version + '"')) {
@@ -20,4 +38,4 @@ if (!gradle.includes('namespace = "' + config.appId + '"') ||
 }
 
 writeFileSync(path, gradle);
-console.log('Android ID set to ' + config.appId + ', version ' + packageJson.version + ' (code ' + versionCode + ').');
+console.log('Android ID set to ' + config.appId + ', version ' + packageJson.version + ' (code ' + versionCode + ').' + (hasReleaseSigning ? ' Release signing configured.' : ' Debug signing only; persistent signing secrets are not configured.'));
