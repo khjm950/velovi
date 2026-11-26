@@ -659,6 +659,15 @@
   };
   Object.entries(commonLocales).forEach(([lang, entries]) => Object.assign(dictionaries[lang], entries));
 
+  const languageAvailability = {
+    en: 'The interface is available in Arabic, German, English, French and Spanish.',
+    de: 'Die Oberfläche ist auf Arabisch, Deutsch, Englisch, Französisch und Spanisch verfügbar.',
+    fr: 'L’interface est disponible en arabe, allemand, anglais, français et espagnol.',
+    es: 'La interfaz está disponible en árabe, alemán, inglés, francés y español.'
+  };
+  Object.entries(languageAvailability).forEach(([lang, value]) => { dictionaries[lang]['الواجهة متاحة بالعربية والألمانية والإنجليزية والفرنسية والإسبانية.'] = value; });
+
+
   const dueHelp = {
     en: 'Recurring transactions are not recorded automatically in the background. Due items appear here for your review; after you confirm one, its next due date is updated.',
     de: 'Wiederkehrende Buchungen werden nicht automatisch im Hintergrund erfasst. Fällige Einträge erscheinen hier zur Prüfung. Nach Ihrer Bestätigung wird der nächste Termin aktualisiert.',
