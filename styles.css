@@ -728,3 +728,41 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
   background:#edf4ef!important;color:#173f35!important;font-size:20px!important;font-weight:700!important;
   line-height:1!important;box-shadow:none!important;cursor:pointer!important;
 }
+
+/* Consistent responsive layouts for planning forms and all mobile page panels. */
+.planning-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0 24px;align-items:end}
+.planning-form>label,.planning-form label{display:grid;gap:8px;min-width:0;color:var(--ink);font-size:14px;font-weight:600}
+.planning-form input,.planning-form select,.planning-form textarea,.form-grid input,.form-grid select,.form-grid textarea{width:100%;min-width:0;min-height:50px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:var(--surface);color:var(--ink);font:inherit;font-weight:400}
+.planning-form>button[type="submit"]{min-height:50px;align-self:end;white-space:normal}
+#budgets .panel,#goals .panel,#recurring .panel{min-width:0;overflow:visible}
+#budgets .panel>h2,#goals .panel>h2,#recurring .panel>h2{margin:8px 0 14px;line-height:1.5}
+#budgetList,#goalList,#recurringList{display:grid;gap:12px;min-width:0}
+.planning-item{min-width:0;overflow-wrap:anywhere}
+.import-category-select{position:relative;width:100%;min-width:0}
+.import-category-select>input{width:100%;min-width:0}
+.import-category-dropdown{position:absolute;z-index:60;inset-inline:0;top:calc(100% + 4px);max-height:240px;overflow:auto}
+.import-category-dropdown .category-option{min-height:42px;text-align:start}
+@media(max-width:700px){
+ .main,.view,.panel,.content-grid,.stats{min-width:0}
+ .panel{padding:16px;border-radius:14px}
+ .planning-form{grid-template-columns:minmax(0,1fr);gap:14px;margin:16px 0 22px}
+ .planning-form>label,.planning-form label{font-size:14px;gap:7px}
+ .planning-form input,.planning-form select,.planning-form textarea{min-height:52px;font-size:16px}
+ .planning-form>button[type="submit"]{width:100%;min-height:52px}
+ #budgets .panel>h2,#goals .panel>h2,#recurring .panel>h2{font-size:17px;margin-top:18px}
+ .planning-item{padding:14px}
+ .form-grid{grid-template-columns:minmax(0,1fr);gap:14px}
+ .form-grid>label{min-width:0;width:100%}
+ .panel-head{align-items:flex-start;gap:12px;flex-wrap:wrap}
+ .panel-head>div{min-width:0;max-width:100%}
+ .chart-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;gap:8px}
+ .chart-controls label,.chart-controls select{min-width:0;width:100%}
+ .filters>*{min-width:0;max-width:100%}
+ .filters input,.filters select{min-height:46px}
+ .transaction-summary{flex-wrap:wrap}
+ .transaction-summary>div{flex:1 1 130px;min-width:0}
+ .page-heading{gap:14px;margin-bottom:18px}
+ .page-heading>div{min-width:0}
+ .page-heading .muted{line-height:1.7}
+}
+@media(max-width:380px){.panel{padding:13px}.planning-form{gap:12px}.page-heading h1{font-size:20px}}
