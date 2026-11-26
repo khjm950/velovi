@@ -715,3 +715,16 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
   .brand-mark{width:34px;height:34px;flex:0 0 34px}
   .brand strong{font-size:15px}
 }
+
+/* Opening balance uses the same explicit sign toggle as forecast balances. */
+.account-opening-balance-row{position:relative!important;display:block!important;width:100%!important;direction:ltr}
+.account-opening-balance-row #accountOpeningBalance{box-sizing:border-box!important;width:100%!important;padding-inline-end:64px!important;text-align:left;font-variant-numeric:tabular-nums}
+.account-opening-balance-row #toggleAccountOpeningBalanceSign{
+  position:absolute!important;z-index:5!important;inset-inline-end:10px!important;top:50%!important;
+  transform:translateY(-50%)!important;display:flex!important;align-items:center!important;justify-content:center!important;
+  visibility:visible!important;opacity:1!important;pointer-events:auto!important;
+  width:40px!important;min-width:40px!important;height:36px!important;min-height:36px!important;
+  margin:0!important;padding:0!important;border:1px solid #d5e2da!important;border-radius:10px!important;
+  background:#edf4ef!important;color:#173f35!important;font-size:20px!important;font-weight:700!important;
+  line-height:1!important;box-shadow:none!important;cursor:pointer!important;
+}
