@@ -659,6 +659,15 @@
   };
   Object.entries(commonLocales).forEach(([lang, entries]) => Object.assign(dictionaries[lang], entries));
 
+  const dueHelp = {
+    en: 'Recurring transactions are not recorded automatically in the background. Due items appear here for your review; after you confirm one, its next due date is updated.',
+    de: 'Wiederkehrende Buchungen werden nicht automatisch im Hintergrund erfasst. Fällige Einträge erscheinen hier zur Prüfung. Nach Ihrer Bestätigung wird der nächste Termin aktualisiert.',
+    fr: 'Les opérations récurrentes ne sont pas enregistrées automatiquement en arrière-plan. Les échéances apparaissent ici pour vérification ; après confirmation, la prochaine date est mise à jour.',
+    es: 'Los movimientos periódicos no se registran automáticamente en segundo plano. Los vencimientos aparecen aquí para que los revises; al confirmar uno, se actualiza la próxima fecha.'
+  };
+  Object.entries(dueHelp).forEach(([lang, value]) => { dictionaries[lang]['لا تُسجّل الحركات تلقائياً في الخلفية؛ ستظهر المستحقات هنا ويمكنك اعتماد كل حركة، ثم يُحدّث موعدها التالي.'] = value; });
+
+
   dictionaries.fr = Object.assign({}, dictionaries.en, dictionaries.fr);
   dictionaries.es = Object.assign({}, dictionaries.en, dictionaries.es);
   const originals = new WeakMap();
@@ -729,7 +738,8 @@
     const lang=language();
     document.documentElement.lang=lang;
     document.documentElement.dir=lang==='ar'?'rtl':'ltr';
-    document.querySelectorAll('input[type="date"]').forEach(input => { input.lang = lang === 'ar' ? 'ar-EG' : lang === 'de' ? 'de-DE' : 'en-GB'; });
+    if (languageSelect && languageSelect.value !== lang) languageSelect.value = lang;
+    document.querySelectorAll('input[type="date"]').forEach(input => { input.lang = lang === 'ar' ? 'ar-EG' : lang === 'de' ? 'de-DE' : lang === 'fr' ? 'fr-FR' : lang === 'es' ? 'es-ES' : 'en-GB'; });
     const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
     const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
     nodes.forEach(node=>{ if (!node.parentElement?.closest('[translate="no"]')) translateTextNode(node,lang); });
