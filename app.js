@@ -573,9 +573,9 @@ function renderImportRows(){
     categoryList.className='category-dropdown import-category-dropdown';categoryList.hidden=true;categoryList.setAttribute('role','listbox');
     item.category=item.category||inferStatementCategory(item.description,item.type);
     const translatedCategory=value=>window.VELOVI_I18N?.t?.(value)||value;
-    const renderCategoryOptions=()=>{
+    const renderCategoryOptions=(filterText=true)=>{
       const catalog=window.VELOVI_CATEGORIES?.options?.(item.type)||[];
-      const query=category.value.trim().toLocaleLowerCase();
+      const query=filterText?category.value.trim().toLocaleLowerCase():'';
       const matches=catalog.filter(value=>!query||value.toLocaleLowerCase().includes(query)||translatedCategory(value).toLocaleLowerCase().includes(query));
       categoryList.replaceChildren(...matches.map(value=>{
         const option=document.createElement('button');option.type='button';option.className='category-option';option.setAttribute('role','option');option.textContent=translatedCategory(value);
@@ -586,11 +586,11 @@ function renderImportRows(){
       categoryList.hidden=matches.length===0;category.setAttribute('aria-expanded',String(!categoryList.hidden));
     };
     category.dataset.veloviCategoryOriginal=item.category;category.value=translatedCategory(item.category);
-    category.addEventListener('focus',renderCategoryOptions);category.addEventListener('click',renderCategoryOptions);
+    category.addEventListener('focus',()=>renderCategoryOptions(false));category.addEventListener('click',()=>renderCategoryOptions(false));
     category.addEventListener('input',()=>{item.category=normalizeVeloviCategory(category.value,item.type);category.dataset.veloviCategoryOriginal=item.category;renderCategoryOptions();});
+    category.addEventListener('blur',()=>{categoryList.hidden=true;category.setAttribute('aria-expanded','false');});
     category.addEventListener('keydown',event=>{if(event.key==='Escape'){categoryList.hidden=true;category.setAttribute('aria-expanded','false');}else if(event.key==='ArrowDown'&&!categoryList.hidden){event.preventDefault();categoryList.querySelector('button')?.focus();}});
     categoryList.addEventListener('keydown',event=>{if(event.key==='Escape'){categoryList.hidden=true;category.setAttribute('aria-expanded','false');category.focus();}});
-    document.addEventListener('click',event=>{if(!categoryWrap.contains(event.target)){categoryList.hidden=true;category.setAttribute('aria-expanded','false');}});
     categoryWrap.append(category,categoryList);categoryCell.appendChild(categoryWrap);
     const typeCell=document.createElement('td'),type=document.createElement('select');typeCell.dataset.label='النوع';[['income','إيراد'],['expense','مصروف']].forEach(pair=>{const option=document.createElement('option');option.value=pair[0];option.textContent=pair[1];type.appendChild(option);});type.value=item.type;
     type.addEventListener('change',()=>{const previous=inferStatementCategory(item.description,item.type);item.type=type.value;if(!item.category||item.category===previous)item.category=inferStatementCategory(item.description,item.type);category.dataset.veloviCategoryOriginal=item.category;category.value=translatedCategory(item.category);renderCategoryOptions();});typeCell.appendChild(type);
