@@ -964,7 +964,44 @@
     setMessage('', false);
   }
 
+  const IDLE_TIMEOUT_MS = 15 * 60 * 1000;
+  const IDLE_WARNING_MS = 60 * 1000;
+  let idleTimer = null, idleWarningTimer = null, lastUserActivity = Date.now(), idleWarningShown = false;
+  function clearIdleTimers() {
+    if (idleTimer) window.clearTimeout(idleTimer);
+    if (idleWarningTimer) window.clearTimeout(idleWarningTimer);
+    idleTimer = null; idleWarningTimer = null; idleWarningShown = false;
+  }
+  function scheduleIdleSignOut() {
+    clearIdleTimers();
+    if (!currentUser || !client) return;
+    const remaining = Math.max(0, IDLE_TIMEOUT_MS - (Date.now() - lastUserActivity));
+    if (remaining <= 0) { autoSignOutForInactivity(); return; }
+    idleWarningTimer = window.setTimeout(() => {
+      if (!currentUser) return;
+      idleWarningShown = true;
+      setMessage('ستنتهي جلستك بسبب عدم النشاط خلال دقيقة. استخدم التطبيق للمتابعة.', false);
+    }, Math.max(0, remaining - IDLE_WARNING_MS));
+    idleTimer = window.setTimeout(autoSignOutForInactivity, remaining);
+  }
+  async function autoSignOutForInactivity() {
+    if (!currentUser || !client) return;
+    clearIdleTimers();
+    try { await client.auth.signOut({ scope: 'local' }); }
+    catch (error) { console.warn('Velovi idle sign-out:', error); }
+    currentUser = null; currentMembership = null; currentHousehold = null;
+    if ($('signOutButton')) $('signOutButton').hidden = true;
+    showGate('login');
+    setMessage('تم تسجيل خروجك تلقائياً بعد 15 دقيقة من عدم النشاط لحماية حسابك.', false);
+  }
+  function noteUserActivity() {
+    if (!currentUser) return;
+    lastUserActivity = Date.now();
+    if (idleWarningShown) setMessage('', false);
+    scheduleIdleSignOut();
+  }
   async function signOut() {
+    clearIdleTimers();
     const result = await client.auth.signOut();
     if (result.error) setMessage(result.error.message, true);
     currentUser = null;
@@ -977,12 +1014,14 @@
 
   async function handleSession(session) {
     if (!session || !session.user) {
+      clearIdleTimers();
       currentUser = null;
       showGate('login');
       return;
     }
     if (workspaceLoadPromise) return workspaceLoadPromise;
     currentUser = session.user;
+    if (!idleTimer) { lastUserActivity = Date.now(); scheduleIdleSignOut(); }
     if (isInviteSetupFlow() && !inviteSetupCompleted) {
       showGate('invite-setup');
       if ($('invitePasswordStatus')) $('invitePasswordStatus').textContent = 'أنشئ كلمة مرور جديدة لإكمال تفعيل حسابك.';
@@ -1479,6 +1518,13 @@
   }
 
   function initialize() {
+    ['pointerdown','keydown','touchstart','scroll'].forEach(type => document.addEventListener(type, noteUserActivity, { passive: true }));
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && currentUser) {
+        if (Date.now() - lastUserActivity >= IDLE_TIMEOUT_MS) autoSignOutForInactivity();
+        else scheduleIdleSignOut();
+      }
+    });
     if (!window.supabase || typeof window.supabase.createClient !== 'function') {
       showGate('login');
       return setMessage('تعذر تحميل مكتبة الاتصال بـ Supabase. تحقق من اتصال الإنترنت ثم أعد تحميل الصفحة.', true);
@@ -1559,6 +1605,7 @@
     });
 
     client.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) { lastUserActivity = Date.now(); scheduleIdleSignOut(); } else clearIdleTimers();
       window.setTimeout(() => handleSession(session), 0);
     });
     client.auth.getSession().then(({ data, error }) => {
