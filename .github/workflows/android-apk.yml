@@ -19,6 +19,11 @@ permissions:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_UPLOAD_KEYSTORE_BASE64: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_BASE64 }}
+      ANDROID_UPLOAD_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+      ANDROID_UPLOAD_KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+      ANDROID_UPLOAD_KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
     steps:
       - name: Check out the current source revision
         uses: actions/checkout@v7
@@ -64,6 +69,16 @@ jobs:
       - name: Apply Velovi Android theme
         run: node scripts/patch-android-theme.mjs
 
+      - name: Prepare persistent Android signing key when configured
+        if: ${{ env.ANDROID_UPLOAD_KEYSTORE_BASE64 != '' && env.ANDROID_UPLOAD_KEYSTORE_PASSWORD != '' && env.ANDROID_UPLOAD_KEY_ALIAS != '' && env.ANDROID_UPLOAD_KEY_PASSWORD != '' }}
+        run: |
+          KEYSTORE_PATH="$RUNNER_TEMP/velovi-upload-key.jks"
+          printf '%s' "$ANDROID_UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE_PATH"
+          echo "VELOVI_SIGNING_STORE_FILE=$KEYSTORE_PATH" >> "$GITHUB_ENV"
+          echo "VELOVI_SIGNING_STORE_PASSWORD=$ANDROID_UPLOAD_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          echo "VELOVI_SIGNING_KEY_ALIAS=$ANDROID_UPLOAD_KEY_ALIAS" >> "$GITHUB_ENV"
+          echo "VELOVI_SIGNING_KEY_PASSWORD=$ANDROID_UPLOAD_KEY_PASSWORD" >> "$GITHUB_ENV"
+
       - name: Set Android package identity and version
         run: node scripts/patch-android-gradle.mjs
 
@@ -82,10 +97,35 @@ jobs:
           echo "$BADGING" | grep -F "application-label:'Velovi'"
           "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
 
-      - name: Upload APK
+      - name: Build persistent-key signed release APK
+        if: ${{ env.ANDROID_UPLOAD_KEYSTORE_BASE64 != '' && env.ANDROID_UPLOAD_KEYSTORE_PASSWORD != '' && env.ANDROID_UPLOAD_KEY_ALIAS != '' && env.ANDROID_UPLOAD_KEY_PASSWORD != '' }}
+        run: |
+          cd android
+          ./gradlew --no-daemon assembleRelease
+
+      - name: Verify release APK identity and signature
+        if: ${{ env.ANDROID_UPLOAD_KEYSTORE_BASE64 != '' && env.ANDROID_UPLOAD_KEYSTORE_PASSWORD != '' && env.ANDROID_UPLOAD_KEY_ALIAS != '' && env.ANDROID_UPLOAD_KEY_PASSWORD != '' }}
+        run: |
+          APK="android/app/build/outputs/apk/release/app-release.apk"
+          BADGING=$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging "$APK")
+          echo "$BADGING"
+          echo "$BADGING" | grep -F "package: name='com.velovi.familyfinance'"
+          echo "$BADGING" | grep -F "versionName='1.0.0'"
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose "$APK"
+
+      - name: Upload debug APK (temporary testing build)
         uses: actions/upload-artifact@v6
         with:
           name: velovi-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 14
+
+      - name: Upload update-compatible signed APK
+        if: ${{ env.ANDROID_UPLOAD_KEYSTORE_BASE64 != '' && env.ANDROID_UPLOAD_KEYSTORE_PASSWORD != '' && env.ANDROID_UPLOAD_KEY_ALIAS != '' && env.ANDROID_UPLOAD_KEY_PASSWORD != '' }}
+        uses: actions/upload-artifact@v6
+        with:
+          name: velovi-update-signed-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+          retention-days: 30
