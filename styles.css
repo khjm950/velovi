@@ -766,3 +766,23 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
  .page-heading .muted{line-height:1.7}
 }
 @media(max-width:380px){.panel{padding:13px}.planning-form{gap:12px}.page-heading h1{font-size:20px}}
+
+/* Visual treatment for budget, savings-goal and recurring-entry cards. */
+.planning-item{padding:16px;border:1px solid var(--line);border-radius:13px;background:var(--surface);box-shadow:0 2px 10px rgba(20,50,35,.035)}
+.planning-item-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.planning-item-head strong{min-width:0;overflow-wrap:anywhere;line-height:1.6}
+.planning-item-head small{color:var(--muted);font-size:12px}
+.planning-item p{line-height:1.7;margin:9px 0}
+.planning-progress{height:9px;overflow:hidden;border-radius:20px;background:var(--line);margin:12px 0}
+.planning-progress i{display:block;height:100%;border-radius:inherit;background:var(--green2);transition:width .2s ease}
+.planning-progress i.over{background:#b94a48}
+.inline-contribution{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) auto;gap:9px;margin-top:12px;align-items:center}
+.inline-contribution input{width:100%;min-width:0;min-height:44px;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font:inherit}
+.planning-item button{min-height:40px}
+@media(max-width:700px){
+ .planning-item{padding:14px}
+ .planning-item-head{display:grid;grid-template-columns:minmax(0,1fr);gap:4px}
+ .inline-contribution{grid-template-columns:minmax(0,1fr);gap:8px}
+ .inline-contribution input,.inline-contribution button{width:100%;min-height:48px}
+ .planning-item>button{width:100%;margin-top:7px}
+}
