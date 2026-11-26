@@ -28,7 +28,7 @@ if (hasReleaseSigning) {
     }`);
   }
   if (!/buildTypes\s*\{\s*release\s*\{/.test(gradle)) throw new Error('Could not find Android release build type for signing.');
-  gradle = gradle.replace(/(buildTypes\s*\{\s*release\s*\{)/, '$1\\n            signingConfig signingConfigs.release');
+  gradle = gradle.replace(/(buildTypes\s*\{\s*release\s*\{)/, match => match + '\n            signingConfig signingConfigs.release');
 }
 
 if (!gradle.includes('namespace = "' + config.appId + '"') ||
