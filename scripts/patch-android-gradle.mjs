@@ -17,7 +17,7 @@ const signingKeys = ['VELOVI_SIGNING_STORE_FILE','VELOVI_SIGNING_STORE_PASSWORD'
 const hasReleaseSigning = signingKeys.every(key => Boolean(process.env[key]));
 if (hasReleaseSigning) {
   if (!gradle.includes('signingConfigs {')) {
-    gradle = gradle.replace(/android\\s*\\{/, `android {
+    gradle = gradle.replace(/android\s*\{/, `android {
     signingConfigs {
         release {
             storeFile file(System.getenv('VELOVI_SIGNING_STORE_FILE'))
@@ -27,8 +27,8 @@ if (hasReleaseSigning) {
         }
     }`);
   }
-  if (!/buildTypes\\s*\\{\\s*release\\s*\\{/.test(gradle)) throw new Error('Could not find Android release build type for signing.');
-  gradle = gradle.replace(/(buildTypes\\s*\\{\\s*release\\s*\\{)/, '$1\\n            signingConfig signingConfigs.release');
+  if (!/buildTypes\s*\{\s*release\s*\{/.test(gradle)) throw new Error('Could not find Android release build type for signing.');
+  gradle = gradle.replace(/(buildTypes\s*\{\s*release\s*\{)/, '$1\\n            signingConfig signingConfigs.release');
 }
 
 if (!gradle.includes('namespace = "' + config.appId + '"') ||
