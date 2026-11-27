@@ -169,12 +169,12 @@ dialog form{gap:17px}
   td,th{border:0;padding:7px 2px;font-size:12px;min-width:0}
   td{display:flex;flex-direction:column;gap:3px;overflow-wrap:anywhere}
   td::before{color:var(--muted);font-size:10px;font-weight:600}
-  td:nth-child(1)::before{content:"النوع"}
-  td:nth-child(2)::before{content:"التصنيف"}
+  td:nth-child(1)::before{content:attr(data-label)}
+  td:nth-child(2)::before{content:attr(data-label)}
   td:nth-child(3){grid-column:1/-1}
-  td:nth-child(3)::before{content:"الوصف"}
-  td:nth-child(4)::before{content:"التاريخ"}
-  td:nth-child(5)::before{content:"المبلغ"}
+  td:nth-child(3)::before{content:attr(data-label)}
+  td:nth-child(4)::before{content:attr(data-label)}
+  td:nth-child(5)::before{content:attr(data-label)}
   td.select-column{position:absolute;top:8px;left:10px;width:auto;display:flex;flex-direction:row;align-items:center;gap:10px;padding:3px 0;z-index:1}
   td.select-column::before{content:none}
   td.select-column .tx-row-actions{display:flex;flex-direction:row;align-items:center;gap:9px;margin:0}
@@ -786,3 +786,9 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
  .inline-contribution input,.inline-contribution button{width:100%;min-height:48px}
  .planning-item>button{width:100%;margin-top:7px}
 }
+
+/* Recurring transaction form is available directly from the transactions page. */
+.recurring-create-panel{margin:0 0 16px;padding:14px 16px}
+.recurring-create-summary{cursor:pointer;list-style:none;font-weight:700;color:var(--green2);font-size:15px}
+.recurring-create-summary::-webkit-details-marker{display:none}
+.recurring-create-panel[open] .recurring-create-summary{padding-bottom:10px;border-bottom:1px solid var(--line)}
