@@ -80,6 +80,8 @@ jobs:
           echo "VELOVI_SIGNING_KEY_PASSWORD=$ANDROID_UPLOAD_KEY_PASSWORD" >> "$GITHUB_ENV"
 
       - name: Set Android package identity and version
+        env:
+          VELOVI_VERSION_CODE: ${{ github.run_number }}
         run: node scripts/patch-android-gradle.mjs
 
       - name: Build installable debug APK
