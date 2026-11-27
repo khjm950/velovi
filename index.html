@@ -285,6 +285,23 @@
           </div>
         </div>
 
+        <details class="panel recurring-create-panel">
+          <summary class="recurring-create-summary">＋ إضافة حركة متكررة</summary>
+          <p class="small muted">سجّل الراتب أو الفاتورة أو الاشتراك، ثم راجع الاستحقاق قبل تسجيله كحركة فعلية.</p>
+          <form id="recurringForm" class="planning-form">
+            <label>الحساب<select id="recurringAccount" required></select></label>
+            <label>النوع<select id="recurringType"><option value="expense">مصروف</option><option value="income">إيراد</option></select></label>
+            <label>الوصف<input id="recurringDescription" maxlength="180" required placeholder="مثلاً: الإيجار الشهري"></label>
+            <label>التصنيف<input id="recurringCategory" maxlength="80" placeholder="مثلاً: السكن"></label>
+            <label>المبلغ<input id="recurringAmount" type="number" min="0.01" step="0.01" required></label>
+            <label>التكرار<select id="recurringFrequency"><option value="weekly">أسبوعي</option><option value="monthly" selected>شهري</option><option value="quarterly">كل 3 أشهر</option><option value="yearly">سنوي</option></select></label>
+            <label>موعد الاستحقاق التالي<input id="recurringNextDate" type="date" required></label>
+            <label>تاريخ الانتهاء (اختياري)<input id="recurringEndDate" type="date"></label>
+            <button class="primary" type="submit">حفظ الحركة المتكررة</button>
+          </form>
+          <p class="small muted">لا تُسجّل الحركات تلقائياً؛ ستظهر المستحقات في صفحة الحركات المتكررة لتراجعها وتسجلها بنفسك.</p>
+        </details>
+
         <article class="panel">
           <div class="filters">
             <input id="searchTx" type="search" placeholder="ابحث في الحركات..." aria-label="بحث في الحركات">
@@ -447,22 +464,10 @@
 
       <!-- الحركات المتكررة -->
       <section class="view" id="recurring">
-        <div class="page-heading"><div><p class="eyebrow">المدفوعات المنتظمة</p><h1>الحركات المتكررة</h1><p class="muted">سجّل الرواتب والفواتير والاشتراكات المتكررة، وراجع المستحق منها قبل تسجيله.</p></div></div>
+        <div class="page-heading"><div><p class="eyebrow">المدفوعات المنتظمة</p><h1>الحركات المتكررة</h1><p class="muted">راجع الاستحقاقات القادمة والحركات المتكررة النشطة، وسجّل المستحق بعد مراجعته.</p></div></div>
         <article class="panel">
-          <h2>إضافة حركة متكررة</h2>
-          <form id="recurringForm" class="planning-form">
-            <label>الحساب<select id="recurringAccount" required></select></label>
-            <label>النوع<select id="recurringType"><option value="expense">مصروف</option><option value="income">إيراد</option></select></label>
-            <label>الوصف<input id="recurringDescription" maxlength="180" required placeholder="مثلاً: الإيجار الشهري"></label>
-            <label>التصنيف<input id="recurringCategory" maxlength="80" placeholder="مثلاً: السكن"></label>
-            <label>المبلغ<input id="recurringAmount" type="number" min="0.01" step="0.01" required></label>
-            <label>التكرار<select id="recurringFrequency"><option value="weekly">أسبوعي</option><option value="monthly" selected>شهري</option><option value="quarterly">كل 3 أشهر</option><option value="yearly">سنوي</option></select></label>
-            <label>موعد الاستحقاق التالي<input id="recurringNextDate" type="date" required></label>
-            <label>تاريخ الانتهاء (اختياري)<input id="recurringEndDate" type="date"></label>
-            <button class="primary" type="submit">حفظ الحركة المتكررة</button>
-          </form>
-          <p class="small muted">لا تُسجّل الحركات تلقائياً في الخلفية؛ ستظهر المستحقات هنا ويمكنك اعتماد كل حركة، ثم يُحدّث موعدها التالي.</p>
-          <h2>المستحقات والحركات النشطة</h2><div id="recurringList" class="planning-list"><p class="empty-state">جارٍ تحميل الحركات المتكررة…</p></div>
+          <h2>المستحقات والحركات النشطة</h2>
+          <div id="recurringList" class="planning-list"><p class="empty-state">جارٍ تحميل الحركات المتكررة…</p></div>
         </article>
       </section>
 
