@@ -164,21 +164,29 @@ dialog form{gap:17px}
   table,tbody{display:block;width:100%}
   thead{display:none}
   tbody{display:grid;gap:10px}
-  tbody tr{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:0 12px;padding:48px 12px 10px;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 3px 12px rgba(23,63,53,.035)}
-  tbody tr:hover{background:#fff}
-  td,th{border:0;padding:7px 2px;font-size:12px;min-width:0}
-  td{display:flex;flex-direction:column;gap:3px;overflow-wrap:anywhere}
-  td::before{color:var(--muted);font-size:10px;font-weight:600}
-  td:nth-child(1)::before{content:attr(data-label)}
-  td:nth-child(2)::before{content:attr(data-label)}
-  td:nth-child(3){grid-column:1/-1}
-  td:nth-child(3)::before{content:attr(data-label)}
-  td:nth-child(4)::before{content:attr(data-label)}
-  td:nth-child(5)::before{content:attr(data-label)}
-  td.select-column{position:absolute;top:8px;left:10px;width:auto;display:flex;flex-direction:row;align-items:center;gap:10px;padding:3px 0;z-index:1}
+  tbody tr{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 14px;padding:58px 15px 14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;box-shadow:0 5px 16px rgba(23,63,53,.055);overflow:hidden}
+  tbody tr:hover{background:var(--surface)}
+  tbody tr::before{content:"";position:absolute;inset:0 0 auto;height:4px;background:var(--mint)}
+  tbody tr[data-type="income"]::before{background:#5ca987}
+  tbody tr[data-type="expense"]::before{background:#d58b7a}
+  td,th{border:0;padding:2px 0;font-size:13px;min-width:0}
+  td{display:flex;flex-direction:column;align-items:flex-start;gap:4px;overflow-wrap:anywhere;min-width:0}
+  td::before{content:attr(data-label);color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.1px}
+  td:nth-child(1){grid-column:1;grid-row:1}
+  td:nth-child(1) .pill{font-size:11px;padding:5px 11px}
+  td:nth-child(2){grid-column:2;grid-row:1}
+  td:nth-child(3){grid-column:1/-1;grid-row:2;padding:7px 0 9px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.55}
+  td:nth-child(4){grid-column:1;grid-row:3;justify-content:center}
+  td:nth-child(5){grid-column:2;grid-row:3;justify-content:center}
+  td:nth-child(5)>span{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+  td.select-column{position:absolute;top:8px;inset-inline-end:12px;width:auto;display:flex;flex-direction:row;align-items:center;gap:8px;padding:0;z-index:1}
   td.select-column::before{content:none}
-  td.select-column .tx-row-actions{display:flex;flex-direction:row;align-items:center;gap:9px;margin:0}
-  td.select-column .tx-row-actions button{font-size:12px;padding:3px 5px}
+  td.select-column .tx-row-actions{display:flex;flex-direction:row;align-items:center;gap:6px;margin:0}
+  td.select-column .tx-row-actions button{font-size:11px;min-height:32px;padding:4px 8px;border-radius:8px}
+  td.select-column input{width:17px;height:17px;min-height:17px}
+  .table-wrap{border:0}
+  #transactions .panel{padding:16px 13px}
+  .recurring-create-panel{margin-bottom:14px}
   .member-row{gap:10px}
   .form-grid{gap:12px}
   dialog{padding:20px}
