@@ -1,4 +1,5 @@
 name: Velovi Android APK
+# Persistent signing secrets enable update-compatible release APK artifacts.
 
 on:
   push:
