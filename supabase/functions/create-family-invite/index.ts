@@ -1,16 +1,22 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
+// Android Capacitor uses https://localhost; iOS commonly uses capacitor://localhost.
 const ALLOWED_ORIGINS = new Set([
+  "https://khjm950.github.io",
+  "https://localhost",
+  "capacitor://localhost",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000"
+]);
+const ALLOWED_REDIRECT_ORIGINS = new Set([
   "https://khjm950.github.io",
   "http://localhost:3000",
   "http://127.0.0.1:3000"
 ]);
-
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin") || "";
   const allowed = ALLOWED_ORIGINS.has(origin);
@@ -35,69 +41,39 @@ Deno.serve(async (req: Request) => {
     });
     const { data: authData, error: authError } = await caller.auth.getUser();
     if (authError || !authData.user) return json({ error: "Invalid session" }, 401);
-
     const body = await req.json();
     const householdId = String(body.household_id || "");
     const email = String(body.email || "").trim().toLowerCase();
     const displayName = String(body.display_name || email.split("@")[0]).trim().slice(0, 80);
     const redirectTo = String(body.redirect_to || "");
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(householdId)) {
-      return json({ error: "Invalid household" }, 400);
-    }
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(householdId)) return json({ error: "Invalid household" }, 400);
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: "Invalid email address" }, 400);
     if (!displayName) return json({ error: "Display name is required" }, 400);
     let redirect: URL;
     try { redirect = new URL(redirectTo); } catch { return json({ error: "Invalid redirect URL" }, 400); }
-    if (!origin || redirect.origin !== origin || !["https:", "http:"].includes(redirect.protocol)) {
-      return json({ error: "Redirect origin mismatch" }, 400);
-    }
-
-    const { data: membership, error: membershipError } = await caller
-      .from("household_members")
-      .select("id, role, is_active")
-      .eq("household_id", householdId)
-      .eq("user_id", authData.user.id)
-      .eq("is_active", true)
-      .maybeSingle();
-    if (membershipError || !membership || membership.role !== "admin") {
-      return json({ error: "Only an active household administrator can invite members" }, 403);
-    }
-
-    const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false }
-    });
+    const localRedirect = ["http://localhost:3000", "http://127.0.0.1:3000"].includes(redirect.origin);
+    if (!ALLOWED_REDIRECT_ORIGINS.has(redirect.origin) || (redirect.protocol !== "https:" && !localRedirect)) return json({ error: "Redirect origin not allowed" }, 400);
+    const { data: membership, error: membershipError } = await caller.from("household_members")
+      .select("id, role, is_active").eq("household_id", householdId)
+      .eq("user_id", authData.user.id).eq("is_active", true).maybeSingle();
+    if (membershipError || !membership || membership.role !== "admin") return json({ error: "Only an active household administrator can invite members" }, 403);
+    const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
     const { data: usersData, error: usersError } = await admin.auth.admin.listUsers({ page: 1, perPage: 1000 });
     if (usersError) return json({ error: "Could not check the invited account" }, 500);
     const existing = usersData.users.find((user) => (user.email || "").toLowerCase() === email);
     if (existing?.id === authData.user.id) return json({ error: "You cannot invite your own email address" }, 400);
-
-    // Keep the exact previously working redirect URL. The client detects
-    // first-time invited users from their Auth user metadata after callback.
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
-      type: existing ? "magiclink" : "invite",
-      email,
-      options: { redirectTo: redirect.toString() }
+      type: existing ? "magiclink" : "invite", email, options: { redirectTo: redirect.toString() }
     });
-    if (linkError || !linkData?.properties?.action_link || !linkData.user?.id) {
-      return json({ error: linkError?.message || "Could not generate invitation link" }, 400);
-    }
-
+    if (linkError || !linkData?.properties?.action_link || !linkData.user?.id) return json({ error: linkError?.message || "Could not generate invitation link" }, 400);
     const { error: addError } = await caller.rpc("add_household_member", {
-      p_household_id: householdId,
-      p_user_id: linkData.user.id,
-      p_display_name: displayName
+      p_household_id: householdId, p_user_id: linkData.user.id, p_display_name: displayName
     });
     const alreadyActive = !!addError?.message?.includes("User is already an active member");
-    if (addError && !alreadyActive) {
-      return json({ error: "Invitation link created, but membership could not be added: " + addError.message }, 400);
-    }
-
+    if (addError && !alreadyActive) return json({ error: "Invitation link created, but membership could not be added: " + addError.message }, 400);
     return json({
-      action_link: linkData.properties.action_link,
-      email,
-      display_name: displayName,
-      existing_account: !!existing,
-      membership_status: alreadyActive ? "already_active" : "added_or_reactivated"
+      action_link: linkData.properties.action_link, email, display_name: displayName,
+      existing_account: !!existing, membership_status: alreadyActive ? "already_active" : "added_or_reactivated"
     });
   } catch (error) {
     return json({ error: error instanceof Error ? error.message : "Unexpected error" }, 500);
