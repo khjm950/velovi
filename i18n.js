@@ -1470,6 +1470,49 @@
     'تم التحقق، لكن تعذر تحديث جلسة الدخول. أعد المحاولة.':'Die Überprüfung war erfolgreich, aber die Anmeldesitzung konnte nicht aktualisiert werden. Versuchen Sie es erneut.'
   });
 
+
+  // Normalize already-English source text as well as Arabic source text.
+  // Some static screens and dynamically generated controls use English literals.
+  // Reuse reviewed translations for the same Arabic source key.
+  for (const lang of ['de', 'fr', 'es']) {
+    const target = dictionaries[lang];
+    for (const [sourceKey, englishValue] of Object.entries(dictionaries.en)) {
+      if (typeof englishValue !== 'string' || !englishValue.trim()) continue;
+      const translated = target[sourceKey];
+      if (typeof translated === 'string' && translated.trim() &&
+          !Object.prototype.hasOwnProperty.call(target, englishValue)) {
+        target[englishValue] = translated;
+      }
+    }
+  }
+
+  Object.assign(dictionaries.fr, {
+    'User Guide & Privacy':'Guide d’utilisation et confidentialité',
+    'Start the guided tour':'Démarrer la visite guidée',
+    'Read the privacy policy':'Lire la politique de confidentialité',
+    'Language saved.':'Langue enregistrée.',
+    'Import transactions':'Importer des opérations',
+    'Restore default settings':'Rétablir les paramètres par défaut',
+    'Recurring transaction':'Opération récurrente',
+    'Add recurring transaction':'Ajouter une opération récurrente',
+    'Account':'Compte','Type':'Type','Amount':'Montant','Date':'Date',
+    'Optional':'Facultatif','Search transactions...':'Rechercher des opérations…',
+    'Newest first':'Plus récentes d’abord','Oldest first':'Plus anciennes d’abord'
+  });
+  Object.assign(dictionaries.es, {
+    'User Guide & Privacy':'Guía de uso y privacidad',
+    'Start the guided tour':'Iniciar el recorrido guiado',
+    'Read the privacy policy':'Leer la política de privacidad',
+    'Language saved.':'Idioma guardado.',
+    'Import transactions':'Importar movimientos',
+    'Restore default settings':'Restablecer la configuración predeterminada',
+    'Recurring transaction':'Movimiento recurrente',
+    'Add recurring transaction':'Añadir movimiento recurrente',
+    'Account':'Cuenta','Type':'Tipo','Amount':'Importe','Date':'Fecha',
+    'Optional':'Opcional','Search transactions...':'Buscar movimientos…',
+    'Newest first':'Más recientes primero','Oldest first':'Más antiguos primero'
+  });
+
   const originals = new WeakMap();
   const attrOriginals = new WeakMap();
   const languageSelect = document.getElementById('languageSetting');
@@ -1517,7 +1560,7 @@
     }
   }
   function translateElement(element, lang) {
-    const attrs = ['placeholder','title','aria-label','alt','data-label'];
+    const attrs = ['placeholder','title','aria-label','alt','data-label','data-expand-label','data-collapse-label'];
     let saved = attrOriginals.get(element);
     if (!saved) { saved = {}; attrOriginals.set(element,saved); }
     attrs.forEach(a => {
@@ -1560,7 +1603,7 @@
     localStorage.setItem('velovi-language',languageSelect.value);
     applyLanguage();
     const status=document.getElementById('settingsStatus');
-    if(status)status.textContent=languageSelect.value==='ar'?'تم حفظ اللغة.':languageSelect.value==='de'?'Sprache gespeichert.':'Language saved.';
+    if(status)status.textContent=window.VELOVI_I18N?.t?.('تم حفظ اللغة.') || 'Language saved.';
   });
   const observer=new MutationObserver(records=>{
     const lang=language();
