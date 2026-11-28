@@ -981,7 +981,8 @@
   function translateComposite(source, lang) {
     const dictionary = dictionaries[lang];
     if (!dictionary) return source;
-    if (dictionary[source.trim()]) return source.replace(source.trim(), dictionary[source.trim()]);
+    const translationFor = key => dictionary[key] ?? ((lang !== 'ar' && lang !== 'en') ? dictionaries.en[key] : undefined);
+    if (translationFor(source.trim()) !== undefined) return source.replace(source.trim(), translationFor(source.trim()));
     let result = source;
     const keys = Object.keys(dictionary).filter(key => key.length >= 2).sort((a,b) => b.length-a.length);
     for (const key of keys) {
@@ -995,7 +996,8 @@
         const startsWithArabic = isArabic(key[0]);
         const endsWithArabic = isArabic(key[key.length - 1]);
         if ((!startsWithArabic || !isArabic(before)) && (!endsWithArabic || !isArabic(after))) {
-          const translated = dictionary[key];
+          const translated = translationFor(key);
+          if (translated === undefined) { index += key.length; continue; }
           result = result.slice(0, index) + translated + result.slice(afterIndex);
           index += translated.length;
         } else index += key.length;
