@@ -1418,7 +1418,7 @@
       'أدخل البريد الإلكتروني لإنشاء دعوة آمنة. يمكنك فتح رسالة بريد جاهزة أو نسخ الرابط ومشاركته. يجب على العضو إكمال التحقق قبل تسجيل الدخول.':'Introduce un correo electrónico para crear una invitación segura. Abre un correo preparado o copia y comparte el enlace. El miembro debe completar la verificación antes de iniciar sesión.',
       'EUR · يورو (€)':'EUR · Euro (€)','USD · دولار أمريكي ($)':'USD · Dólar estadounidense ($)','GBP · جنيه إسترليني (£)':'GBP · Libra esterlina (£)','CHF · فرنك سويسري':'CHF · Franco suizo',
       'SAR · ريال سعودي (ر.س)':'SAR · Rial saudí (ر.س)','AED · درهم إماراتي (د.إ)':'AED · Dírham de los EAU (د.إ)','CAD · دولار كندي':'CAD · Dólar canadiense',
-      'AUD · دولار أسترالي':'AUD · Dólar australiano','NZD · دولار نيوزيلandي':'NZD · Dólar neozelandés','JPY · ين ياباني (¥)':'JPY · Yen japonés (¥)',
+      'AUD · دولار أسترالي':'AUD · Dólar australiano','NZD · دولار نيوزيلندي':'NZD · Dólar neozelandés','JPY · ين ياباني (¥)':'JPY · Yen japonés (¥)',
       'CNY · يوان صيني (¥)':'CNY · Yuan chino (¥)','INR · روبية هندية (₹)':'INR · Rupia india (₹)','TRY · ليرة تركية (₺)':'TRY · Lira turca (₺)',
       'BRL · ريال برازيلي (R$)':'BRL · Real brasileño (R$)','MXN · بيزو مكسيكي':'MXN · Peso mexicano','ZAR · راند جنوب أفريقي':'ZAR · Rand sudafricano',
       'SEK · كرونة سويدية':'SEK · Corona sueca','NOK · كرونة نرويجية':'NOK · Corona noruega','DKK · كرونة دنماركية':'DKK · Corona danesa',
