@@ -565,17 +565,35 @@ function renderImportRows(){
   if(!importRowsBody)return; importRowsBody.replaceChildren();
   extractedImportRows.forEach(item=>{
     const tr=document.createElement('tr'),selectedCell=document.createElement('td'),selected=document.createElement('input');
-    selectedCell.dataset.label='اعتماد';
-    selected.type='checkbox';selected.checked=item.selected;selected.setAttribute('aria-label','اعتماد هذه الحركة');selected.addEventListener('change',()=>{item.selected=selected.checked;updateImportCount();});selectedCell.appendChild(selected);
+    selectedCell.dataset.label='اعتماد';selected.type='checkbox';selected.checked=item.selected;selected.setAttribute('aria-label','اعتماد هذه الحركة');selected.addEventListener('change',()=>{item.selected=selected.checked;updateImportCount();});selectedCell.appendChild(selected);
     const dateCell=document.createElement('td'),date=document.createElement('input');dateCell.dataset.label='التاريخ';date.type='date';date.dir='ltr';date.lang=window.VELOVI_I18N?.language?.()==='ar'?'ar-EG':window.VELOVI_I18N?.language?.()==='de'?'de-DE':'en-GB';date.style.textAlign='center';date.value=item.date;date.addEventListener('change',()=>{item.date=date.value;});dateCell.appendChild(date);
     const descCell=document.createElement('td'),desc=document.createElement('input');descCell.dataset.label='الوصف';desc.type='text';desc.value=item.description;desc.maxLength=180;desc.addEventListener('input',()=>{item.description=desc.value;});descCell.appendChild(desc);
-    const categoryCell=document.createElement('td'),category=document.createElement('input'),categoryList=document.createElement('datalist');
-    categoryCell.dataset.label='التصنيف';category.type='text';category.autocomplete='off';category.maxLength=80;
-    categoryList.id='importCategoryOptions'+extractedImportRows.indexOf(item);populateImportCategoryDatalist(categoryList,item.type);
-    category.setAttribute('list',categoryList.id);item.category=item.category||inferStatementCategory(item.description,item.type);category.dataset.veloviCategoryOriginal=item.category;category.value=window.VELOVI_I18N?.t?.(item.category)||item.category;
-    category.addEventListener('input',()=>{item.category=normalizeVeloviCategory(category.value,item.type);category.dataset.veloviCategoryOriginal=item.category;});categoryCell.append(category,categoryList);
+    const categoryCell=document.createElement('td'),categoryWrap=document.createElement('div'),category=document.createElement('input'),categoryList=document.createElement('div');
+    categoryCell.dataset.label='التصنيف';categoryWrap.className='import-category-select';category.type='text';category.autocomplete='off';category.maxLength=80;category.placeholder='اكتب للبحث أو اختر تصنيفاً';category.setAttribute('role','combobox');category.setAttribute('aria-autocomplete','list');category.setAttribute('aria-expanded','false');
+    categoryList.className='category-dropdown import-category-dropdown';categoryList.hidden=true;categoryList.setAttribute('role','listbox');
+    item.category=item.category||inferStatementCategory(item.description,item.type);
+    const translatedCategory=value=>window.VELOVI_I18N?.t?.(value)||value;
+    const renderCategoryOptions=(filterText=true)=>{
+      const catalog=window.VELOVI_CATEGORIES?.options?.(item.type)||[];
+      const query=filterText?category.value.trim().toLocaleLowerCase():'';
+      const matches=catalog.filter(value=>!query||value.toLocaleLowerCase().includes(query)||translatedCategory(value).toLocaleLowerCase().includes(query));
+      categoryList.replaceChildren(...matches.map(value=>{
+        const option=document.createElement('button');option.type='button';option.className='category-option';option.setAttribute('role','option');option.textContent=translatedCategory(value);
+        option.addEventListener('pointerdown',event=>event.preventDefault());
+        option.addEventListener('click',()=>{item.category=value;category.dataset.veloviCategoryOriginal=value;category.value=translatedCategory(value);categoryList.hidden=true;category.setAttribute('aria-expanded','false');});
+        return option;
+      }));
+      categoryList.hidden=matches.length===0;category.setAttribute('aria-expanded',String(!categoryList.hidden));
+    };
+    category.dataset.veloviCategoryOriginal=item.category;category.value=translatedCategory(item.category);
+    category.addEventListener('focus',()=>renderCategoryOptions(false));category.addEventListener('click',()=>renderCategoryOptions(false));
+    category.addEventListener('input',()=>{item.category=normalizeVeloviCategory(category.value,item.type);category.dataset.veloviCategoryOriginal=item.category;renderCategoryOptions();});
+    category.addEventListener('blur',()=>{categoryList.hidden=true;category.setAttribute('aria-expanded','false');});
+    category.addEventListener('keydown',event=>{if(event.key==='Escape'){categoryList.hidden=true;category.setAttribute('aria-expanded','false');}else if(event.key==='ArrowDown'&&!categoryList.hidden){event.preventDefault();categoryList.querySelector('button')?.focus();}});
+    categoryList.addEventListener('keydown',event=>{if(event.key==='Escape'){categoryList.hidden=true;category.setAttribute('aria-expanded','false');category.focus();}});
+    categoryWrap.append(category,categoryList);categoryCell.appendChild(categoryWrap);
     const typeCell=document.createElement('td'),type=document.createElement('select');typeCell.dataset.label='النوع';[['income','إيراد'],['expense','مصروف']].forEach(pair=>{const option=document.createElement('option');option.value=pair[0];option.textContent=pair[1];type.appendChild(option);});type.value=item.type;
-    type.addEventListener('change',()=>{const previous=inferStatementCategory(item.description,item.type);item.type=type.value;if(!item.category||item.category===previous)item.category=inferStatementCategory(item.description,item.type);populateImportCategoryDatalist(categoryList,item.type);category.dataset.veloviCategoryOriginal=item.category;category.value=window.VELOVI_I18N?.t?.(item.category)||item.category;});typeCell.appendChild(type);
+    type.addEventListener('change',()=>{const previous=inferStatementCategory(item.description,item.type);item.type=type.value;if(!item.category||item.category===previous)item.category=inferStatementCategory(item.description,item.type);category.dataset.veloviCategoryOriginal=item.category;category.value=translatedCategory(item.category);renderCategoryOptions();});typeCell.appendChild(type);
     const amountCell=document.createElement('td'),amount=document.createElement('input');amountCell.dataset.label='المبلغ';amount.type='number';amount.min='0.01';amount.step='0.01';amount.value=item.amount.toFixed(2);amount.inputMode='decimal';amount.addEventListener('change',()=>{item.amount=Number(amount.value)||0;});amountCell.appendChild(amount);
     tr.append(selectedCell,dateCell,descCell,categoryCell,typeCell,amountCell);importRowsBody.appendChild(tr);
   });

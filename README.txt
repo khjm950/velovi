@@ -1,111 +1,113 @@
-Velovi — implementation status
-==============================
+Velovi — current implementation and launch status
+================================================
 
 Project
 -------
-Arabic-first, RTL family-finance PWA. Current working branch:
-`feat/permissions-import-settings-restoration`. Do not merge to main until
-browser end-to-end tests have been completed.
+Velovi is an Arabic-first, RTL family-finance PWA with an Android Capacitor
+build path. Current development branch: feat/velovi-launch-suite.
+Draft pull request: https://github.com/khjm950/velovi/pull/45
 
 Live Supabase project
 ---------------------
-- Project: Velovi (`rzxfsfexkduutlekcfwu`), eu-central-1, PostgreSQL 17.
-- A live household exists with two active members: one administrator and one
-  member. The member sees only their own membership row by default.
-- Current financial account and transaction tables are empty; no financial
-  records have been created yet.
-- RLS is enabled on households, household_members, financial_accounts,
-  financial_transactions, and audit_log.
-- The Data API browser client uses the publishable key in
-  `supabase-config.js`. Never place a service_role or secret key in browser
-  code or send it in chat.
+- Project ref: rzxfsfexkduutlekcfwu.
+- Existing household and membership records are retained.
+- At the latest schema inspection, one household and one active membership
+  (administrator) were present. Financial accounts and transactions were empty.
+- New planning tables exist and are empty; no test records were retained.
+- RLS is enabled on all household, financial, audit, and planning tables.
+- Never place a service_role or secret key in browser code.
 
-Implemented in this branch
---------------------------
-- Household sign-in, household onboarding, member management, and permission
-  editing through Supabase Auth and RPC functions.
-- Separate read-only permission to view other members' account records.
-  This does not grant access to their transaction history.
-- Reactivation trigger resets all member permissions to the agreed defaults:
-  add=true, edit=true, delete=false, view-other-accounts=false.
-- RLS helper functions moved to a non-exposed `private` schema. Public helper
-  RPC execution was revoked from anon and authenticated; the policies use the
-  private helpers. The remaining public SECURITY DEFINER RPCs perform explicit
-  authentication/admin checks.
-- Account create/edit/archive UI backed by `financial_accounts`.
-- Transaction create/edit/delete UI backed by `financial_transactions`,
-  respecting member add/edit/delete permissions and account ownership.
-- Account balances calculated from opening balances and recorded income/expense
-  transactions. Negative opening balances are supported.
-- Account-specific ISO currency is stored on accounts and transactions.
-  Dashboard and transaction totals are grouped by currency; no silent FX
-  conversion is performed.
-- Import preview for PDF and JPG/PNG with local OCR (German, English, Arabic),
-  editable rows, CSV export, account selection, duplicate filtering, and
-  persistence into the selected account.
-- Camera capture for statement photos and QR/barcode scanning where the browser
-  supports the BarcodeDetector API and camera access.
-- Historical-data forecast: analyzes the prior six completed months, detects
-  regular categories using median values, uses weighted estimates for variable
-  categories, supports excluding categories, and offers a 1–1200 month horizon.
-  It displays a confidence indicator and historical volatility.
-- Existing manual scenario calculator retained separately.
-- Dashboard cards navigate to their respective sections. More menu closes on
-  navigation.
-- Transaction search by text and amount, date range, type filter, sortable
-  columns, currency-separated net total, and transaction count.
-- Settings for language, currency preference, theme, and independent chart
-  palette. Currency preference is a default/display preference, not an FX
-  conversion engine.
-- PWA cache bumped to v9 so installed devices fetch the new application shell.
+Existing application functionality
+----------------------------------
+- Household authentication, onboarding, member invitations, membership
+  management, and permission editing.
+- Separate permissions for adding, editing, deleting transactions and
+  read-only visibility of other members' accounts.
+- Members see their own transactions by default; admins can manage household
+  financial records.
+- Accounts support individual currencies, opening balances (including negative
+  balances), and ownership. No silent currency conversion is performed.
+- Transactions support income, expense, and transfer records, with account
+  ownership and household consistency enforced by composite foreign keys.
+- Transaction table includes search by text/amount, date range, type filtering,
+  sortable columns, currency-aware net totals, and transaction counts.
+- Statement import supports PDF and JPG/PNG, local OCR (German, English,
+  Arabic), editable review rows, CSV export, account selection, duplicate
+  filtering, and persistence after review.
+- Camera capture and QR/barcode reading are available where browser support and
+  permissions allow.
+- Historical smart forecast uses recent category patterns, weighted estimates
+  for variable categories, category exclusions, and a 1–1200 month horizon.
+  It now also accounts for active recurring schedules and future-dated
+  one-off transactions. Forecasts remain estimates, not guarantees.
+- Settings include language, preferred currency, theme, and chart palette.
+- PWA service worker cache is currently velovi-shell-v28.
 
-Important limitations
----------------------
-- No financial data has been inserted into the live project yet. The new
-  account/transaction forms must be tested from a signed-in browser session
-  before the application is treated as ready for real household finances.
-- Account visibility for a non-admin member is read-only. When viewing another
-  member's account, the UI shows the opening balance only because transaction
-  history remains private.
-- Smart forecasting is a statistical heuristic based on available history,
-  not an AI financial adviser. Sparse history lowers its confidence.
-- The expense chart now uses actual transaction aggregates, selected time
-  period, and the independent chart palette.
-- Full translation of every UI string is not complete; the language preference
-  currently stores the selected language and sets document direction.
-- QR/barcode scanning reads a code and places it into the transaction
-  description if empty; it does not automatically interpret every invoice or
-  payment QR standard.
-- Automatic Open Banking connections, bank-provider cost comparison, and
-  bank synchronization are not implemented.
-- Backups, recovery testing, and a production security review remain required.
+Family planning features added in this branch
+---------------------------------------------
+- Monthly category budgets with actual-versus-limit progress.
+- Personal savings goals and explicitly family-shared savings goals.
+- Individual contribution records for shared goals.
+- Recurring income/expense templates with weekly, monthly, quarterly, and
+  yearly schedules, optional end dates, seven-day in-app reminders, and a manual
+  "record due" action. Overdue occurrences advance one at a time, so missed
+  periods are not silently skipped.
+- Recording a due recurring item and advancing its next due date are performed
+  by one database RPC transaction, preventing duplicate creation on retry.
+- The four new tables are monthly_budgets, savings_goals,
+  savings_goal_contributions, and recurring_entries.
+- Four additive migrations have been applied to the live Supabase project:
+  family_planning_features, optimize_planning_rls_and_indexes,
+  record_recurring_one_period_at_a_time, and enforce_planning_creator_identity.
+- New planning data is owner/admin scoped by RLS. Only goals explicitly marked
+  as family-visible can be read and contributed to by other active members.
+- A rollback-only database test passed for budget, goal, contribution, recurring
+  entry creation, and due-transaction recording. All test rows were rolled back.
+- French and Spanish translations are included for the new planning screens.
+  Full translation of every existing application screen remains unfinished.
 
-Database migrations / SQL references
-------------------------------------
-- `SUPABASE_MEMBER_ACCOUNT_VISIBILITY.sql`: account visibility policy.
-- `SUPABASE_FINANCIAL_SCHEMA_QUERY.sql`: catalog query for exact ordered
-  composite foreign keys and schema inspection.
-- `SUPABASE_RESET_MEMBER_PERMISSIONS_ON_REACTIVATION.sql`: live trigger
-  function reset for all four permission defaults.
-- `SUPABASE_HARDEN_RLS_HELPERS.sql`: private-schema RLS helpers and policy
-  rewrites.
-- `SUPABASE_MOVE_HOUSEHOLD_RPCS_TO_PRIVATE.sql`: moves privileged household
-  operations into the non-exposed schema and leaves SECURITY INVOKER public
-  RPC wrappers. All these changes were applied to the live project and tested
-  with simulated admin/member JWT contexts.
+Android and Google Play
+-----------------------
+- Android Capacitor build pipeline is present.
+- The Android debug APK workflow completed successfully for the current web
+  bundle, including source syntax checks, web staging, Android project creation,
+  manifest hardening, package identity checks, APK signature verification,
+  and artifact upload.
+- A manual signed AAB workflow is provided at
+  .github/workflows/android-release-aab.yml.
+- The AAB workflow requires a private upload keystore and these GitHub Actions
+  repository secrets:
+    ANDROID_UPLOAD_KEYSTORE_BASE64
+    ANDROID_UPLOAD_KEYSTORE_PASSWORD
+    ANDROID_UPLOAD_KEY_ALIAS
+    ANDROID_UPLOAD_KEY_PASSWORD
+- Never commit the keystore or its passwords. Back up the upload key securely
+  outside GitHub. The signed AAB workflow cannot run until these secrets exist.
+- The debug APK is not the Play Store release package. Google Play requires the
+  signed Android App Bundle (AAB) for the release workflow.
 
-Privacy model
--------------
-- Members see their own transactions by default.
-- Admins can see and manage all household financial records.
-- Other-account visibility is a separate read-only permission for accounts.
-- Transaction permissions remain separate: add, edit, and delete.
-- Financial transactions must belong to the selected account's owner and
-  household; database composite foreign keys enforce this.
+Outstanding before public release
+---------------------------------
+- Finish French and Spanish translation across all existing screens, not only
+  the new planning pages.
+- Run signed-in browser tests with at least two real household members to verify
+  owner-only visibility and the family-shared-goal exception end to end.
+- Perform visual testing on Android and iPhone-sized screens.
+- Complete Play Console listing, Data safety declarations, privacy policy
+  contact/retention details, content rating, and internal testing.
+- Create and securely configure the Android upload keystore before generating
+  the signed AAB.
+- Review Supabase Auth security settings: the security advisor currently warns
+  that leaked-password protection is disabled.
+- Automatic Open Banking connections and bank synchronization are not enabled;
+  provider research and consent flows remain a separate feature.
+- Offline shell caching does not imply offline financial writes or sync.
 
-PWA
----
-- Serve over HTTPS (or localhost during development).
-- The service worker caches the app shell and falls back to it when offline.
-- Offline shell availability does not mean financial-data writes or sync are
-  available offline.
+Safety notes
+------------
+- The applied planning migrations are additive. They did not delete or rewrite
+  existing financial records.
+- The database test transactions were rolled back; new planning tables remain
+  empty until users create real budgets, goals, contributions, and schedules.
+- Manual confirmation is required before a recurring template creates a real
+  financial transaction.

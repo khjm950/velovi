@@ -114,6 +114,9 @@
         <button class="nav-item nav-secondary" data-view="reports">
           <span aria-hidden="true">◷</span> التقارير والتوقعات
         </button>
+        <button class="nav-item nav-secondary" data-view="budgets"><span aria-hidden="true">▤</span> الميزانيات الشهرية</button>
+        <button class="nav-item nav-secondary" data-view="goals"><span aria-hidden="true">◎</span> أهداف الادخار</button>
+        <button class="nav-item nav-secondary" data-view="recurring"><span aria-hidden="true">↻</span> الحركات المتكررة</button>
         <button class="nav-item nav-secondary" data-view="settings"><span aria-hidden="true">⚙</span> الإعدادات</button>
       </nav>
       <details class="mobile-more">
@@ -121,6 +124,9 @@
         <div class="mobile-more-menu">
           <button class="nav-item" data-view="members"><span aria-hidden="true">♧</span> أفراد الأسرة والصلاحيات</button>
           <button class="nav-item" data-view="reports"><span aria-hidden="true">◷</span> التقارير والتوقعات</button>
+          <button class="nav-item" data-view="budgets"><span aria-hidden="true">▤</span> الميزانيات الشهرية</button>
+          <button class="nav-item" data-view="goals"><span aria-hidden="true">◎</span> أهداف الادخار</button>
+          <button class="nav-item" data-view="recurring"><span aria-hidden="true">↻</span> الحركات المتكررة</button>
           <button class="nav-item" data-view="settings"><span aria-hidden="true">⚙</span> الإعدادات</button>
         </div>
       </details>
@@ -279,6 +285,23 @@
           </div>
         </div>
 
+        <details class="panel recurring-create-panel">
+          <summary class="recurring-create-summary">＋ إضافة حركة متكررة</summary>
+          <p class="small muted">سجّل الراتب أو الفاتورة أو الاشتراك، ثم راجع الاستحقاق قبل تسجيله كحركة فعلية.</p>
+          <form id="recurringForm" class="planning-form">
+            <label>الحساب<select id="recurringAccount" required></select></label>
+            <label>النوع<select id="recurringType"><option value="expense">مصروف</option><option value="income">إيراد</option></select></label>
+            <label>الوصف<input id="recurringDescription" maxlength="180" required placeholder="مثلاً: الإيجار الشهري"></label>
+            <label>التصنيف<input id="recurringCategory" maxlength="80" placeholder="مثلاً: السكن"></label>
+            <label>المبلغ<input id="recurringAmount" type="number" min="0.01" step="0.01" required></label>
+            <label>التكرار<select id="recurringFrequency"><option value="weekly">أسبوعي</option><option value="monthly" selected>شهري</option><option value="quarterly">كل 3 أشهر</option><option value="yearly">سنوي</option></select></label>
+            <label>موعد الاستحقاق التالي<input id="recurringNextDate" type="date" required></label>
+            <label>تاريخ الانتهاء (اختياري)<input id="recurringEndDate" type="date"></label>
+            <button class="primary" type="submit">حفظ الحركة المتكررة</button>
+          </form>
+          <p class="small muted">لا تُسجّل الحركات تلقائياً؛ ستظهر المستحقات في صفحة الحركات المتكررة لتراجعها وتسجلها بنفسك.</p>
+        </details>
+
         <article class="panel">
           <div class="filters">
             <input id="searchTx" type="search" placeholder="ابحث في الحركات..." aria-label="بحث في الحركات">
@@ -404,6 +427,50 @@
         </article>
       </section>
 
+
+      <!-- الميزانيات الشهرية -->
+      <section class="view" id="budgets">
+        <div class="page-heading"><div><p class="eyebrow">التحكم في الإنفاق</p><h1>الميزانيات الشهرية</h1><p class="muted">حدد حداً لكل تصنيف وتابع الإنفاق الفعلي مقارنة بالميزانية.</p></div></div>
+        <article class="panel">
+          <h2>إضافة أو تحديث ميزانية</h2>
+          <form id="budgetForm" class="planning-form">
+            <label>التصنيف<input id="budgetCategory" list="budgetCategoryOptions" maxlength="80" required placeholder="مثلاً: الطعام"></label>
+            <datalist id="budgetCategoryOptions"></datalist>
+            <label>الحد الشهري<input id="budgetLimit" type="number" min="0.01" step="0.01" required></label>
+            <label>العملة<select id="budgetCurrency" required></select></label>
+            <label>الشهر<input id="budgetPeriod" type="month" required></label>
+            <button class="primary" type="submit">حفظ الميزانية</button>
+          </form>
+          <h2>ميزانيات الشهر</h2><div id="budgetList" class="planning-list"><p class="empty-state">جارٍ تحميل الميزانيات…</p></div>
+        </article>
+      </section>
+
+      <!-- أهداف الادخار -->
+      <section class="view" id="goals">
+        <div class="page-heading"><div><p class="eyebrow">التخطيط العائلي</p><h1>أهداف الادخار</h1><p class="muted">أنشئ هدفاً شخصياً أو هدفاً عائلياً مشتركاً، وسجّل مساهمات أفراد الأسرة.</p></div></div>
+        <article class="panel">
+          <h2>إنشاء هدف ادخار</h2>
+          <form id="goalForm" class="planning-form">
+            <label>اسم الهدف<input id="goalTitle" maxlength="120" required placeholder="مثلاً: عطلة الأسرة"></label>
+            <label>المبلغ المستهدف<input id="goalTarget" type="number" min="0.01" step="0.01" required></label>
+            <label>العملة<select id="goalCurrency" required></select></label>
+            <label>التاريخ المستهدف<input id="goalDate" type="date"></label>
+            <label>نوع الهدف<select id="goalVisibility"><option value="private">شخصي</option><option value="family">عائلي مشترك</option></select></label>
+            <button class="primary" type="submit">إنشاء الهدف</button>
+          </form>
+          <h2>أهداف الأسرة</h2><div id="goalList" class="planning-list"><p class="empty-state">جارٍ تحميل أهداف الادخار…</p></div>
+        </article>
+      </section>
+
+      <!-- الحركات المتكررة -->
+      <section class="view" id="recurring">
+        <div class="page-heading"><div><p class="eyebrow">المدفوعات المنتظمة</p><h1>الحركات المتكررة</h1><p class="muted">راجع الاستحقاقات القادمة والحركات المتكررة النشطة، وسجّل المستحق بعد مراجعته.</p></div></div>
+        <article class="panel">
+          <h2>المستحقات والحركات النشطة</h2>
+          <div id="recurringList" class="planning-list"><p class="empty-state">جارٍ تحميل الحركات المتكررة…</p></div>
+        </article>
+      </section>
+
       <!-- التقارير والتوقعات -->
       <section class="view" id="reports">
         <div class="page-heading">
@@ -468,7 +535,7 @@
         <article class="panel settings-panel">
           <h2>اللغة والمنطقة</h2>
           <div class="form-grid">
-            <label>لغة الواجهة<select id="languageSetting"><option value="ar">العربية</option><option value="de">Deutsch</option><option value="en">English</option></select><small class="field-hint">الواجهة متاحة بالعربية والألمانية والإنجليزية.</small></label>
+            <label>لغة الواجهة<select id="languageSetting"><option value="ar">العربية</option><option value="de">Deutsch</option><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option></select><small class="field-hint">الواجهة متاحة بالعربية والألمانية والإنجليزية والفرنسية والإسبانية.</small></label>
             <label>العملة المفضلة<select id="currencySetting" dir="ltr" aria-label="العملة المفضلة">
               <option value="EUR">EUR · يورو (€)</option><option value="USD">USD · دولار أمريكي ($)</option><option value="GBP">GBP · جنيه إسترليني (£)</option><option value="CHF">CHF · فرنك سويسري</option><option value="SAR">SAR · ريال سعودي (ر.س)</option><option value="AED">AED · درهم إماراتي (د.إ)</option><option value="CAD">CAD · دولار كندي</option><option value="AUD">AUD · دولار أسترالي</option><option value="NZD">NZD · دولار نيوزيلندي</option><option value="JPY">JPY · ين ياباني (¥)</option><option value="CNY">CNY · يوان صيني (¥)</option><option value="INR">INR · روبية هندية (₹)</option><option value="TRY">TRY · ليرة تركية (₺)</option><option value="BRL">BRL · ريال برازيلي (R$)</option><option value="MXN">MXN · بيزو مكسيكي</option><option value="ZAR">ZAR · راند جنوب أفريقي</option><option value="SEK">SEK · كرونة سويدية</option><option value="NOK">NOK · كرونة نرويجية</option><option value="DKK">DKK · كرونة دنماركية</option><option value="PLN">PLN · زلوتي بولندي</option><option value="CZK">CZK · كرونة تشيكية</option><option value="HUF">HUF · فورنت مجري</option><option value="RON">RON · ليو روماني</option><option value="BGN">BGN · ليف بلغاري</option><option value="SGD">SGD · دولار سنغافوري</option><option value="HKD">HKD · دولار هونغ كونغ</option><option value="KRW">KRW · وون كوري</option><option value="THB">THB · بات تايلندي</option><option value="MYR">MYR · رينغيت ماليزي</option><option value="IDR">IDR · روبية إندونيسية</option><option value="PHP">PHP · بيزو فلبيني</option><option value="PKR">PKR · روبية باكستانية</option><option value="EGP">EGP · جنيه مصري</option><option value="QAR">QAR · ريال قطري</option><option value="KWD">KWD · دينار كويتي</option><option value="BHD">BHD · دينار بحريني</option><option value="OMR">OMR · ريال عُماني</option><option value="JOD">JOD · دينار أردني</option><option value="MAD">MAD · درهم مغربي</option><option value="NGN">NGN · نايرا نيجيرية</option><option value="KES">KES · شلن كيني</option>
             </select><small class="field-hint">تُستخدم كعملة افتراضية للحسابات الجديدة والسيناريو اليدوي. لا تحوّل أرصدة الحسابات أو الحركات المسجلة.</small></label>
@@ -628,8 +695,14 @@
       <label>نوع الحساب<select id="accountType"><option value="bank">حساب بنكي</option><option value="savings">مدخرات</option><option value="cash">نقد</option><option value="other">أخرى</option></select></label>
       <label>العملة<select id="accountCurrency" dir="ltr"><option value="EUR">EUR</option><option value="USD">USD</option><option value="GBP">GBP</option><option value="CHF">CHF</option><option value="SAR">SAR</option><option value="AED">AED</option><option value="CAD">CAD</option></select></label>
       <label id="accountOwnerLabel">صاحب الحساب<select id="accountOwner"></select></label>
-      <label>الرصيد الافتتاحي<input id="accountOpeningBalance" type="text" inputmode="decimal" value="0" dir="ltr" required></label>
-      <p class="small muted">يمكن إدخال رصيد سالب. لا تغيّر العملة بعد تسجيل حركات على الحساب إلا بعد مراجعة السجل.</p>
+      <label>الرصيد الافتتاحي
+        <div class="balance-input-row account-opening-balance-row">
+          <input id="accountOpeningBalance" type="text" inputmode="decimal" value="0" dir="ltr" aria-describedby="accountOpeningBalanceHint" autocomplete="off" required>
+          <button class="balance-sign-button" id="toggleAccountOpeningBalanceSign" type="button" aria-label="تغيير إشارة الرصيد الافتتاحي" title="التبديل بين الموجب والسالب">±</button>
+        </div>
+      </label>
+      <p id="accountOpeningBalanceHint" class="small muted">اكتب الرصيد أو اضغط ± للتبديل بين الموجب والسالب. يمكن أن يكون الرصيد الافتتاحي سالباً.</p>
+      <p class="small muted">لا تغيّر العملة بعد تسجيل حركات على الحساب إلا بعد مراجعة السجل.</p>
       <button class="primary full" id="saveAccount" type="submit">حفظ الحساب</button>
     </form>
   </dialog>
@@ -782,9 +855,11 @@
   <script defer src="./supabase-config.js"></script>
   <script defer src="./app.js"></script>
   <script defer src="./auth.js"></script>
+  <script defer src="./planning.js"></script>
   <script defer src="./guide.js"></script>
   <script defer src="./install.js"></script>
   <script defer src="./i18n.js"></script>
+  <script defer src="./capacitor-bridge.js"></script>
 </body>
 </html>
 

@@ -15,6 +15,7 @@
   let currentMembers = [];
   let currentAccounts = [];
   let currentTransactions = [];
+  let currentRecurring = [];
   let workspaceLoadPromise = null;
   let mfaLoginFactorId = null;
   let mfaLoginChallengeId = null;
@@ -395,7 +396,7 @@
       stat.append(label,amount,note); stats.appendChild(stat);
     }
   }
-  function bulkText(ar) { return ar; }
+  function bulkText(ar) { return window.VELOVI_I18N?.t?.(ar) || ar; }
   function updateBulkSelectionUi() {
     const all = [...document.querySelectorAll('#txRows .tx-select')];
     const visible = all.filter(box => !box.closest('tr')?.hidden);
@@ -450,6 +451,11 @@
     const sorted = [...currentTransactions].sort((a,b)=>String(b.transaction_date).localeCompare(String(a.transaction_date)));
     sorted.forEach(tx => {
       const row = document.createElement('tr');
+      row.classList.add('transaction-card-row');
+      row.tabIndex = 0;
+      row.setAttribute('aria-expanded', 'false');
+      row.dataset.expandLabel = 'اضغط لعرض التفاصيل';
+      row.dataset.collapseLabel = 'اضغط لإخفاء التفاصيل';
       row.dataset.type = tx.transaction_type === 'income' ? 'income' : tx.transaction_type === 'expense' ? 'expense' : 'other';
       row.dataset.category = tx.category || 'غير مصنف';
       row.dataset.description = tx.description || '';
@@ -459,15 +465,17 @@
       row.dataset.currency = tx.currency || 'EUR';
       row.dataset.transactionId = tx.id;
       const typeCell=document.createElement('td'), badge=document.createElement('span');
+      const txLabel=(value)=>window.VELOVI_I18N?.t(value)||value;
+      typeCell.dataset.label='النوع';
       badge.className='pill '+(tx.transaction_type==='income'?'green':tx.transaction_type==='expense'?'red':'');
       badge.textContent=tx.transaction_type==='income'?'إيراد':tx.transaction_type==='expense'?'مصروف':'تحويل';
       typeCell.appendChild(badge);
-      const categoryCell=document.createElement('td'); categoryCell.textContent=tx.category || 'غير مصنف';
-      const descCell=document.createElement('td'); descCell.textContent=tx.description || '—'; descCell.setAttribute('translate', 'no');
-      const dateCell=document.createElement('td');
+      const categoryCell=document.createElement('td'); categoryCell.dataset.label='التصنيف'; const categoryChip=document.createElement('span'); categoryChip.className='tx-category-chip'; categoryChip.textContent=tx.category || txLabel('غير مصنف'); categoryCell.appendChild(categoryChip);
+      const descCell=document.createElement('td'); descCell.dataset.label='الوصف'; const descText=document.createElement('span'); descText.textContent=tx.description || '—'; descText.setAttribute('translate','no'); descCell.appendChild(descText);
+      const dateCell=document.createElement('td'); dateCell.dataset.label='التاريخ';
       const date=new Date(String(tx.transaction_date)+'T12:00:00');
-      dateCell.textContent=Number.isNaN(date.getTime())?tx.transaction_date:date.toLocaleDateString(document.documentElement.lang==='ar'?'ar-EG':document.documentElement.lang==='en'?'en-GB':'de-DE');
-      const amountCell=document.createElement('td'); amountCell.className=tx.transaction_type==='income'?'positive':tx.transaction_type==='expense'?'negative':'';
+      dateCell.textContent=Number.isNaN(date.getTime())?tx.transaction_date:date.toLocaleDateString(({ar:'ar-EG',de:'de-DE',en:'en-GB',fr:'fr-FR',es:'es-ES'})[document.documentElement.lang]||'en-GB');
+      const amountCell=document.createElement('td'); amountCell.dataset.label='المبلغ'; amountCell.className=tx.transaction_type==='income'?'positive':tx.transaction_type==='expense'?'negative':'';
       const amount=document.createElement('span');
       amount.textContent=(tx.transaction_type==='income'?'+':tx.transaction_type==='expense'?'−':'')+formatMoney(Number(tx.amount),tx.currency);
       amountCell.appendChild(amount);
@@ -493,6 +501,19 @@
       }
       if (actions.childElementCount) selectCell.appendChild(actions);
       row.append(typeCell,categoryCell,descCell,dateCell,amountCell,selectCell);
+      const toggleDetails = event => {
+        if (!window.matchMedia('(max-width: 700px)').matches) return;
+        if (event.target.closest('button,input,select,a,label')) return;
+        const expanded = !row.classList.contains('is-expanded');
+        row.classList.toggle('is-expanded', expanded);
+        row.setAttribute('aria-expanded', String(expanded));
+      };
+      row.addEventListener('click', toggleDetails);
+      row.addEventListener('keydown', event => {
+        if (event.target !== row || (event.key !== 'Enter' && event.key !== ' ')) return;
+        event.preventDefault();
+        toggleDetails(event);
+      });
       body.appendChild(row);
     });
     if (empty) empty.hidden = currentTransactions.length !== 0;
@@ -602,7 +623,7 @@
   }
 
   async function loadFinancialData() {
-    const [accountsResult,transactionsResult]=await Promise.all([
+    const [accountsResult,transactionsResult,recurringResult]=await Promise.all([
       client.from('financial_accounts')
         .select('id,household_id,owner_member_id,name,account_type,currency,opening_balance,is_active,created_at')
         .eq('household_id',currentHousehold.id)
@@ -610,12 +631,18 @@
       client.from('financial_transactions')
         .select('id,household_id,owner_member_id,account_id,transaction_type,amount,currency,description,category,transaction_date,transfer_group_id,created_by,created_at,updated_at')
         .eq('household_id',currentHousehold.id)
-        .order('transaction_date',{ascending:false})
+        .order('transaction_date',{ascending:false}),
+      client.from('recurring_entries')
+        .select('id,owner_member_id,account_id,transaction_type,amount,currency,category,frequency,next_due_date,end_date,is_active')
+        .eq('household_id',currentHousehold.id)
+        .eq('is_active',true)
     ]);
     if(accountsResult.error)throw accountsResult.error;
     if(transactionsResult.error)throw transactionsResult.error;
+    if(recurringResult.error)throw recurringResult.error;
     currentAccounts=accountsResult.data||[];
     currentTransactions=transactionsResult.data||[];
+    currentRecurring=recurringResult.data||[];
     populateAccountSelects();
     renderAccounts();
     renderTransactions();
@@ -623,6 +650,11 @@
     renderExpenseChart();
     window.VELOVI_FINANCE_CHART = renderExpenseChart;
     renderForecastControls();
+    window.VELOVI_REFRESH_FINANCIAL_DATA = loadFinancialData;
+    window.dispatchEvent(new CustomEvent('velovi:financial-data-loaded', { detail: {
+      client, user: currentUser, household: currentHousehold, membership: currentMembership,
+      members: currentMembers, accounts: currentAccounts, transactions: currentTransactions, recurring: currentRecurring
+    }}));
   }
   function openAccountDialog(account=null) {
     const dialog=$('accountDialog'), form=$('accountForm');
@@ -638,6 +670,15 @@
     const save=$('saveAccount');if(save)save.textContent=account?'حفظ التعديلات':'حفظ الحساب';
     dialog.showModal();
   }
+  $('toggleAccountOpeningBalanceSign')?.addEventListener('click', () => {
+    const input = $('accountOpeningBalance');
+    if (!input) return;
+    const value = parseMoney(input.value);
+    if (!Number.isFinite(value)) { input.focus(); return; }
+    input.value = value < 0 ? String(Math.abs(value)) : String(-Math.abs(value));
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.focus();
+  });
   async function saveAccount(event) {
     event.preventDefault();
     const accountId=$('accountDialog').dataset.accountId||'';
@@ -835,6 +876,46 @@
       estimates[type]+=estimate;
       patterns.push({category,type,estimate,pattern,months:active.length,frequency:active.length/monthKeys.length});
     }
+    // Replace historical category estimates with actual recurring schedules where configured.
+    const adjustments=new Map(), recurringKeys=new Set(), recurringTotals={income:0,expense:0};
+    const firstMonth=new Date(now.getFullYear(),now.getMonth(),1);
+    const horizon=new Date(now.getFullYear(),now.getMonth()+monthsCount,1);
+    const addAdjustment=(month,type,amount)=>{
+      const key=month.getFullYear()+'-'+String(month.getMonth()+1).padStart(2,'0');
+      const signed=type==='income'?amount:-amount;
+      adjustments.set(key,(adjustments.get(key)||0)+signed);
+    };
+    const advanceDueDate=(date,frequency)=>{
+      const d=new Date(date.getFullYear(),date.getMonth(),date.getDate(),12);
+      if(frequency==='weekly')d.setDate(d.getDate()+7);
+      else {
+        const months=frequency==='quarterly'?3:frequency==='yearly'?12:1;
+        const day=d.getDate(),target=new Date(d.getFullYear(),d.getMonth()+months,1,12);
+        const last=new Date(target.getFullYear(),target.getMonth()+1,0).getDate();
+        target.setDate(Math.min(day,last));
+        return target;
+      }
+      return d;
+    };
+    for(const entry of currentRecurring.filter(item=>item.currency===currency&&['income','expense'].includes(item.transaction_type))){
+      const key=entry.transaction_type+'|'+(entry.category||'غير مصنف');
+      if(!recurringKeys.has(key)){
+        const historical=patterns.find(item=>item.type+'|'+item.category===key);
+        if(historical){estimates[entry.transaction_type]-=historical.estimate;historical.pattern='مجدول';historical.estimate=0;}
+        recurringKeys.add(key);
+      }
+      let due=new Date(String(entry.next_due_date)+'T12:00:00'),guard=0;
+      while(due<firstMonth&&guard++<1200)due=advanceDueDate(due,entry.frequency);
+      guard=0;
+      while(due<horizon&&guard++<1200&&(!entry.end_date||due.toISOString().slice(0,10)<=entry.end_date)){
+        addAdjustment(due,entry.transaction_type,Number(entry.amount));
+        recurringTotals[entry.transaction_type]+=Number(entry.amount);
+        due=advanceDueDate(due,entry.frequency);
+      }
+    }
+    // Future-dated one-off transactions are included in the month they are scheduled for.
+    currentTransactions.filter(tx=>tx.currency===currency&&tx.transaction_date>now.toISOString().slice(0,10)&&['income','expense'].includes(tx.transaction_type))
+      .forEach(tx=>{const d=new Date(String(tx.transaction_date)+'T12:00:00');if(d<horizon)addAdjustment(d,tx.transaction_type,Number(tx.amount));});
     const net=estimates.income-estimates.expense;
     const monthlyNet=monthKeys.map(month=>{
       const rows=transactions.filter(tx=>String(tx.transaction_date).startsWith(month));
@@ -846,11 +927,18 @@
     const annual=Number($('annualReturn')?.value||0);
     const rate=Math.pow(1+annual/100,1/12)-1;
     let projected=accountBalance;
-    for(let i=0;i<monthsCount;i++)projected=projected*(1+rate)+net;
+    for(let i=0;i<monthsCount;i++){
+      const projectionMonth=new Date(now.getFullYear(),now.getMonth()+i,1);
+      const monthKey=projectionMonth.getFullYear()+'-'+String(projectionMonth.getMonth()+1).padStart(2,'0');
+      projected=projected*(1+rate)+net+(adjustments.get(monthKey)||0);
+    }
+    const displayIncome=estimates.income+recurringTotals.income/monthsCount;
+    const displayExpense=estimates.expense+recurringTotals.expense/monthsCount;
+    const displayNet=displayIncome-displayExpense;
     const confidence=transactions.length>=18&&monthKeys.filter(month=>transactions.some(tx=>String(tx.transaction_date).startsWith(month))).length>=5?'متوسطة إلى جيدة':transactions.length>=6?'متوسطة':'منخفضة';
     const result=$('smartForecastResult');result.replaceChildren();
     const title=document.createElement('b');title.textContent='التوقع بعد '+monthsCount+' شهراً: '+formatMoney(projected,currency);
-    const details=document.createElement('p');details.textContent='الرصيد الحالي المحسوب: '+formatMoney(accountBalance,currency)+' · دخل شهري مقدّر: '+formatMoney(estimates.income,currency)+' · مصروف شهري مقدّر: '+formatMoney(estimates.expense,currency)+' · صافي شهري متوقع: '+formatMoney(net,currency);
+    const details=document.createElement('p');details.textContent='الرصيد الحالي المحسوب: '+formatMoney(accountBalance,currency)+' · دخل شهري مقدّر: '+formatMoney(displayIncome,currency)+' · مصروف شهري مقدّر: '+formatMoney(displayExpense,currency)+' · صافي شهري متوقع: '+formatMoney(displayNet,currency);
     const confidenceLine=document.createElement('p');confidenceLine.className='small muted';confidenceLine.textContent='مستوى الثقة: '+confidence+' · تذبذب صافي الأشهر الستة: '+formatMoney(volatility,currency)+'. التوقع يستخدم الوسيط للبنود المنتظمة والمتوسط المرجح للبنود المتغيرة.';
     const breakdown=document.createElement('ul');breakdown.className='forecast-patterns';
     patterns.forEach(item=>{const li=document.createElement('li');li.textContent=item.category+' — '+(item.type==='income'?'إيراد':'مصروف')+' · '+item.pattern+' · ظهر في '+item.months+' من 6 أشهر · '+formatMoney(item.estimate,currency)+' شهرياً';breakdown.appendChild(li);});
@@ -896,7 +984,44 @@
     setMessage('', false);
   }
 
+  const IDLE_TIMEOUT_MS = 15 * 60 * 1000;
+  const IDLE_WARNING_MS = 60 * 1000;
+  let idleTimer = null, idleWarningTimer = null, lastUserActivity = Date.now(), idleWarningShown = false;
+  function clearIdleTimers() {
+    if (idleTimer) window.clearTimeout(idleTimer);
+    if (idleWarningTimer) window.clearTimeout(idleWarningTimer);
+    idleTimer = null; idleWarningTimer = null; idleWarningShown = false;
+  }
+  function scheduleIdleSignOut() {
+    clearIdleTimers();
+    if (!currentUser || !client) return;
+    const remaining = Math.max(0, IDLE_TIMEOUT_MS - (Date.now() - lastUserActivity));
+    if (remaining <= 0) { autoSignOutForInactivity(); return; }
+    idleWarningTimer = window.setTimeout(() => {
+      if (!currentUser) return;
+      idleWarningShown = true;
+      setMessage('ستنتهي جلستك بسبب عدم النشاط خلال دقيقة. استخدم التطبيق للمتابعة.', false);
+    }, Math.max(0, remaining - IDLE_WARNING_MS));
+    idleTimer = window.setTimeout(autoSignOutForInactivity, remaining);
+  }
+  async function autoSignOutForInactivity() {
+    if (!currentUser || !client) return;
+    clearIdleTimers();
+    try { await client.auth.signOut({ scope: 'local' }); }
+    catch (error) { console.warn('Velovi idle sign-out:', error); }
+    currentUser = null; currentMembership = null; currentHousehold = null;
+    if ($('signOutButton')) $('signOutButton').hidden = true;
+    showGate('login');
+    setMessage('تم تسجيل خروجك تلقائياً بعد 15 دقيقة من عدم النشاط لحماية حسابك.', false);
+  }
+  function noteUserActivity() {
+    if (!currentUser) return;
+    lastUserActivity = Date.now();
+    if (idleWarningShown) setMessage('', false);
+    scheduleIdleSignOut();
+  }
   async function signOut() {
+    clearIdleTimers();
     const result = await client.auth.signOut();
     if (result.error) setMessage(result.error.message, true);
     currentUser = null;
@@ -909,12 +1034,14 @@
 
   async function handleSession(session) {
     if (!session || !session.user) {
+      clearIdleTimers();
       currentUser = null;
       showGate('login');
       return;
     }
     if (workspaceLoadPromise) return workspaceLoadPromise;
     currentUser = session.user;
+    if (!idleTimer) { lastUserActivity = Date.now(); scheduleIdleSignOut(); }
     if (isInviteSetupFlow() && !inviteSetupCompleted) {
       showGate('invite-setup');
       if ($('invitePasswordStatus')) $('invitePasswordStatus').textContent = 'أنشئ كلمة مرور جديدة لإكمال تفعيل حسابك.';
@@ -1411,6 +1538,13 @@
   }
 
   function initialize() {
+    ['pointerdown','keydown','touchstart','scroll'].forEach(type => document.addEventListener(type, noteUserActivity, { passive: true }));
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && currentUser) {
+        if (Date.now() - lastUserActivity >= IDLE_TIMEOUT_MS) autoSignOutForInactivity();
+        else scheduleIdleSignOut();
+      }
+    });
     if (!window.supabase || typeof window.supabase.createClient !== 'function') {
       showGate('login');
       return setMessage('تعذر تحميل مكتبة الاتصال بـ Supabase. تحقق من اتصال الإنترنت ثم أعد تحميل الصفحة.', true);
@@ -1491,6 +1625,7 @@
     });
 
     client.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) { lastUserActivity = Date.now(); scheduleIdleSignOut(); } else clearIdleTimers();
       window.setTimeout(() => handleSession(session), 0);
     });
     client.auth.getSession().then(({ data, error }) => {
@@ -1501,6 +1636,7 @@
 
   document.addEventListener('velovi:language-changed', () => {
     if (!currentHousehold) return;
+    renderTransactions();
     renderAccounts();
     updateDashboard();
     renderExpenseChart();
