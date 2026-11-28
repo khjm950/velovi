@@ -470,7 +470,7 @@
       badge.className='pill '+(tx.transaction_type==='income'?'green':tx.transaction_type==='expense'?'red':'');
       badge.textContent=tx.transaction_type==='income'?'إيراد':tx.transaction_type==='expense'?'مصروف':'تحويل';
       typeCell.appendChild(badge);
-      const categoryCell=document.createElement('td'); categoryCell.dataset.label=txLabel('التصنيف'); categoryCell.textContent=tx.category || 'غير مصنف';
+      const categoryCell=document.createElement('td'); categoryCell.dataset.label=txLabel('التصنيف'); const categoryChip=document.createElement('span'); categoryChip.className='tx-category-chip'; categoryChip.textContent=tx.category || txLabel('غير مصنف'); categoryCell.appendChild(categoryChip);
       const descCell=document.createElement('td'); descCell.dataset.label=txLabel('الوصف'); const descText=document.createElement('span'); descText.textContent=tx.description || '—'; descText.setAttribute('translate','no'); descCell.appendChild(descText);
       const dateCell=document.createElement('td'); dateCell.dataset.label=txLabel('التاريخ');
       const date=new Date(String(tx.transaction_date)+'T12:00:00');
