@@ -451,6 +451,11 @@
     const sorted = [...currentTransactions].sort((a,b)=>String(b.transaction_date).localeCompare(String(a.transaction_date)));
     sorted.forEach(tx => {
       const row = document.createElement('tr');
+      row.classList.add('transaction-card-row');
+      row.tabIndex = 0;
+      row.setAttribute('aria-expanded', 'false');
+      row.dataset.expandLabel = window.VELOVI_I18N?.t?.('اضغط لعرض التفاصيل') || 'اضغط لعرض التفاصيل';
+      row.dataset.collapseLabel = window.VELOVI_I18N?.t?.('اضغط لإخفاء التفاصيل') || 'اضغط لإخفاء التفاصيل';
       row.dataset.type = tx.transaction_type === 'income' ? 'income' : tx.transaction_type === 'expense' ? 'expense' : 'other';
       row.dataset.category = tx.category || 'غير مصنف';
       row.dataset.description = tx.description || '';
@@ -496,6 +501,19 @@
       }
       if (actions.childElementCount) selectCell.appendChild(actions);
       row.append(typeCell,categoryCell,descCell,dateCell,amountCell,selectCell);
+      const toggleDetails = event => {
+        if (!window.matchMedia('(max-width: 700px)').matches) return;
+        if (event.target.closest('button,input,select,a,label')) return;
+        const expanded = !row.classList.contains('is-expanded');
+        row.classList.toggle('is-expanded', expanded);
+        row.setAttribute('aria-expanded', String(expanded));
+      };
+      row.addEventListener('click', toggleDetails);
+      row.addEventListener('keydown', event => {
+        if (event.target !== row || (event.key !== 'Enter' && event.key !== ' ')) return;
+        event.preventDefault();
+        toggleDetails(event);
+      });
       body.appendChild(row);
     });
     if (empty) empty.hidden = currentTransactions.length !== 0;
