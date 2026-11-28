@@ -1471,18 +1471,26 @@
   });
 
 
-  // Normalize already-English source text as well as Arabic source text.
-  // Some static screens and dynamically generated controls use English literals.
-  // Reuse reviewed translations for the same Arabic source key.
-  for (const lang of ['de', 'fr', 'es']) {
-    const target = dictionaries[lang];
-    for (const [sourceKey, englishValue] of Object.entries(dictionaries.en)) {
-      if (typeof englishValue !== 'string' || !englishValue.trim()) continue;
+  // Normalize source text generated in any supported language. Some dynamic
+  // panels are initially rendered using the active locale; build unambiguous
+  // aliases so changing the language later translates those existing nodes too.
+  for (const targetLang of ['de', 'fr', 'es']) {
+    const target = dictionaries[targetLang];
+    const aliases = new Map();
+    const ambiguous = new Set();
+    for (const sourceKey of Object.keys(dictionaries.en)) {
       const translated = target[sourceKey];
-      if (typeof translated === 'string' && translated.trim() &&
-          !Object.prototype.hasOwnProperty.call(target, englishValue)) {
-        target[englishValue] = translated;
+      if (typeof translated !== 'string' || !translated.trim()) continue;
+      for (const sourceLang of ['de', 'en', 'fr', 'es']) {
+        const alias = dictionaries[sourceLang][sourceKey];
+        if (typeof alias !== 'string' || !alias.trim() || alias === translated ||
+            Object.prototype.hasOwnProperty.call(target, alias)) continue;
+        if (aliases.has(alias) && aliases.get(alias) !== translated) ambiguous.add(alias);
+        else aliases.set(alias, translated);
       }
+    }
+    for (const [alias, translated] of aliases) {
+      if (!ambiguous.has(alias)) target[alias] = translated;
     }
   }
 
