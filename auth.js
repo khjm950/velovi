@@ -396,7 +396,7 @@
       stat.append(label,amount,note); stats.appendChild(stat);
     }
   }
-  function bulkText(ar) { return ar; }
+  function bulkText(ar) { return window.VELOVI_I18N?.t?.(ar) || ar; }
   function updateBulkSelectionUi() {
     const all = [...document.querySelectorAll('#txRows .tx-select')];
     const visible = all.filter(box => !box.closest('tr')?.hidden);
