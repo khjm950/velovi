@@ -1,5 +1,5 @@
 'use strict';
-const CACHE_NAME = 'velovi-shell-v32';
+const CACHE_NAME = 'velovi-shell-v33';
 const APP_SHELL = ['./','./index.html','./styles.css','./app.js','./auth.js','./planning.js','./guide.js','./capacitor-bridge.js','./capacitor-native.js','./i18n.js','./supabase-config.js','./manifest.webmanifest','./install.js','./icon-192.png','./icon-512.png'];
 const APP_FILES = new Set(APP_SHELL.map(path => new URL(path, self.registration.scope).href));
 
