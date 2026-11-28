@@ -1095,6 +1095,95 @@
   };
   Object.entries(coverageTranslations).forEach(([lang, entries]) => Object.assign(dictionaries[lang], entries));
 
+
+  const remainingDynamicTranslations = {
+    en: {
+      'انتهت مهلة الاتصال أثناء ':'Connection timed out while ',' · عضوية غير نشطة':' · inactive membership','إضافة ':'Add ','　 تعديل ':'　 Edit ','　 حذف ':'　 Delete ','　 رؤية حسابات الآخرين ':'　 View other members’ accounts',' · المدير':' · administrator',
+      'تعذر حفظ الحركات: ':'Could not save transactions: ','تم حفظ ':'Saved ','التوقع بعد ':'Forecast after ','الرصيد الحالي المحسوب: ':'Calculated current balance: ',
+      ' · دخل شهري مقدّر: ':' · estimated monthly income: ',' · مصروف شهري مقدّر: ':' · estimated monthly expenses: ',' · صافي شهري متوقع: ':' · expected monthly net: ',
+      'مستوى الثقة: ':'Confidence level: ',' · تذبذب صافي الأشهر الستة: ':' · six-month net variation: ',' · ظهر في ':' · appeared in ',' من 6 أشهر · ':' of 6 months · ',' شهرياً':' per month',
+      'تعذر التحقق من مستوى المصادقة: ':'Could not verify authentication level: ','تعذر تحميل بيانات الأسرة: ':'Could not load family data: ','تعذر إنشاء الأسرة: ':'Could not create family: ',
+      'تم إنشاء الأسرة، لكن تعذر تحميلها: ':'The family was created, but could not be loaded: ','تعذر إنشاء رابط الدعوة: ':'Could not create invitation link: ',
+      'مرحباً ':'Hello ', '،\\n\\nتمت دعوتك للانضمام إلى الأسرة في Velovi لإدارة الشؤون المالية. افتح الرابط التالي لتفعيل حسابك والانضمام:\\n':'،\\n\\nYou are invited to join a family in Velovi to manage family finances. Open the following link to activate your account and join:\\n',
+      '\\n\\nإذا لم تكن تتوقع هذه الدعوة فتجاهل الرسالة.':'\\n\\nIf you were not expecting this invitation, please ignore this message.',
+      'تعذرت إضافة العضو: ':'Could not add member: ','تعذر تحديث الصلاحيات: ':'Could not update permissions: ','تأكيد إلغاء عضوية ':'Confirm removal of membership for ',
+      'تعذرت إزالة العضو: ':'Could not remove member: ','تعذر قراءة حالة المصادقة الثنائية: ':'Could not read two-factor authentication status: ','تعذر بدء الإعداد: ':'Could not start setup: ',
+      'تعذر إلغاء المصادقة الثنائية: ':'Could not disable two-factor authentication: ',' — مستوفى':' — satisfied',' — غير مستوفى':' — not satisfied',
+      'تعذر الاتصال لحفظ كلمة المرور: ':'Could not connect to save the password: ','تعذر حفظ كلمة المرور: ':'Could not save password: ','تعذر تحديث كلمة المرور: ':'Could not update password: ',
+      'تعذر إرسال طلب تغيير البريد: ':'Could not send email change request: ','تعذر إنهاء الجلسات الأخرى: ':'Could not sign out other sessions: ','تعذر إكمال حذف الحساب: ':'Could not complete account deletion: ',
+      'تحذير: حذف العضو ':'Warning: permanently deleting member ',' وبياناته نهائياً\\n\\nسيتم حذف ':' and their data\\n\\nThis will delete ',
+      ' حساب مالي و':' financial account(s) and ',' حركة مالية مرتبطة به من هذه الأسرة. هذا الإجراء نهائي ولا يمكن التراجع عنه، ولن يمكن استعادة هذه البيانات.\\n\\nإذا كنت تريد إيقاف عضويته فقط مع الاحتفاظ ببياناته، استخدم «إلغاء عضوية العضو» بدلاً من ذلك.\\n\\nهل أنت متأكد من الحذف النهائي؟':' financial transaction(s) linked to this member in this family. This action is permanent and cannot be undone.\\n\\nTo stop membership while keeping the data, use “Remove member from family” instead.\\n\\nAre you sure you want to permanently delete this member?',
+      'تعذر الحذف النهائي: ':'Could not permanently delete: ',' بقي حساب الدخول فعالاً لأنه ما زال عضواً في أسرة أخرى.':' Their sign-in account remains active because they still belong to another family.',
+      'تم حذف بيانات العضو نهائياً من هذه الأسرة: ':'The member’s data was permanently deleted from this family: ',' حركة و':' transaction(s) and ',' حساب.': ' account(s).',
+      'تعذر قراءة جلسة الدخول: ':'Could not read sign-in session: ','الرصيد الحسابي الافتراضي بعد ${months} شهراً: ':'Estimated account balance after ${months} months: ',
+      ' من ':' of ',' حركة':' transaction(s)','قراءة صفحة PDF ':'Reading PDF page ','اكتملت قراءة الصفحة ':'Finished reading page ','الخطوة ':'Step ',' من ':' of '
+    },
+    de: {
+      'انتهت مهلة الاتصال أثناء ':'Zeitüberschreitung bei ',' · عضوية غير نشطة':' · inaktive Mitgliedschaft','إضافة ':'Hinzufügen ','　 تعديل ':'　 Bearbeiten ','　 حذف ':'　 Löschen ','　 رؤية حسابات الآخرين ':'　 Konten anderer Mitglieder ansehen',' · المدير':' · Administrator',
+      'تعذر حفظ الحركات: ':'Buchungen konnten nicht gespeichert werden: ','تم حفظ ':'Gespeichert: ','التوقع بعد ':'Prognose nach ','الرصيد الحالي المحسوب: ':'Berechneter aktueller Kontostand: ',
+      ' · دخل شهري مقدّر: ':' · geschätzte monatliche Einnahmen: ',' · مصروف شهري مقدّر: ':' · geschätzte monatliche Ausgaben: ',' · صافي شهري متوقع: ':' · erwarteter monatlicher Saldo: ',
+      'مستوى الثقة: ':'Konfidenzniveau: ',' · تذبذب صافي الأشهر الستة: ':' · Schwankung des Saldos der letzten sechs Monate: ',' · ظهر في ':' · enthalten in ',' من 6 أشهر · ':' von 6 Monaten · ',' شهرياً':' monatlich',
+      'تعذر التحقق من مستوى المصادقة: ':'Authentifizierungsstufe konnte nicht überprüft werden: ','تعذر تحميل بيانات الأسرة: ':'Familiendaten konnten nicht geladen werden: ','تعذر إنشاء الأسرة: ':'Familie konnte nicht erstellt werden: ',
+      'تم إنشاء الأسرة، لكن تعذر تحميلها: ':'Die Familie wurde erstellt, konnte aber nicht geladen werden: ','تعذر إنشاء رابط الدعوة: ':'Einladungslink konnte nicht erstellt werden: ',
+      'مرحباً ':'Hallo ', '،\\n\\nتمت دعوتك للانضمام إلى الأسرة في Velovi لإدارة الشؤون المالية. افتح الرابط التالي لتفعيل حسابك والانضمام:\\n':'،\\n\\nSie wurden eingeladen, einer Familie in Velovi zur Verwaltung der Finanzen beizutreten. Öffnen Sie den folgenden Link, um Ihr Konto zu aktivieren:\\n',
+      '\\n\\nإذا لم تكن تتوقع هذه الدعوة فتجاهل الرسالة.':'\\n\\nWenn Sie diese Einladung nicht erwarten, ignorieren Sie bitte diese Nachricht.',
+      'تعذرت إضافة العضو: ':'Mitglied konnte nicht hinzugefügt werden: ','تعذر تحديث الصلاحيات: ':'Berechtigungen konnten nicht aktualisiert werden: ','تأكيد إلغاء عضوية ':'Beendigung der Mitgliedschaft bestätigen: ',
+      'تعذرت إزالة العضو: ':'Mitglied konnte nicht entfernt werden: ','تعذر قراءة حالة المصادقة الثنائية: ':'Status der Zwei-Faktor-Authentifizierung konnte nicht gelesen werden: ','تعذر بدء الإعداد: ':'Einrichtung konnte nicht gestartet werden: ',
+      'تعذر إلغاء المصادقة الثنائية: ':'Zwei-Faktor-Authentifizierung konnte nicht deaktiviert werden: ',' — مستوفى':' — erfüllt',' — غير مستوفى':' — nicht erfüllt',
+      'تعذر الاتصال لحفظ كلمة المرور: ':'Verbindung zum Speichern des Passworts fehlgeschlagen: ','تعذر حفظ كلمة المرور: ':'Passwort konnte nicht gespeichert werden: ','تعذر تحديث كلمة المرور: ':'Passwort konnte nicht aktualisiert werden: ',
+      'تعذر إرسال طلب تغيير البريد: ':'E-Mail-Änderungsanfrage konnte nicht gesendet werden: ','تعذر إنهاء الجلسات الأخرى: ':'Andere Sitzungen konnten nicht beendet werden: ','تعذر إكمال حذف الحساب: ':'Kontolöschung konnte nicht abgeschlossen werden: ',
+      'تحذير: حذف العضو ':'Warnung: Mitglied endgültig löschen: ',' وبياناته نهائياً\\n\\nسيتم حذف ':' und seine Daten\\n\\nFolgendes wird gelöscht: ',
+      ' حساب مالي و':' Finanzkonto/-konten und ',' حركة مالية مرتبطة به من هذه الأسرة. هذا الإجراء نهائي ولا يمكن التراجع عنه، ولن يمكن استعادة هذه البيانات.\\n\\nإذا كنت تريد إيقاف عضويته فقط مع الاحتفاظ ببياناته، استخدم «إلغاء عضوية العضو» بدلاً من ذلك.\\n\\nهل أنت متأكد من الحذف النهائي؟':' Finanzbuchung(en) dieser Familie. Dieser Vorgang ist endgültig und kann nicht rückgängig gemacht werden.\\n\\nWenn Sie nur die Mitgliedschaft beenden und die Daten behalten möchten, verwenden Sie stattdessen „Mitgliedschaft beenden“.\\n\\nMöchten Sie wirklich endgültig löschen?',
+      'تعذر الحذف النهائي: ':'Endgültiges Löschen fehlgeschlagen: ',' بقي حساب الدخول فعالاً لأنه ما زال عضواً في أسرة أخرى.':' Das Anmeldekonto bleibt aktiv, da das Mitglied noch einer anderen Familie angehört.',
+      'تم حذف بيانات العضو نهائياً من هذه الأسرة: ':'Die Daten des Mitglieds wurden endgültig aus dieser Familie gelöscht: ',' حركة و':' Buchung(en) und ',' حساب.':' Konto/Konten.',
+      'تعذر قراءة جلسة الدخول: ':'Anmeldesitzung konnte nicht gelesen werden: ','الرصيد الحسابي الافتراضي بعد ${months} شهراً: ':'Geschätzter Kontostand nach ${months} Monaten: ',
+      ' من ':' von ',' حركة':' Buchung(en)','قراءة صفحة PDF ':'PDF-Seite wird gelesen ','اكتملت قراءة الصفحة ':'Seite gelesen ','الخطوة ':'Schritt ',' من ':' von '
+    },
+    fr: {
+      'انتهت مهلة الاتصال أثناء ':'Délai de connexion dépassé pendant ',' · عضوية غير نشطة':' · adhésion inactive','إضافة ':'Ajouter ','　 تعديل ':'　 Modifier ','　 حذف ':'　 Supprimer ','　 رؤية حسابات الآخرين ':'　 Voir les comptes des autres membres',' · المدير':' · administrateur',
+      'تعذر حفظ الحركات: ':'Impossible d’enregistrer les opérations : ','تم حفظ ':'Enregistré : ','التوقع بعد ':'Prévision après ','الرصيد الحالي المحسوب: ':'Solde actuel calculé : ',
+      ' · دخل شهري مقدّر: ':' · revenus mensuels estimés : ',' · مصروف شهري مقدّر: ':' · dépenses mensuelles estimées : ',' · صافي شهري متوقع: ':' · solde mensuel prévu : ',
+      'مستوى الثقة: ':'Niveau de confiance : ',' · تذبذب صافي الأشهر الستة: ':' · variation du solde sur six mois : ',' · ظهر في ':' · présent dans ',' من 6 أشهر · ':' sur 6 mois · ',' شهرياً':' par mois',
+      'تعذر التحقق من مستوى المصادقة: ':'Impossible de vérifier le niveau d’authentification : ','تعذر تحميل بيانات الأسرة: ':'Impossible de charger les données familiales : ','تعذر إنشاء الأسرة: ':'Impossible de créer la famille : ',
+      'تم إنشاء الأسرة، لكن تعذر تحميلها: ':'La famille a été créée, mais son chargement a échoué : ','تعذر إنشاء رابط الدعوة: ':'Impossible de créer le lien d’invitation : ',
+      'مرحباً ':'Bonjour ', '،\\n\\nتمت دعوتك للانضمام إلى الأسرة في Velovi لإدارة الشؤون المالية. افتح الرابط التالي لتفعيل حسابك والانضمام:\\n':'،\\n\\nVous êtes invité à rejoindre une famille sur Velovi pour gérer les finances. Ouvrez le lien suivant pour activer votre compte et rejoindre la famille :\\n',
+      '\\n\\nإذا لم تكن تتوقع هذه الدعوة فتجاهل الرسالة.':'\\n\\nSi vous n’attendiez pas cette invitation, veuillez ignorer ce message.',
+      'تعذرت إضافة العضو: ':'Impossible d’ajouter le membre : ','تعذر تحديث الصلاحيات: ':'Impossible de mettre à jour les autorisations : ','تأكيد إلغاء عضوية ':'Confirmer le retrait du membre : ',
+      'تعذرت إزالة العضو: ':'Impossible de retirer le membre : ','تعذر قراءة حالة المصادقة الثنائية: ':'Impossible de lire l’état de l’authentification à deux facteurs : ','تعذر بدء الإعداد: ':'Impossible de démarrer la configuration : ',
+      'تعذر إلغاء المصادقة الثنائية: ':'Impossible de désactiver l’authentification à deux facteurs : ',' — مستوفى':' — satisfait',' — غير مستوفى':' — non satisfait',
+      'تعذر الاتصال لحفظ كلمة المرور: ':'Connexion impossible pour enregistrer le mot de passe : ','تعذر حفظ كلمة المرور: ':'Impossible d’enregistrer le mot de passe : ','تعذر تحديث كلمة المرور: ':'Impossible de mettre à jour le mot de passe : ',
+      'تعذر إرسال طلب تغيير البريد: ':'Impossible d’envoyer la demande de changement d’e-mail : ','تعذر إنهاء الجلسات الأخرى: ':'Impossible de fermer les autres sessions : ','تعذر إكمال حذف الحساب: ':'Impossible de terminer la suppression du compte : ',
+      'تحذير: حذف العضو ':'Attention : suppression définitive du membre ',' وبياناته نهائياً\\n\\nسيتم حذف ':' et de ses données\\n\\nLes éléments suivants seront supprimés : ',
+      ' حساب مالي و':' compte(s) financier(s) et ',' حركة مالية مرتبطة به من هذه الأسرة. هذا الإجراء نهائي ولا يمكن التراجع عنه، ولن يمكن استعادة هذه البيانات.\\n\\nإذا كنت تريد إيقاف عضويته فقط مع الاحتفاظ ببياناته، استخدم «إلغاء عضوية العضو» بدلاً من ذلك.\\n\\nهل أنت متأكد من الحذف النهائي؟':' opération(s) financière(s) liées à ce membre dans cette famille. Cette action est définitive et irréversible.\\n\\nPour retirer uniquement son adhésion tout en conservant ses données, utilisez plutôt « Retirer le membre de la famille ».\\n\\nConfirmez-vous la suppression définitive ?',
+      'تعذر الحذف النهائي: ':'Échec de la suppression définitive : ',' بقي حساب الدخول فعالاً لأنه ما زال عضواً في أسرة أخرى.':' Son compte de connexion reste actif car il appartient encore à une autre famille.',
+      'تم حذف بيانات العضو نهائياً من هذه الأسرة: ':'Les données du membre ont été définitivement supprimées de cette famille : ',' حركة و':' opération(s) et ',' حساب.':' compte(s).',
+      'تعذر قراءة جلسة الدخول: ':'Impossible de lire la session de connexion : ','الرصيد الحسابي الافتراضي بعد ${months} شهراً: ':'Solde estimé après ${months} mois : ',
+      ' من ':' sur ',' حركة':' opération(s)','قراءة صفحة PDF ':'Lecture de la page PDF ','اكتملت قراءة الصفحة ':'Lecture de la page terminée ','الخطوة ':'Étape ',' من ':' sur '
+    },
+    es: {
+      'انتهت مهلة الاتصال أثناء ':'La conexión agotó el tiempo durante ',' · عضوية غير نشطة':' · membresía inactiva','إضافة ':'Añadir ','　 تعديل ':'　 Editar ','　 حذف ':'　 Eliminar ','　 رؤية حسابات الآخرين ':'　 Ver cuentas de otros miembros',' · المدير':' · administrador',
+      'تعذر حفظ الحركات: ':'No se pudieron guardar los movimientos: ','تم حفظ ':'Guardado: ','التوقع بعد ':'Previsión después de ','الرصيد الحالي المحسوب: ':'Saldo actual calculado: ',
+      ' · دخل شهري مقدّر: ':' · ingresos mensuales estimados: ',' · مصروف شهري مقدّر: ':' · gastos mensuales estimados: ',' · صافي شهري متوقع: ':' · saldo mensual previsto: ',
+      'مستوى الثقة: ':'Nivel de confianza: ',' · تذبذب صافي الأشهر الستة: ':' · variación del saldo de los últimos seis meses: ',' · ظهر في ':' · aparece en ',' من 6 أشهر · ':' de 6 meses · ',' شهرياً':' al mes',
+      'تعذر التحقق من مستوى المصادقة: ':'No se pudo verificar el nivel de autenticación: ','تعذر تحميل بيانات الأسرة: ':'No se pudieron cargar los datos familiares: ','تعذر إنشاء الأسرة: ':'No se pudo crear la familia: ',
+      'تم إنشاء الأسرة، لكن تعذر تحميلها: ':'La familia se creó, pero no se pudieron cargar sus datos: ','تعذر إنشاء رابط الدعوة: ':'No se pudo crear el enlace de invitación: ',
+      'مرحباً ':'Hola ', '،\\n\\nتمت دعوتك للانضمام إلى الأسرة في Velovi لإدارة الشؤون المالية. افتح الرابط التالي لتفعيل حسابك والانضمام:\\n':'،\\n\\nTe han invitado a unirte a una familia en Velovi para gestionar las finanzas. Abre el siguiente enlace para activar tu cuenta y unirte:\\n',
+      '\\n\\nإذا لم تكن تتوقع هذه الدعوة فتجاهل الرسالة.':'\\n\\nSi no esperabas esta invitación, ignora este mensaje.',
+      'تعذرت إضافة العضو: ':'No se pudo añadir al miembro: ','تعذر تحديث الصلاحيات: ':'No se pudieron actualizar los permisos: ','تأكيد إلغاء عضوية ':'Confirmar la retirada del miembro: ',
+      'تعذرت إزالة العضو: ':'No se pudo retirar al miembro: ','تعذر قراءة حالة المصادقة الثنائية: ':'No se pudo leer el estado de la autenticación en dos pasos: ','تعذر بدء الإعداد: ':'No se pudo iniciar la configuración: ',
+      'تعذر إلغاء المصادقة الثنائية: ':'No se pudo desactivar la autenticación en dos pasos: ',' — مستوفى':' — cumplido',' — غير مستوفى':' — no cumplido',
+      'تعذر الاتصال لحفظ كلمة المرور: ':'No se pudo conectar para guardar la contraseña: ','تعذر حفظ كلمة المرور: ':'No se pudo guardar la contraseña: ','تعذر تحديث كلمة المرور: ':'No se pudo actualizar la contraseña: ',
+      'تعذر إرسال طلب تغيير البريد: ':'No se pudo enviar la solicitud de cambio de correo: ','تعذر إنهاء الجلسات الأخرى: ':'No se pudieron cerrar las otras sesiones: ','تعذر إكمال حذف الحساب: ':'No se pudo completar la eliminación de la cuenta: ',
+      'تحذير: حذف العضو ':'Aviso: eliminación permanente del miembro ',' وبياناته نهائياً\\n\\nسيتم حذف ':' y sus datos\\n\\nSe eliminarán ',
+      ' حساب مالي و':' cuenta(s) financiera(s) y ',' حركة مالية مرتبطة به من هذه الأسرة. هذا الإجراء نهائي ولا يمكن التراجع عنه، ولن يمكن استعادة هذه البيانات.\\n\\nإذا كنت تريد إيقاف عضويته فقط مع الاحتفاظ ببياناته، استخدم «إلغاء عضوية العضو» بدلاً من ذلك.\\n\\nهل أنت متأكد من الحذف النهائي؟':' movimiento(s) financiero(s) vinculado(s) a este miembro en esta familia. Esta acción es permanente y no se puede deshacer.\\n\\nPara retirar solo su membresía y conservar sus datos, utiliza «Retirar al miembro de la familia».\\n\\n¿Confirmas la eliminación permanente?',
+      'تعذر الحذف النهائي: ':'No se pudo completar la eliminación permanente: ',' بقي حساب الدخول فعالاً لأنه ما زال عضواً في أسرة أخرى.':' Su cuenta de acceso sigue activa porque aún pertenece a otra familia.',
+      'تم حذف بيانات العضو نهائياً من هذه الأسرة: ':'Los datos del miembro se eliminaron permanentemente de esta familia: ',' حركة و':' movimiento(s) y ',' حساب.':' cuenta(s).',
+      'تعذر قراءة جلسة الدخول: ':'No se pudo leer la sesión de inicio: ','الرصيد الحسابي الافتراضي بعد ${months} شهراً: ':'Saldo estimado después de ${months} meses: ',
+      ' من ':' de ',' حركة':' movimiento(s)','قراءة صفحة PDF ':'Leyendo página PDF ','اكتملت قراءة الصفحة ':'Lectura de página completada ','الخطوة ':'Paso ',' من ':' de '
+    }
+  };
+  Object.entries(remainingDynamicTranslations).forEach(([lang, entries]) => Object.assign(dictionaries[lang], entries));
+
   const originals = new WeakMap();
   const attrOriginals = new WeakMap();
   const languageSelect = document.getElementById('languageSetting');
