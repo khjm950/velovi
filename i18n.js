@@ -677,6 +677,108 @@
   Object.entries(dueHelp).forEach(([lang, value]) => { dictionaries[lang]['لا تُسجّل الحركات تلقائياً في الخلفية؛ ستظهر المستحقات هنا ويمكنك اعتماد كل حركة، ثم يُحدّث موعدها التالي.'] = value; });
 
 
+
+  // Complete translations for the planning and transaction workflows.
+  const extendedTranslations = {
+    en: {
+      'السجل المالي':'Financial record','الحركات المالية':'Financial transactions','إيراداتك ومصروفاتك والتحويلات':'Your income, expenses, and transfers',
+      'استيراد الحركات':'Import transactions','إضافة حركة متكررة':'Add recurring transaction','سجّل الراتب أو الفاتورة أو الاشتراك، ثم راجع الاستحقاق قبل تسجيله كحركة فعلية.':'Set up a salary, bill, or subscription, then review each due item before recording it as an actual transaction.',
+      'الحساب':'Account','النوع':'Type','الوصف':'Description','التصنيف':'Category','المبلغ':'Amount','التكرار':'Frequency',
+      'أسبوعي':'Weekly','شهري':'Monthly','كل 3 أشهر':'Every 3 months','سنوي':'Yearly','موعد الاستحقاق التالي':'Next due date',
+      'تاريخ الانتهاء (اختياري)':'End date (optional)','حفظ الحركة المتكررة':'Save recurring transaction',
+      'لا تُسجّل الحركات تلقائياً؛ ستظهر المستحقات في صفحة الحركات المتكررة لتراجعها وتسجلها بنفسك.':'Transactions are not recorded automatically. Due items appear on the recurring transactions page for you to review and record.',
+      'ابحث في الحركات...':'Search transactions...','بحث في الحركات':'Search transactions','تصفية حسب نوع الحركة':'Filter by transaction type','ترتيب الحركات':'Sort transactions',
+      'كل الأنواع':'All types','الإيرادات':'Income','المصروفات':'Expenses','الأحدث':'Newest','الأقدم':'Oldest','الأعلى مبلغاً':'Highest amount','الأقل مبلغاً':'Lowest amount',
+      'الصافي للفترة':'Net for period','عدد الحركات':'Number of transactions','مسح الفلاتر':'Clear filters','حذف المحدد':'Delete selected','تحديد الكل':'Select all',
+      'تحديد الحركة':'Select transaction','اضغط لعرض التفاصيل':'Tap to view details','اضغط لإخفاء التفاصيل':'Tap to hide details',
+      'الميزانيات الشهرية':'Monthly budgets','التحكم في الإنفاق':'Spending control','حدد حداً لكل تصنيف وتابع الإنفاق الفعلي مقارنة بالميزانية.':'Set a limit for each category and track actual spending against your budget.',
+      'إضافة أو تحديث ميزانية':'Add or update a budget','الحد الشهري':'Monthly limit','حفظ الميزانية':'Save budget','ميزانيات الشهر':'Monthly budgets',
+      'لا توجد ميزانيات لهذه الفترة.':'No budgets for this period.','المنفق':'Spent','تجاوزت الميزانية':'Over budget','من الميزانية':'of budget',
+      'التخطيط العائلي':'Family planning','أهداف الادخار':'Savings goals','إنشاء هدف ادخار':'Create a savings goal','اسم الهدف':'Goal name',
+      'المبلغ المستهدف':'Target amount','التاريخ المستهدف':'Target date','نوع الهدف':'Goal type','شخصي':'Personal','عائلي مشترك':'Shared family',
+      'إنشاء الهدف':'Create goal','أهداف الأسرة':'Family goals','لا توجد أهداف ادخار بعد.':'No savings goals yet.','هدف عائلي مشترك':'Shared family goal',
+      'هدف شخصي':'Personal goal','المساهمات':'Contributions','مبلغ المساهمة':'Contribution amount','ملاحظة (اختياري)':'Note (optional)',
+      'إضافة مساهمة':'Add contribution','أرشفة الهدف':'Archive goal','تمت إضافة المساهمة.':'Contribution added.','تم إنشاء هدف الادخار.':'Savings goal created.',
+      'المدفوعات المنتظمة':'Recurring payments','المستحقات والحركات النشطة':'Due items and active transactions','لا توجد حركات متكررة بعد.':'No recurring transactions yet.',
+      'تسجيل الحركة المستحقة':'Record due transaction','موعد الاستحقاق':'Due date','إيقاف':'Pause','تم تسجيل الحركة وتحديث موعدها التالي.':'Transaction recorded and next due date updated.',
+      'تذكير: لديك':'Reminder: you have','استحقاق خلال الأيام السبعة القادمة.':'due item(s) in the next seven days.',
+      'لا توجد حركات متكررة':'No recurring transactions','إيراد':'Income','مصروف':'Expense','غير مصنف':'Uncategorized','حفظ':'Save','إلغاء':'Cancel','حذف':'Delete','تعديل':'Edit'
+    },
+    de: {
+      'السجل المالي':'Finanzübersicht','الحركات المالية':'Finanzbuchungen','إيراداتك ومصروفاتك والتحويلات':'Ihre Einnahmen, Ausgaben und Überweisungen',
+      'استيراد الحركات':'Buchungen importieren','إضافة حركة متكررة':'Wiederkehrende Buchung hinzufügen','سجّل الراتب أو الفاتورة أو الاشتراك، ثم راجع الاستحقاق قبل تسجيله كحركة فعلية.':'Erfassen Sie Gehalt, Rechnung oder Abonnement und prüfen Sie die Fälligkeit, bevor Sie die Buchung übernehmen.',
+      'الحساب':'Konto','النوع':'Typ','الوصف':'Beschreibung','التصنيف':'Kategorie','المبلغ':'Betrag','التكرار':'Häufigkeit',
+      'أسبوعي':'Wöchentlich','شهري':'Monatlich','كل 3 أشهر':'Vierteljährlich','سنوي':'Jährlich','موعد الاستحقاق التالي':'Nächster Fälligkeitstermin',
+      'تاريخ الانتهاء (اختياري)':'Enddatum (optional)','حفظ الحركة المتكررة':'Wiederkehrende Buchung speichern',
+      'لا تُسجّل الحركات تلقائياً؛ ستظهر المستحقات في صفحة الحركات المتكررة لتراجعها وتسجلها بنفسك.':'Buchungen werden nicht automatisch erfasst. Fällige Einträge erscheinen auf der Seite für wiederkehrende Buchungen und können dort geprüft und manuell übernommen werden.',
+      'ابحث في الحركات...':'Buchungen suchen...','بحث في الحركات':'Buchungen suchen','تصفية حسب نوع الحركة':'Nach Buchungstyp filtern','ترتيب الحركات':'Buchungen sortieren',
+      'كل الأنواع':'Alle Typen','الإيرادات':'Einnahmen','المصروفات':'Ausgaben','الأحدث':'Neueste zuerst','الأقدم':'Älteste zuerst','الأعلى مبلغاً':'Höchster Betrag','الأقل مبلغاً':'Niedrigster Betrag',
+      'الصافي للفترة':'Saldo im Zeitraum','عدد الحركات':'Anzahl der Buchungen','مسح الفلاتر':'Filter zurücksetzen','حذف المحدد':'Ausgewählte löschen','تحديد الكل':'Alle auswählen',
+      'تحديد الحركة':'Buchung auswählen','اضغط لعرض التفاصيل':'Tippen, um Details anzuzeigen','اضغط لإخفاء التفاصيل':'Tippen, um Details auszublenden',
+      'الميزانيات الشهرية':'Monatliche Budgets','التحكم في الإنفاق':'Ausgaben kontrollieren','حدد حداً لكل تصنيف وتابع الإنفاق الفعلي مقارنة بالميزانية.':'Legen Sie für jede Kategorie ein Limit fest und vergleichen Sie die tatsächlichen Ausgaben mit dem Budget.',
+      'إضافة أو تحديث ميزانية':'Budget hinzufügen oder aktualisieren','الحد الشهري':'Monatliches Limit','حفظ الميزانية':'Budget speichern','ميزانيات الشهر':'Monatsbudgets',
+      'لا توجد ميزانيات لهذه الفترة.':'Keine Budgets für diesen Zeitraum.','المنفق':'Ausgegeben','تجاوزت الميزانية':'Budget überschritten','من الميزانية':'des Budgets',
+      'التخطيط العائلي':'Familienplanung','أهداف الادخار':'Sparziele','إنشاء هدف ادخار':'Sparziel erstellen','اسم الهدف':'Name des Ziels',
+      'المبلغ المستهدف':'Zielbetrag','التاريخ المستهدف':'Zieldatum','نوع الهدف':'Zieltyp','شخصي':'Persönlich','عائلي مشترك':'Gemeinsames Familienziel',
+      'إنشاء الهدف':'Ziel erstellen','أهداف الأسرة':'Familienziele','لا توجد أهداف ادخار بعد.':'Noch keine Sparziele vorhanden.','هدف عائلي مشترك':'Gemeinsames Familienziel',
+      'هدف شخصي':'Persönliches Ziel','المساهمات':'Beiträge','مبلغ المساهمة':'Beitragsbetrag','ملاحظة (اختياري)':'Notiz (optional)',
+      'إضافة مساهمة':'Beitrag hinzufügen','أرشفة الهدف':'Ziel archivieren','تمت إضافة المساهمة.':'Beitrag hinzugefügt.','تم إنشاء هدف الادخار.':'Sparziel erstellt.',
+      'المدفوعات المنتظمة':'Regelmäßige Zahlungen','المستحقات والحركات النشطة':'Fällige und aktive Buchungen','لا توجد حركات متكررة بعد.':'Noch keine wiederkehrenden Buchungen.',
+      'تسجيل الحركة المستحقة':'Fällige Buchung erfassen','موعد الاستحقاق':'Fälligkeit','إيقاف':'Pausieren','تم تسجيل الحركة وتحديث موعدها التالي.':'Buchung erfasst und nächster Termin aktualisiert.',
+      'تذكير: لديك':'Erinnerung: Sie haben','استحقاق خلال الأيام السبعة القادمة.':'fällige Zahlung(en) in den nächsten sieben Tagen.',
+      'لا توجد حركات متكررة':'Keine wiederkehrenden Buchungen','إيراد':'Einnahme','مصروف':'Ausgabe','غير مصنف':'Nicht kategorisiert','حفظ':'Speichern','إلغاء':'Abbrechen','حذف':'Löschen','تعديل':'Bearbeiten'
+    },
+    fr: {
+      'السجل المالي':'Relevé financier','الحركات المالية':'Opérations financières','إيراداتك ومصروفاتك والتحويلات':'Vos revenus, dépenses et virements',
+      'استيراد الحركات':'Importer des opérations','إضافة حركة متكررة':'Ajouter une opération récurrente','سجّل الراتب أو الفاتورة أو الاشتراك، ثم راجع الاستحقاق قبل تسجيله كحركة فعلية.':'Ajoutez un salaire, une facture ou un abonnement, puis vérifiez l’échéance avant d’enregistrer l’opération.',
+      'الحساب':'Compte','النوع':'Type','الوصف':'Description','التصنيف':'Catégorie','المبلغ':'Montant','التكرار':'Fréquence',
+      'أسبوعي':'Hebdomadaire','شهري':'Mensuel','كل 3 أشهر':'Tous les 3 mois','سنوي':'Annuel','موعد الاستحقاق التالي':'Prochaine échéance',
+      'تاريخ الانتهاء (اختياري)':'Date de fin (facultatif)','حفظ الحركة المتكررة':'Enregistrer l’opération récurrente',
+      'لا تُسجّل الحركات تلقائياً؛ ستظهر المستحقات في صفحة الحركات المتكررة لتراجعها وتسجلها بنفسك.':'Les opérations ne sont pas enregistrées automatiquement. Les échéances apparaissent dans la page des opérations récurrentes pour être vérifiées et enregistrées manuellement.',
+      'ابحث في الحركات...':'Rechercher des opérations...','بحث في الحركات':'Rechercher des opérations','تصفية حسب نوع الحركة':'Filtrer par type d’opération','ترتيب الحركات':'Trier les opérations',
+      'كل الأنواع':'Tous les types','الإيرادات':'Revenus','المصروفات':'Dépenses','الأحدث':'Plus récentes','الأقدم':'Plus anciennes','الأعلى مبلغاً':'Montant le plus élevé','الأقل مبلغاً':'Montant le plus faible',
+      'الصافي للفترة':'Solde de la période','عدد الحركات':'Nombre d’opérations','مسح الفلاتر':'Effacer les filtres','حذف المحدد':'Supprimer la sélection','تحديد الكل':'Tout sélectionner',
+      'تحديد الحركة':'Sélectionner l’opération','اضغط لعرض التفاصيل':'Touchez pour afficher les détails','اضغط لإخفاء التفاصيل':'Touchez pour masquer les détails',
+      'الميزانيات الشهرية':'Budgets mensuels','التحكم في الإنفاق':'Maîtrise des dépenses','حدد حداً لكل تصنيف وتابع الإنفاق الفعلي مقارنة بالميزانية.':'Définissez une limite pour chaque catégorie et comparez les dépenses réelles au budget.',
+      'إضافة أو تحديث ميزانية':'Ajouter ou modifier un budget','الحد الشهري':'Limite mensuelle','حفظ الميزانية':'Enregistrer le budget','ميزانيات الشهر':'Budgets du mois',
+      'لا توجد ميزانيات لهذه الفترة.':'Aucun budget pour cette période.','المنفق':'Dépensé','تجاوزت الميزانية':'Budget dépassé','من الميزانية':'du budget',
+      'التخطيط العائلي':'Planification familiale','أهداف الادخار':'Objectifs d’épargne','إنشاء هدف ادخار':'Créer un objectif d’épargne','اسم الهدف':'Nom de l’objectif',
+      'المبلغ المستهدف':'Montant cible','التاريخ المستهدف':'Date cible','نوع الهدف':'Type d’objectif','شخصي':'Personnel','عائلي مشترك':'Familial partagé',
+      'إنشاء الهدف':'Créer l’objectif','أهداف الأسرة':'Objectifs familiaux','لا توجد أهداف ادخار بعد.':'Aucun objectif d’épargne pour le moment.','هدف عائلي مشترك':'Objectif familial partagé',
+      'هدف شخصي':'Objectif personnel','المساهمات':'Contributions','مبلغ المساهمة':'Montant de la contribution','ملاحظة (اختياري)':'Note (facultative)',
+      'إضافة مساهمة':'Ajouter une contribution','أرشفة الهدف':'Archiver l’objectif','تمت إضافة المساهمة.':'Contribution ajoutée.','تم إنشاء هدف الادخار.':'Objectif d’épargne créé.',
+      'المدفوعات المنتظمة':'Paiements récurrents','المستحقات والحركات النشطة':'Échéances et opérations actives','لا توجد حركات متكررة بعد.':'Aucune opération récurrente pour le moment.',
+      'تسجيل الحركة المستحقة':'Enregistrer l’opération due','موعد الاستحقاق':'Échéance','إيقاف':'Mettre en pause','تم تسجيل الحركة وتحديث موعدها التالي.':'Opération enregistrée et prochaine échéance mise à jour.',
+      'تذكير: لديك':'Rappel : vous avez','استحقاق خلال الأيام السبعة القادمة.':'échéance(s) dans les sept prochains jours.',
+      'لا توجد حركات متكررة':'Aucune opération récurrente','إيراد':'Revenu','مصروف':'Dépense','غير مصنف':'Non catégorisé','حفظ':'Enregistrer','إلغاء':'Annuler','حذف':'Supprimer','تعديل':'Modifier'
+    },
+    es: {
+      'السجل المالي':'Registro financiero','الحركات المالية':'Movimientos financieros','إيراداتك ومصروفاتك والتحويلات':'Tus ingresos, gastos y transferencias',
+      'استيراد الحركات':'Importar movimientos','إضافة حركة متكررة':'Añadir movimiento recurrente','سجّل الراتب أو الفاتورة أو الاشتراك، ثم راجع الاستحقاق قبل تسجيله كحركة فعلية.':'Añade un salario, una factura o una suscripción y revisa el vencimiento antes de registrar el movimiento.',
+      'الحساب':'Cuenta','النوع':'Tipo','الوصف':'Descripción','التصنيف':'Categoría','المبلغ':'Importe','التكرار':'Frecuencia',
+      'أسبوعي':'Semanal','شهري':'Mensual','كل 3 أشهر':'Cada 3 meses','سنوي':'Anual','موعد الاستحقاق التالي':'Próximo vencimiento',
+      'تاريخ الانتهاء (اختياري)':'Fecha de finalización (opcional)','حفظ الحركة المتكررة':'Guardar movimiento recurrente',
+      'لا تُسجّل الحركات تلقائياً؛ ستظهر المستحقات في صفحة الحركات المتكررة لتراجعها وتسجلها بنفسك.':'Los movimientos no se registran automáticamente. Los vencimientos aparecen en la página de movimientos recurrentes para que los revises y registres manualmente.',
+      'ابحث في الحركات...':'Buscar movimientos...','بحث في الحركات':'Buscar movimientos','تصفية حسب نوع الحركة':'Filtrar por tipo de movimiento','ترتيب الحركات':'Ordenar movimientos',
+      'كل الأنواع':'Todos los tipos','الإيرادات':'Ingresos','المصروفات':'Gastos','الأحدث':'Más recientes','الأقدم':'Más antiguos','الأعلى مبلغاً':'Importe más alto','الأقل مبلغاً':'Importe más bajo',
+      'الصافي للفترة':'Balance del periodo','عدد الحركات':'Número de movimientos','مسح الفلاتر':'Borrar filtros','حذف المحدد':'Eliminar seleccionados','تحديد الكل':'Seleccionar todo',
+      'تحديد الحركة':'Seleccionar movimiento','اضغط لعرض التفاصيل':'Toca para ver los detalles','اضغط لإخفاء التفاصيل':'Toca para ocultar los detalles',
+      'الميزانيات الشهرية':'Presupuestos mensuales','التحكم في الإنفاق':'Control del gasto','حدد حداً لكل تصنيف وتابع الإنفاق الفعلي مقارنة بالميزانية.':'Establece un límite para cada categoría y compara el gasto real con el presupuesto.',
+      'إضافة أو تحديث ميزانية':'Añadir o actualizar presupuesto','الحد الشهري':'Límite mensual','حفظ الميزانية':'Guardar presupuesto','ميزانيات الشهر':'Presupuestos del mes',
+      'لا توجد ميزانيات لهذه الفترة.':'No hay presupuestos para este periodo.','المنفق':'Gastado','تجاوزت الميزانية':'Presupuesto superado','من الميزانية':'del presupuesto',
+      'التخطيط العائلي':'Planificación familiar','أهداف الادخار':'Objetivos de ahorro','إنشاء هدف ادخار':'Crear objetivo de ahorro','اسم الهدف':'Nombre del objetivo',
+      'المبلغ المستهدف':'Importe objetivo','التاريخ المستهدف':'Fecha objetivo','نوع الهدف':'Tipo de objetivo','شخصي':'Personal','عائلي مشترك':'Familiar compartido',
+      'إنشاء الهدف':'Crear objetivo','أهداف الأسرة':'Objetivos familiares','لا توجد أهداف ادخار بعد.':'Todavía no hay objetivos de ahorro.','هدف عائلي مشترك':'Objetivo familiar compartido',
+      'هدف شخصي':'Objetivo personal','المساهمات':'Aportaciones','مبلغ المساهمة':'Importe de la aportación','ملاحظة (اختياري)':'Nota (opcional)',
+      'إضافة مساهمة':'Añadir aportación','أرشفة الهدف':'Archivar objetivo','تمت إضافة المساهمة.':'Aportación añadida.','تم إنشاء هدف الادخار.':'Objetivo de ahorro creado.',
+      'المدفوعات المنتظمة':'Pagos recurrentes','المستحقات والحركات النشطة':'Vencimientos y movimientos activos','لا توجد حركات متكررة بعد.':'Todavía no hay movimientos recurrentes.',
+      'تسجيل الحركة المستحقة':'Registrar movimiento pendiente','موعد الاستحقاق':'Vencimiento','إيقاف':'Pausar','تم تسجيل الحركة وتحديث موعدها التالي.':'Movimiento registrado y próxima fecha actualizada.',
+      'تذكير: لديك':'Recordatorio: tienes','استحقاق خلال الأيام السبعة القادمة.':'vencimiento(s) durante los próximos siete días.',
+      'لا توجد حركات متكررة':'No hay movimientos recurrentes','إيراد':'Ingreso','مصروف':'Gasto','غير مصنف':'Sin categoría','حفظ':'Guardar','إلغاء':'Cancelar','حذف':'Eliminar','تعديل':'Editar'
+    }
+  };
+  Object.entries(extendedTranslations).forEach(([lang, entries]) => Object.assign(dictionaries[lang], entries));
+
   dictionaries.fr = Object.assign({}, dictionaries.en, dictionaries.fr);
   dictionaries.es = Object.assign({}, dictionaries.en, dictionaries.es);
   const originals = new WeakMap();
