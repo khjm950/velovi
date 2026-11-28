@@ -800,3 +800,68 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
 .recurring-create-summary{cursor:pointer;list-style:none;font-weight:700;color:var(--green2);font-size:15px}
 .recurring-create-summary::-webkit-details-marker{display:none}
 .recurring-create-panel[open] .recurring-create-summary{padding-bottom:10px;border-bottom:1px solid var(--line)}
+
+
+/* Velovi transaction cards: one consistent, tap-to-expand layout on phones. */
+@media (max-width:700px){
+  #transactions .table-wrap{overflow:visible}
+  #transactions table,#transactions tbody{display:block;width:100%}
+  #transactions thead{display:none}
+  #transactions #txRows{display:grid;gap:12px}
+  #transactions #txRows tr.transaction-card-row{
+    position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:11px 16px;width:100%;margin:0;padding:19px 15px 14px;
+    border:1px solid var(--line);border-radius:17px;background:#fff;
+    box-shadow:0 3px 12px rgba(24,55,43,.045);cursor:pointer;outline-offset:3px;
+  }
+  #transactions #txRows tr.transaction-card-row::before{
+    content:"";position:absolute;inset:0 0 auto;height:4px;border-radius:17px 17px 0 0;background:#9aa9a1;
+  }
+  #transactions #txRows tr[data-type="income"]::before{background:#58a784}
+  #transactions #txRows tr[data-type="expense"]::before{background:#d58b7a}
+  #transactions #txRows tr[data-type="other"]::before{background:#8c9a94}
+  #transactions #txRows td{
+    display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+    min-width:0;padding:2px 0;border:0;gap:5px;overflow-wrap:anywhere;
+    background:transparent;font-size:13px;
+  }
+  #transactions #txRows td::before{content:attr(data-label);font-size:10px;color:var(--muted);font-weight:700}
+  #transactions #txRows td:nth-child(1){grid-column:1;grid-row:1}
+  #transactions #txRows td:nth-child(2){grid-column:2;grid-row:1}
+  #transactions #txRows td:nth-child(4){grid-column:1;grid-row:2}
+  #transactions #txRows td:nth-child(5){grid-column:2;grid-row:2}
+  #transactions #txRows td:nth-child(5)>span{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+  #transactions #txRows td:nth-child(3){display:none}
+  #transactions #txRows tr.is-expanded td:nth-child(3){
+    display:flex;grid-column:1/-1;grid-row:3;padding:10px 0 5px;
+    border-top:1px solid var(--line);font-size:14px;line-height:1.6;
+  }
+  #transactions #txRows td.select-column{
+    display:none;position:static;grid-column:1/-1;grid-row:4;
+    width:auto;margin:0;padding:9px 0 0;border-top:1px solid var(--line);
+    flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;
+  }
+  #transactions #txRows tr.is-expanded td.select-column{display:flex}
+  #transactions #txRows td.select-column::before{content:none}
+  #transactions #txRows .tx-row-actions{display:flex;align-items:center;gap:16px;margin:0}
+  #transactions #txRows .tx-row-actions button{min-height:36px;padding:5px 10px;font-size:12px}
+  #transactions #txRows td.select-column input{width:18px;height:18px;min-height:18px}
+  #transactions #txRows tr.transaction-card-row::after{
+    content:attr(data-expand-label);grid-column:1/-1;grid-row:3;
+    justify-self:start;margin-top:1px;color:var(--green2);font-size:11px;font-weight:700;
+  }
+  #transactions #txRows tr.transaction-card-row.is-expanded::after{
+    content:attr(data-collapse-label);grid-row:5;margin-top:3px;
+  }
+  #transactions .transaction-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  #transactions .transaction-summary>div{min-width:0;padding:10px}
+  #transactions .transaction-summary strong{font-size:16px;overflow-wrap:anywhere}
+  #transactions .filters{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+  #transactions .filters>input{grid-column:1/-1;width:100%;min-width:0}
+  #transactions .filters>select{width:100%;min-width:0}
+  #transactions .sort-filter{grid-column:1/-1;display:grid;grid-template-columns:auto minmax(0,1fr)}
+  #transactions .sort-filter select{width:100%;min-width:0}
+  #transactions .date-filter{display:grid;grid-template-columns:auto minmax(0,1fr);min-width:0}
+  #transactions .date-filter input{width:100%;min-width:0}
+  #transactions #clearFilters{grid-column:1/-1;justify-self:start}
+}
