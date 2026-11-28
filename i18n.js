@@ -1184,6 +1184,43 @@
   };
   Object.entries(remainingDynamicTranslations).forEach(([lang, entries]) => Object.assign(dictionaries[lang], entries));
 
+
+  const invitationAndDeletionTranslations = {
+    en: {
+      'تمت دعوتك للانضمام إلى الأسرة في Velovi لإدارة الشؤون المالية. افتح الرابط التالي لتفعيل حسابك والانضمام:':'You are invited to join a family in Velovi to manage family finances. Open the following link to activate your account and join:',
+      'إذا لم تكن تتوقع هذه الدعوة فتجاهل الرسالة.':'If you were not expecting this invitation, please ignore this message.',
+      'وبياناته نهائياً':'and their data permanently','سيتم حذف ':'The following will be deleted: ',
+      'حركة مالية مرتبطة به من هذه الأسرة. هذا الإجراء نهائي ولا يمكن التراجع عنه، ولن يمكن استعادة هذه البيانات.':'financial transaction(s) linked to this member in this family. This action is permanent, cannot be undone, and the data cannot be recovered.',
+      'إذا كنت تريد إيقاف عضويته فقط مع الاحتفاظ ببياناته، استخدم «إلغاء عضوية العضو» بدلاً من ذلك.':'If you only want to end their membership while keeping their data, use “Remove member from family” instead.',
+      'هل أنت متأكد من الحذف النهائي؟':'Are you sure you want to permanently delete this member?'
+    },
+    de: {
+      'تمت دعوتك للانضمام إلى الأسرة في Velovi لإدارة الشؤون المالية. افتح الرابط التالي لتفعيل حسابك والانضمام:':'Sie wurden eingeladen, einer Familie in Velovi zur Verwaltung der Finanzen beizutreten. Öffnen Sie den folgenden Link, um Ihr Konto zu aktivieren:',
+      'إذا لم تكن تتوقع هذه الدعوة فتجاهل الرسالة.':'Wenn Sie diese Einladung nicht erwarten, ignorieren Sie bitte diese Nachricht.',
+      'وبياناته نهائياً':'und seine Daten endgültig','سيتم حذف ':'Folgendes wird gelöscht: ',
+      'حركة مالية مرتبطة به من هذه الأسرة. هذا الإجراء نهائي ولا يمكن التراجع عنه، ولن يمكن استعادة هذه البيانات.':'Finanzbuchung(en), die mit diesem Mitglied in dieser Familie verknüpft sind. Dieser Vorgang ist endgültig und kann nicht rückgängig gemacht werden.',
+      'إذا كنت تريد إيقاف عضويته فقط مع الاحتفاظ ببياناته، استخدم «إلغاء عضوية العضو» بدلاً من ذلك.':'Wenn Sie nur die Mitgliedschaft beenden und die Daten behalten möchten, verwenden Sie stattdessen „Mitgliedschaft beenden“.',
+      'هل أنت متأكد من الحذف النهائي؟':'Möchten Sie wirklich endgültig löschen?'
+    },
+    fr: {
+      'تمت دعوتك للانضمام إلى الأسرة في Velovi لإدارة الشؤون المالية. افتح الرابط التالي لتفعيل حسابك والانضمام:':'Vous êtes invité à rejoindre une famille sur Velovi pour gérer les finances. Ouvrez le lien suivant pour activer votre compte et rejoindre la famille :',
+      'إذا لم تكن تتوقع هذه الدعوة فتجاهل الرسالة.':'Si vous n’attendiez pas cette invitation, veuillez ignorer ce message.',
+      'وبياناته نهائياً':'et ses données définitivement','سيتم حذف ':'Les éléments suivants seront supprimés : ',
+      'حركة مالية مرتبطة به من هذه الأسرة. هذا الإجراء نهائي ولا يمكن التراجع عنه، ولن يمكن استعادة هذه البيانات.':'opération(s) financière(s) liées à ce membre dans cette famille. Cette action est définitive et irréversible.',
+      'إذا كنت تريد إيقاف عضويته فقط مع الاحتفاظ ببياناته، استخدم «إلغاء عضوية العضو» بدلاً من ذلك.':'Pour retirer uniquement son adhésion tout en conservant ses données, utilisez plutôt « Retirer le membre de la famille ».',
+      'هل أنت متأكد من الحذف النهائي؟':'Confirmez-vous la suppression définitive ?'
+    },
+    es: {
+      'تمت دعوتك للانضمام إلى الأسرة في Velovi لإدارة الشؤون المالية. افتح الرابط التالي لتفعيل حسابك والانضمام:':'Te han invitado a unirte a una familia en Velovi para gestionar las finanzas. Abre el siguiente enlace para activar tu cuenta y unirte:',
+      'إذا لم تكن تتوقع هذه الدعوة فتجاهل الرسالة.':'Si no esperabas esta invitación, ignora este mensaje.',
+      'وبياناته نهائياً':'y sus datos de forma permanente','سيتم حذف ':'Se eliminarán los siguientes datos: ',
+      'حركة مالية مرتبطة به من هذه الأسرة. هذا الإجراء نهائي ولا يمكن التراجع عنه، ولن يمكن استعادة هذه البيانات.':'movimiento(s) financiero(s) vinculado(s) a este miembro en esta familia. Esta acción es permanente y no se puede deshacer.',
+      'إذا كنت تريد إيقاف عضويته فقط مع الاحتفاظ ببياناته، استخدم «إلغاء عضوية العضو» بدلاً من ذلك.':'Para retirar solo su membresía y conservar sus datos, utiliza «Retirar al miembro de la familia».',
+      'هل أنت متأكد من الحذف النهائي؟':'¿Confirmas la eliminación permanente?'
+    }
+  };
+  Object.entries(invitationAndDeletionTranslations).forEach(([lang, entries]) => Object.assign(dictionaries[lang], entries));
+
   const originals = new WeakMap();
   const attrOriginals = new WeakMap();
   const languageSelect = document.getElementById('languageSetting');
