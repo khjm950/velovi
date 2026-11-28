@@ -865,3 +865,64 @@ dialog{padding:20px;max-height:min(88vh,760px);overflow:auto}
   #transactions .date-filter input{width:100%;min-width:0}
   #transactions #clearFilters{grid-column:1/-1;justify-self:start}
 }
+
+/* Refined mobile transaction cards: clearer hierarchy, calmer surfaces and readable amounts. */
+@media (max-width:700px){
+  #transactions #txRows{gap:14px}
+  #transactions #txRows tr.transaction-card-row{
+    padding:20px 17px 15px;gap:13px 15px;
+    border:1px solid color-mix(in srgb,var(--green2) 12%,var(--line));
+    border-radius:19px;
+    background:linear-gradient(145deg,#fff 0%,color-mix(in srgb,var(--mint) 24%,#fff) 100%);
+    box-shadow:0 5px 16px rgba(25,55,43,.055);
+    transition:box-shadow .18s ease,transform .18s ease,border-color .18s ease;
+  }
+  #transactions #txRows tr.transaction-card-row:active{transform:scale(.995)}
+  #transactions #txRows tr.transaction-card-row:focus-visible{
+    outline:3px solid color-mix(in srgb,var(--green2) 38%,transparent);
+  }
+  #transactions #txRows tr[data-type="income"]::before{background:#31956d;height:5px}
+  #transactions #txRows tr[data-type="expense"]::before{background:#cf806c;height:5px}
+  #transactions #txRows tr[data-type="other"]::before{background:#87978f;height:5px}
+  #transactions #txRows td{gap:7px;font-size:14px;line-height:1.45}
+  #transactions #txRows td::before{font-size:11px;letter-spacing:.01em;color:var(--muted);font-weight:600}
+  #transactions #txRows td:nth-child(1) .pill{
+    display:inline-flex;align-items:center;min-height:31px;padding:5px 12px;
+    border-radius:999px;font-size:12px;font-weight:700;
+  }
+  #transactions #txRows .tx-category-chip{
+    display:inline-flex;align-items:center;max-width:100%;
+    padding:5px 10px;border-radius:9px;
+    background:color-mix(in srgb,var(--green2) 8%,#fff);
+    color:var(--ink);font-size:13px;font-weight:600;overflow-wrap:anywhere;
+  }
+  #transactions #txRows td:nth-child(5)>span{
+    display:inline-block;padding:5px 0;font-size:19px;font-weight:800;
+    letter-spacing:-.02em;line-height:1.25;font-variant-numeric:tabular-nums;
+  }
+  #transactions #txRows td:nth-child(5).positive>span{color:#23815c}
+  #transactions #txRows td:nth-child(5).negative>span{color:#b66a3d}
+  #transactions #txRows tr.is-expanded td:nth-child(3){
+    padding:13px 0 7px;border-top:1px solid color-mix(in srgb,var(--green2) 13%,var(--line));
+    font-size:14px;line-height:1.7;color:var(--ink);
+  }
+  #transactions #txRows tr.transaction-card-row::after{
+    display:inline-flex;align-items:center;gap:6px;margin-top:3px;
+    padding:5px 0;color:var(--green2);font-size:11px;font-weight:700;
+  }
+  #transactions #txRows tr.transaction-card-row.is-expanded::after{margin-top:5px}
+  #transactions #txRows td.select-column{
+    padding-top:11px;border-top:1px solid color-mix(in srgb,var(--green2) 13%,var(--line));
+  }
+  #transactions #txRows .tx-row-actions{gap:9px;flex-wrap:wrap}
+  #transactions #txRows .tx-row-actions button{
+    min-height:38px;padding:7px 13px;border-radius:10px;
+    background:var(--mint);font-size:12px;font-weight:700;
+  }
+  #transactions #txRows .tx-row-actions .danger-text{background:#fbefed;color:#a94e45}
+  #transactions .transaction-summary>div{
+    border:1px solid var(--line);border-radius:13px;background:#fff;padding:12px;
+  }
+  #transactions .transaction-summary span{font-size:11px}
+  #transactions .transaction-summary strong{font-size:17px}
+}
