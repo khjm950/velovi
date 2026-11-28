@@ -1463,6 +1463,13 @@
   };
   Object.entries(remainingFrenchSpanish).forEach(([lang, entries]) => Object.assign(dictionaries[lang], entries));
 
+
+  Object.assign(dictionaries.de, {
+    'عضويتك السابقة غير نشطة. يمكنك إنشاء أسرة جديدة أو التواصل مع مدير الأسرة لإعادة تفعيل عضويتك.':'Ihre frühere Mitgliedschaft ist inaktiv. Sie können eine neue Familie erstellen oder den Familienadministrator kontaktieren, um Ihre Mitgliedschaft zu reaktivieren.',
+    'هذا الحساب يتطلب المصادقة الثنائية، لكن لا يوجد عامل TOTP مؤكد.':'Für dieses Konto ist eine Zwei-Faktor-Authentifizierung erforderlich, aber es wurde kein bestätigter TOTP-Faktor gefunden.',
+    'تم التحقق، لكن تعذر تحديث جلسة الدخول. أعد المحاولة.':'Die Überprüfung war erfolgreich, aber die Anmeldesitzung konnte nicht aktualisiert werden. Versuchen Sie es erneut.'
+  });
+
   const originals = new WeakMap();
   const attrOriginals = new WeakMap();
   const languageSelect = document.getElementById('languageSetting');
