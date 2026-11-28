@@ -1636,6 +1636,7 @@
 
   document.addEventListener('velovi:language-changed', () => {
     if (!currentHousehold) return;
+    renderTransactions();
     renderAccounts();
     updateDashboard();
     renderExpenseChart();
